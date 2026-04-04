@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, useRef, useSyncExternalStore } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getSocket } from '@/lib/socket';
-import { playAllVotedSound, playRevealSound } from '@/lib/sounds';
+import { playAllVotedSound, playRevealSound, playPopSound, playEmojiSound } from '@/lib/sounds';
 import type { RoomState, Player } from '@/types';
 
 function VoteCard({ value, selected, onClick, disabled }: {
@@ -314,12 +314,14 @@ export default function RoomPage() {
   }, [myVote]);
 
   const sendEmoji = (emoji: string) => {
+    playEmojiSound(emoji);
     getSocket().emit('send-emoji', { emoji });
     setEmojiPickerOpen(false);
   };
 
   const sendChat = (message: string) => {
     if (!message.trim()) return;
+    playPopSound();
     getSocket().emit('send-chat', { message: message.trim() });
     setChatInput('');
     setChatOpen(false);
