@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState, useCallback, useSyncExternalStore } from 'react';
+import { useEffect, useState, useCallback, useRef, useSyncExternalStore } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getSocket } from '@/lib/socket';
+import { playAllVotedSound, playRevealSound } from '@/lib/sounds';
 import type { RoomState, Player } from '@/types';
 
 function VoteCard({ value, selected, onClick, disabled }: {
@@ -164,6 +165,8 @@ export default function RoomPage() {
   const [chatOpen, setChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState('');
 
+  const prevRoomRef = useRef<RoomState | null>(null);
+
   const REACTION_EMOJIS = ['👍', '👏', '🎉', '🔥', '😂', '🤔', '😱', '💀', '🚀', '❤️', '👀', '🙈', '🍻'];
 
   const myId = useSyncExternalStore(
@@ -180,6 +183,24 @@ export default function RoomPage() {
     const socket = getSocket();
 
     const onRoomUpdate = (state: RoomState) => {
+      const prev = prevRoomRef.current;
+
+      // Play reveal sound when votes are revealed
+      if (state.revealed && prev && !prev.revealed) {
+        playRevealSound();
+        if (document.hidden) document.title = '🎉 Votes Revealed! — Scrum Poker';
+      }
+      // Play all-voted sound when everyone has voted (and not yet revealed)
+      else if (!state.revealed && state.players.length > 0) {
+        const allVotedNow = state.players.every(p => p.vote !== null);
+        const allVotedBefore = prev && prev.players.length > 0 && prev.players.every(p => p.vote !== null);
+        if (allVotedNow && !allVotedBefore) {
+          playAllVotedSound();
+          if (document.hidden) document.title = '✅ All Voted! — Scrum Poker';
+        }
+      }
+
+      prevRoomRef.current = state;
       setRoom(state);
       const socketId = socket.id;
       if (state.revealed) {
@@ -336,6 +357,17 @@ export default function RoomPage() {
       router.replace(`/join/${roomId}`);
     }
   }, [notJoined, roomId, router]);
+
+  // Restore tab title when user returns to the tab
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      if (!document.hidden) {
+        document.title = 'Scrum Poker';
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', onVisibilityChange);
+  }, []);
 
   if (!room) {
     return (
