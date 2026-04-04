@@ -1,1 +1,43 @@
 @AGENTS.md
+
+# Scrum Poker
+
+Real-time planning poker app built with Next.js 16, React 19, Socket.IO, and Tailwind CSS 4.
+
+## Architecture
+
+- **Custom server** — `server.ts` runs a Node.js HTTP server with Socket.IO alongside Next.js. All real-time state is managed here via in-memory `Map<string, Room>`.
+- **No database** — Room/player state is in-memory only. Lost on server restart.
+- **No REST API** — All communication is event-driven via WebSocket (Socket.IO).
+
+## Key Files
+
+- `server.ts` — Socket.IO server, room management, all game logic
+- `src/app/page.tsx` — Home page (create/join room)
+- `src/app/room/[id]/page.tsx` — Main voting room (largest file ~530 lines)
+- `src/app/join/[id]/page.tsx` — Invite join page
+- `src/lib/socket.ts` — Socket.IO client singleton
+- `src/lib/sounds.ts` — Web Audio API sounds + Web Speech API TTS
+- `src/types/index.ts` — Shared TypeScript interfaces (Room, Player, RoomState)
+
+## Commands
+
+- `npm run dev` — Start dev server (tsx server.ts)
+- `npm run build` — Build for production (next build)
+- `npm start` — Start production server (NODE_ENV=production tsx server.ts)
+- `npm run lint` — Run ESLint
+
+## Socket Events
+
+**Client → Server:** `create-room`, `join-room`, `rejoin-room`, `get-room-state`, `vote`, `reveal-votes`, `reset-votes`, `send-emoji`, `send-chat`
+
+**Server → Client:** `room-update`, `player-emoji`, `player-chat`
+
+## Important Patterns
+
+- Room IDs are always uppercase 6-char alphanumeric (generated in `generateRoomId`)
+- `votingSystem` is stored as `string[]` on the room — Fibonacci or T-Shirt values
+- Vote masking: server sends `'voted'` instead of actual vote value until `revealed === true`
+- Host auto-transfers to first remaining player on disconnect
+- Empty rooms are kept for 60s grace period (allows refresh/rejoin), then cleaned up
+- TTS requires macOS system voices installed (Accessibility > Spoken Content > Manage Voices)
