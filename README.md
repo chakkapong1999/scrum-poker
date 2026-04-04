@@ -1,36 +1,80 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Scrum Poker
+
+Real-time planning poker for agile teams. Create a room, share the link, and estimate together.
+
+## Features
+
+- **Real-time voting** — Fibonacci (0, 1, 2, 3, 5, 8, 13, 21...) and T-Shirt (XS, S, M, L, XL, XXL) scales
+- **Room management** — Create rooms with a 6-character code, invite via link
+- **Host controls** — Reveal votes, start new rounds, auto host transfer on disconnect
+- **Emoji reactions** — 13 emojis with unique sounds and floating animations
+- **Quick chat** — Predefined messages + custom input with text-to-speech (English & Thai)
+- **Sound notifications** — Chime when all voted, fanfare on reveal, per-emoji sounds
+- **Browser tab notifications** — Tab title updates when votes are revealed or all players voted
+- **Mute toggle** — Disable all sounds and TTS, persisted across sessions
+- **Auto reconnect** — Rejoin rooms automatically after connection loss or page refresh
+
+## Tech Stack
+
+- **Frontend:** Next.js 16, React 19, TypeScript, Tailwind CSS 4
+- **Real-time:** Socket.IO 4
+- **Server:** Custom Node.js server with tsx
+- **Audio:** Web Audio API + Web Speech API (no external files)
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+
+- Node.js 22+
+- npm
+
+### Install & Run
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run build
+npm start
+```
 
-## Learn More
+### Docker
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+docker build -t scrum-poker .
+docker run -p 3000:3000 scrum-poker
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Project Structure
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```
+src/
+  app/
+    page.tsx              # Home — create/join room
+    room/[id]/page.tsx    # Voting room
+    join/[id]/page.tsx    # Invite join page
+    layout.tsx            # Root layout
+    globals.css           # Animations & global styles
+  lib/
+    socket.ts             # Socket.IO client singleton
+    sounds.ts             # Sound effects & TTS
+  types/
+    index.ts              # TypeScript interfaces & constants
+server.ts                 # Custom Socket.IO + Next.js server
+Dockerfile                # Multi-stage production build
+```
 
-## Deploy on Vercel
+## Scripts
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+| Command | Description |
+|---------|-------------|
+| `npm run dev` | Start development server |
+| `npm run build` | Build for production |
+| `npm start` | Start production server |
+| `npm run lint` | Run ESLint |
