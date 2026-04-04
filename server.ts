@@ -13,6 +13,9 @@ const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
 
 const rooms = new Map<string, Room>();
+const ROOM_TTL_MS = 30 * 60 * 1000; // 30 minutes idle timeout
+const ROOM_EMPTY_GRACE_MS = 60 * 1000; // keep empty rooms for 60s (allows refresh)
+const CLEANUP_INTERVAL_MS = 30 * 1000; // check every 30 seconds
 
 function generateRoomId(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
@@ -67,6 +70,7 @@ app.prepare().then(() => {
         players: new Map(),
         revealed: false,
         votingSystem: getVotingSystem(votingSystem),
+        lastActivity: Date.now(),
       };
 
       const player: Player = {
@@ -103,6 +107,36 @@ app.prepare().then(() => {
       };
 
       room.players.set(playerId, player);
+      room.lastActivity = Date.now();
+      socket.join(room.id);
+      currentRoomId = room.id;
+      currentPlayerId = playerId;
+
+      callback({ success: true, roomId: room.id, playerId });
+      io.to(room.id).emit('room-update', getRoomState(room));
+    });
+
+    socket.on('rejoin-room', ({ roomId, playerName }: { roomId: string; playerName: string }, callback) => {
+      const room = rooms.get(roomId.toUpperCase());
+      if (!room) {
+        callback({ success: false, error: 'Room not found' });
+        return;
+      }
+
+      const playerId = socket.id;
+      const player: Player = {
+        id: playerId,
+        name: playerName,
+        vote: null,
+        isHost: false,
+      };
+
+      // If no host remains, this player becomes host
+      const hasHost = Array.from(room.players.values()).some(p => p.isHost);
+      if (!hasHost) player.isHost = true;
+
+      room.players.set(playerId, player);
+      room.lastActivity = Date.now();
       socket.join(room.id);
       currentRoomId = room.id;
       currentPlayerId = playerId;
@@ -142,14 +176,18 @@ app.prepare().then(() => {
       });
     });
 
-    socket.on('vote', ({ vote }: { vote: string }) => {
+    socket.on('vote', ({ vote }: { vote: string | null }) => {
       if (!currentRoomId || !currentPlayerId) return;
       const room = rooms.get(currentRoomId);
       if (!room || room.revealed) return;
 
+      // Validate vote value against room's voting system
+      if (vote !== null && !room.votingSystem.includes(vote)) return;
+
       const player = room.players.get(currentPlayerId);
       if (player) {
         player.vote = vote;
+        room.lastActivity = Date.now();
         io.to(currentRoomId).emit('room-update', getRoomState(room));
       }
     });
@@ -163,6 +201,7 @@ app.prepare().then(() => {
       if (!player?.isHost) return;
 
       room.revealed = true;
+      room.lastActivity = Date.now();
       io.to(currentRoomId).emit('room-update', getRoomState(room));
     });
 
@@ -175,6 +214,7 @@ app.prepare().then(() => {
       if (!player?.isHost) return;
 
       room.revealed = false;
+      room.lastActivity = Date.now();
       room.players.forEach(p => { p.vote = null; });
       io.to(currentRoomId).emit('room-update', getRoomState(room));
     });
@@ -185,9 +225,11 @@ app.prepare().then(() => {
       if (!room) return;
 
       room.players.delete(currentPlayerId);
+      room.lastActivity = Date.now();
 
       if (room.players.size === 0) {
-        rooms.delete(currentRoomId);
+        // Don't delete immediately — keep for grace period so refreshing users can rejoin
+        // The cleanup interval will remove it after ROOM_EMPTY_GRACE_MS
       } else {
         // Transfer host if needed
         const hasHost = Array.from(room.players.values()).some(p => p.isHost);
@@ -199,6 +241,19 @@ app.prepare().then(() => {
       }
     });
   });
+
+  // Periodically clean up idle or empty rooms
+  setInterval(() => {
+    const now = Date.now();
+    for (const [roomId, room] of rooms) {
+      const idle = now - room.lastActivity;
+      if (room.players.size === 0 && idle > ROOM_EMPTY_GRACE_MS) {
+        rooms.delete(roomId);
+      } else if (idle > ROOM_TTL_MS) {
+        rooms.delete(roomId);
+      }
+    }
+  }, CLEANUP_INTERVAL_MS);
 
   httpServer.listen(port, () => {
     console.log(`> Scrum Poker running on http://${hostname}:${port}`);

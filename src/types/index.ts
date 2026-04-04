@@ -11,6 +11,7 @@ export interface Room {
   players: Map<string, Player>;
   revealed: boolean;
   votingSystem: string[];
+  lastActivity: number;
 }
 
 export interface RoomState {

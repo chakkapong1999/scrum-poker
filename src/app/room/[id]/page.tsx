@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback, useSyncExternalStore } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { getSocket } from '@/lib/socket';
 import type { RoomState, Player } from '@/types';
 
@@ -152,8 +152,10 @@ function VoteStats({ players }: { players: Player[] }) {
 
 export default function RoomPage() {
   const params = useParams();
+  const router = useRouter();
   const roomId = params.id as string;
   const [room, setRoom] = useState<RoomState | null>(null);
+  const [notJoined, setNotJoined] = useState(false);
   const [myVote, setMyVote] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [floatingEmojis, setFloatingEmojis] = useState<Map<string, FloatingEmoji[]>>(new Map());
@@ -242,19 +244,46 @@ export default function RoomPage() {
 
     socket.on('player-chat', onPlayerChat);
 
-    // Request current state in case we missed the initial room-update
-    socket.emit('get-room-state', (res: { success: boolean; state?: RoomState }) => {
-      if (res.success && res.state) {
-        onRoomUpdate(res.state);
-      }
-    });
+    // Request current state, or rejoin if we were disconnected
+    const requestOrRejoin = () => {
+      socket.emit('get-room-state', (res: { success: boolean; state?: RoomState }) => {
+        if (res.success && res.state) {
+          onRoomUpdate(res.state);
+        } else {
+          // Not in a room on the server — try to rejoin using stored name
+          const storedName = sessionStorage.getItem('playerName');
+          if (storedName) {
+            socket.emit('rejoin-room', {
+              roomId: roomId.toUpperCase(),
+              playerName: storedName,
+            }, (rejoinRes: { success: boolean; roomId?: string; error?: string }) => {
+              if (!rejoinRes.success) {
+                setNotJoined(true);
+              }
+            });
+          } else {
+            setNotJoined(true);
+          }
+        }
+      });
+    };
+
+    requestOrRejoin();
+
+    // Handle reconnection — rejoin the room after socket reconnects
+    const onReconnect = () => {
+      setNotJoined(false);
+      requestOrRejoin();
+    };
+    socket.on('connect', onReconnect);
 
     return () => {
       socket.off('room-update', onRoomUpdate);
       socket.off('player-emoji', onPlayerEmoji);
       socket.off('player-chat', onPlayerChat);
+      socket.off('connect', onReconnect);
     };
-  }, []);
+  }, [roomId]);
 
   const handleVote = useCallback((value: string) => {
     const socket = getSocket();
@@ -301,6 +330,12 @@ export default function RoomPage() {
   const isHost = me?.isHost ?? false;
   const allVoted = room?.players.every(p => p.vote !== null) ?? false;
   const votedCount = room?.players.filter(p => p.vote !== null).length ?? 0;
+
+  useEffect(() => {
+    if (notJoined) {
+      router.replace(`/join/${roomId}`);
+    }
+  }, [notJoined, roomId, router]);
 
   if (!room) {
     return (
@@ -394,8 +429,7 @@ export default function RoomPage() {
       </div>
 
       {/* Emoji reactions & Quick chat */}
-      {!room.revealed && (
-        <div className="flex flex-col items-center gap-3 mb-6">
+      <div className="flex flex-col items-center gap-3 mb-6">
           <div className="flex gap-2">
             <button
               onClick={() => { setEmojiPickerOpen(!emojiPickerOpen); setChatOpen(false); }}
@@ -468,7 +502,6 @@ export default function RoomPage() {
             </div>
           )}
         </div>
-      )}
 
       {/* Vote stats (when revealed) */}
       {room.revealed && <VoteStats players={room.players} />}
