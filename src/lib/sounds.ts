@@ -1,4 +1,19 @@
 let audioCtx: AudioContext | null = null;
+let _muted = typeof window !== 'undefined' && localStorage.getItem('scrumPokerMuted') === 'true';
+
+export function isMuted(): boolean {
+  return _muted;
+}
+
+export function setMuted(muted: boolean) {
+  _muted = muted;
+  if (typeof window !== 'undefined') {
+    localStorage.setItem('scrumPokerMuted', String(muted));
+  }
+  if (muted && typeof window !== 'undefined' && window.speechSynthesis) {
+    window.speechSynthesis.cancel();
+  }
+}
 
 function getAudioContext(): AudioContext {
   if (!audioCtx) {
@@ -9,6 +24,7 @@ function getAudioContext(): AudioContext {
 
 /** Short rising chime — played when all players have voted */
 export function playAllVotedSound() {
+  if (_muted) return;
   const ctx = getAudioContext();
   const now = ctx.currentTime;
 
@@ -29,6 +45,7 @@ export function playAllVotedSound() {
 
 /** Short pop — played when sending a chat message */
 export function playPopSound() {
+  if (_muted) return;
   const ctx = getAudioContext();
   const now = ctx.currentTime;
   const osc = ctx.createOscillator();
@@ -71,6 +88,7 @@ const EMOJI_SOUNDS: Record<string, EmojiSoundDef> = {
 
 /** Play a unique sound per emoji */
 export function playEmojiSound(emoji: string) {
+  if (_muted) return;
   const def = EMOJI_SOUNDS[emoji];
   if (!def) {
     playPopSound();
@@ -96,8 +114,60 @@ export function playEmojiSound(emoji: string) {
   });
 }
 
+/** Speak a chat message — auto-detects Thai vs English and picks the right voice */
+let allVoices: SpeechSynthesisVoice[] = [];
+
+function loadVoices() {
+  allVoices = window.speechSynthesis.getVoices();
+}
+
+if (typeof window !== 'undefined' && window.speechSynthesis) {
+  loadVoices();
+  window.speechSynthesis.addEventListener('voiceschanged', loadVoices);
+}
+
+const THAI_RANGE = /[\u0E00-\u0E7F]/;
+
+function isThai(text: string): boolean {
+  return THAI_RANGE.test(text);
+}
+
+function findVoice(lang: string, preferred: string[]): SpeechSynthesisVoice | null {
+  // Try preferred names first
+  const byName = allVoices.find(v =>
+    v.lang.startsWith(lang) && preferred.some(name => v.name.includes(name))
+  );
+  if (byName) return byName;
+  // Fall back to any voice matching the language
+  return allVoices.find(v => v.lang.startsWith(lang)) ?? null;
+}
+
+export function speakMessage(text: string) {
+  if (_muted) return;
+  if (typeof window === 'undefined' || !window.speechSynthesis) return;
+
+  const utterance = new SpeechSynthesisUtterance(text);
+  utterance.rate = 1.05;
+  utterance.pitch = 1.0;
+  utterance.volume = 0.8;
+
+  if (isThai(text)) {
+    utterance.lang = 'th-TH';
+    const thVoice = findVoice('th', ['Kanya', 'Niwat', 'Sasithorn']);
+    if (thVoice) utterance.voice = thVoice;
+  } else {
+    utterance.lang = 'en-US';
+    const enVoice = findVoice('en', ['Samantha', 'Karen', 'Daniel', 'Moira', 'Tessa']);
+    if (enVoice) utterance.voice = enVoice;
+  }
+
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(utterance);
+}
+
 /** Reveal fanfare — two-note ascending tone */
 export function playRevealSound() {
+  if (_muted) return;
   const ctx = getAudioContext();
   const now = ctx.currentTime;
 

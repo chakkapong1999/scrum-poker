@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback, useRef, useSyncExternalStore } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { getSocket } from '@/lib/socket';
-import { playAllVotedSound, playRevealSound, playPopSound, playEmojiSound } from '@/lib/sounds';
+import { playAllVotedSound, playRevealSound, playPopSound, playEmojiSound, speakMessage, isMuted, setMuted } from '@/lib/sounds';
 import type { RoomState, Player } from '@/types';
 
 function VoteCard({ value, selected, onClick, disabled }: {
@@ -164,6 +164,7 @@ export default function RoomPage() {
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState('');
+  const [muted, setMutedState] = useState(isMuted);
 
   const prevRoomRef = useRef<RoomState | null>(null);
 
@@ -242,6 +243,7 @@ export default function RoomPage() {
 
     let chatIdCounter = 0;
     const onPlayerChat = ({ playerId, message }: { playerId: string; message: string }) => {
+      speakMessage(message);
       const id = chatIdCounter++;
       setChatBubbles(prev => {
         const next = new Map(prev);
@@ -342,6 +344,12 @@ export default function RoomPage() {
     setMyVote(null);
   };
 
+  const toggleMute = () => {
+    const next = !muted;
+    setMutedState(next);
+    setMuted(next);
+  };
+
   const copyInviteLink = () => {
     const link = `${window.location.origin}/join/${roomId}`;
     navigator.clipboard.writeText(link);
@@ -411,6 +419,22 @@ export default function RoomPage() {
                 </svg>
                 Copy Invite Link
               </>
+            )}
+          </button>
+          <button
+            onClick={toggleMute}
+            className="px-3 py-2 bg-slate-700/50 hover:bg-slate-600/50 border border-slate-600 rounded-xl text-sm text-white transition-all"
+            title={muted ? 'Unmute sounds' : 'Mute sounds'}
+          >
+            {muted ? (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+              </svg>
+            ) : (
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+              </svg>
             )}
           </button>
           <div className="px-3 py-2 bg-slate-800/50 rounded-xl text-sm text-slate-300">
