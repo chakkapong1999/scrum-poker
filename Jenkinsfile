@@ -9,4 +9,6 @@ servicePipeline(
     pkgManager     : 'npm',
     buildScript    : 'build',
     testScript     : 'test:ci',
+    hostPort       : 3000,
+    containerPort  : 3000
 )
