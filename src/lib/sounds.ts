@@ -146,6 +146,9 @@ export function speakMessage(text: string) {
   if (_muted) return;
   if (typeof window === 'undefined' || !window.speechSynthesis) return;
 
+  // Re-fetch voices if the initial load got an empty array (Chrome loads async)
+  if (allVoices.length === 0) loadVoices();
+
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.rate = 1.05;
   utterance.pitch = 1.0;
@@ -161,8 +164,16 @@ export function speakMessage(text: string) {
     if (enVoice) utterance.voice = enVoice;
   }
 
-  window.speechSynthesis.cancel();
-  window.speechSynthesis.speak(utterance);
+  // Chrome requires cancel() before speak() to avoid queuing issues,
+  // but Safari breaks if cancel() is called. Detect Chrome via userAgent.
+  const isChrome = /Chrome/.test(navigator.userAgent) && !/Edg/.test(navigator.userAgent);
+  if (isChrome) {
+    window.speechSynthesis.cancel();
+    // Chrome needs a small delay after cancel() or it kills the new utterance
+    setTimeout(() => window.speechSynthesis.speak(utterance), 50);
+  } else {
+    window.speechSynthesis.speak(utterance);
+  }
 }
 
 /** Reveal fanfare — two-note ascending tone */

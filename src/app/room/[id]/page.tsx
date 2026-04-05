@@ -243,7 +243,7 @@ export default function RoomPage() {
 
     let chatIdCounter = 0;
     const onPlayerChat = ({ playerId, message }: { playerId: string; message: string }) => {
-      speakMessage(message);
+      if (playerId !== socket.id) speakMessage(message);
       const id = chatIdCounter++;
       setChatBubbles(prev => {
         const next = new Map(prev);
@@ -324,6 +324,7 @@ export default function RoomPage() {
   const sendChat = (message: string) => {
     if (!message.trim()) return;
     playPopSound();
+    speakMessage(message.trim());
     getSocket().emit('send-chat', { message: message.trim() });
     setChatInput('');
     setChatOpen(false);
