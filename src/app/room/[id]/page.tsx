@@ -126,6 +126,27 @@ function handleSoundAndTitle(state: RoomState, prev: RoomState | null) {
   }
 }
 
+function applyVoteUpdate(
+  prev: RoomState | null,
+  playerId: string,
+  vote: string | null,
+): RoomState | null {
+  if (!prev || prev.revealed) return prev;
+  const players = prev.players.map(p =>
+    p.id === playerId ? { ...p, vote } : p
+  );
+  const next = { ...prev, players };
+
+  const allVotedNow = players.every(p => p.vote !== null);
+  const allVotedBefore = prev.players.every(p => p.vote !== null);
+  if (allVotedNow && !allVotedBefore) {
+    playAllVotedSound();
+    if (document.hidden) document.title = '✅ All Voted! — Scrum Poker';
+  }
+
+  return next;
+}
+
 function syncMyVote(state: RoomState, socketId: string | undefined, setMyVote: (v: string | null) => void) {
   const me = state.players.find(p => p.id === socketId);
   if (state.revealed) {
@@ -148,7 +169,7 @@ export default function RoomPage() {
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState('');
-  const [muted, setMutedState] = useState(() => isMuted());
+  const [muted, setMutedState] = useState(isMuted);
 
   const prevRoomRef = useRef<RoomState | null>(null);
 
@@ -177,21 +198,8 @@ export default function RoomPage() {
     // Lightweight vote diff — avoids sending full room state on every vote
     const onVoteUpdate = ({ playerId, vote }: { playerId: string; vote: string | null }) => {
       setRoom(prev => {
-        if (!prev || prev.revealed) return prev;
-        const players = prev.players.map(p =>
-          p.id === playerId ? { ...p, vote } : p
-        );
-        const next = { ...prev, players };
-
-        // Check if all voted now (and weren't before)
-        const allVotedNow = players.every(p => p.vote !== null);
-        const allVotedBefore = prev.players.every(p => p.vote !== null);
-        if (allVotedNow && !allVotedBefore) {
-          playAllVotedSound();
-          if (document.hidden) document.title = '✅ All Voted! — Scrum Poker';
-        }
-
-        prevRoomRef.current = next;
+        const next = applyVoteUpdate(prev, playerId, vote);
+        if (next) prevRoomRef.current = next;
         return next;
       });
     };

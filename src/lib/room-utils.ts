@@ -12,13 +12,17 @@ export function generateRoomId(): string {
   return result;
 }
 
+function maskedVote(vote: string | null): string | null {
+  return vote ? 'voted' : null;
+}
+
 export function getRoomState(room: Room): RoomState {
   return {
     id: room.id,
     name: room.name,
     players: Array.from(room.players.values()).map(p => ({
       ...p,
-      vote: room.revealed ? p.vote : (p.vote ? 'voted' : null),
+      vote: room.revealed ? p.vote : maskedVote(p.vote),
     })),
     revealed: room.revealed,
     votingSystem: room.votingSystem,
@@ -26,8 +30,6 @@ export function getRoomState(room: Room): RoomState {
 }
 
 export function getVotingSystem(system: string): string[] {
-  switch (system) {
-    case 'tshirt': return T_SHIRT;
-    default: return FIBONACCI;
-  }
+  if (system === 'tshirt') return T_SHIRT;
+  return FIBONACCI;
 }

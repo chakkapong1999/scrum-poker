@@ -1,5 +1,5 @@
 let audioCtx: AudioContext | null = null;
-let _muted = typeof globalThis.window !== 'undefined' && localStorage.getItem('scrumPokerMuted') === 'true';
+let _muted = globalThis.window !== undefined && localStorage.getItem('scrumPokerMuted') === 'true';
 
 export function isMuted(): boolean {
   return _muted;
@@ -7,10 +7,10 @@ export function isMuted(): boolean {
 
 export function setMuted(muted: boolean) {
   _muted = muted;
-  if (typeof globalThis.window !== 'undefined') {
+  if (globalThis.window !== undefined) {
     localStorage.setItem('scrumPokerMuted', String(muted));
   }
-  if (muted && typeof globalThis.window !== 'undefined' && globalThis.speechSynthesis) {
+  if (muted && globalThis.window !== undefined && globalThis.speechSynthesis) {
     globalThis.speechSynthesis.cancel();
   }
 }
@@ -119,7 +119,7 @@ function loadVoices() {
   allVoices = globalThis.speechSynthesis.getVoices();
 }
 
-if (typeof globalThis.window !== 'undefined' && globalThis.speechSynthesis) {
+if (globalThis.window !== undefined && globalThis.speechSynthesis) {
   loadVoices();
   globalThis.speechSynthesis.addEventListener('voiceschanged', loadVoices);
 }
@@ -142,7 +142,7 @@ function findVoice(lang: string, preferred: string[]): SpeechSynthesisVoice | nu
 
 export function speakMessage(text: string) {
   if (_muted) return;
-  if (typeof globalThis.window === 'undefined' || !globalThis.speechSynthesis) return;
+  if (globalThis.window === undefined || !globalThis.speechSynthesis) return;
 
   // Re-fetch voices if the initial load got an empty array (Chrome loads async)
   if (allVoices.length === 0) loadVoices();
