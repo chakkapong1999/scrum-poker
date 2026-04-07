@@ -2,8 +2,8 @@ import { createServer } from 'http';
 import { parse } from 'url';
 import next from 'next';
 import { Server as SocketIOServer } from 'socket.io';
-import type { Room, Player, RoomState } from './src/types';
-import { FIBONACCI, T_SHIRT } from './src/types';
+import type { Room, Player } from './src/types';
+import { generateRoomId, getRoomState, getVotingSystem } from './src/lib/room-utils';
 
 const dev = process.env.NODE_ENV !== 'production';
 const hostname = 'localhost';
@@ -16,35 +16,6 @@ const rooms = new Map<string, Room>();
 const ROOM_TTL_MS = 30 * 60 * 1000; // 30 minutes idle timeout
 const ROOM_EMPTY_GRACE_MS = 60 * 1000; // keep empty rooms for 60s (allows refresh)
 const CLEANUP_INTERVAL_MS = 30 * 1000; // check every 30 seconds
-
-function generateRoomId(): string {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  let result = '';
-  for (let i = 0; i < 6; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
-}
-
-function getRoomState(room: Room): RoomState {
-  return {
-    id: room.id,
-    name: room.name,
-    players: Array.from(room.players.values()).map(p => ({
-      ...p,
-      vote: room.revealed ? p.vote : (p.vote ? 'voted' : null),
-    })),
-    revealed: room.revealed,
-    votingSystem: room.votingSystem,
-  };
-}
-
-function getVotingSystem(system: string): string[] {
-  switch (system) {
-    case 'tshirt': return T_SHIRT;
-    default: return FIBONACCI;
-  }
-}
 
 app.prepare().then(() => {
   const httpServer = createServer((req, res) => {

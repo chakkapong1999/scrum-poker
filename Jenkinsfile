@@ -8,7 +8,7 @@ servicePipeline(
     nodeVersion    : '20',
     pkgManager     : 'npm',
     buildScript    : 'build',
-    testScript     : 'test:ci',
+    testScript     : 'test',
     hostPort       : 3000,
     containerPort  : 3000
 )
