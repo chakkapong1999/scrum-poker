@@ -7,8 +7,7 @@ servicePipeline(
     gitCredentials : 'github-creds',
     nodeVersion    : '20',
     pkgManager     : 'npm',
-    buildScript    : 'build',
-    testScript     : 'test',
+    testScript     : 'test:coverage',
     hostPort       : 3000,
     containerPort  : 3000
 )
