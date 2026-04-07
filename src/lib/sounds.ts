@@ -1,5 +1,5 @@
 let audioCtx: AudioContext | null = null;
-let _muted = typeof window !== 'undefined' && localStorage.getItem('scrumPokerMuted') === 'true';
+let _muted = typeof globalThis.window !== 'undefined' && localStorage.getItem('scrumPokerMuted') === 'true';
 
 export function isMuted(): boolean {
   return _muted;
@@ -7,18 +7,16 @@ export function isMuted(): boolean {
 
 export function setMuted(muted: boolean) {
   _muted = muted;
-  if (typeof window !== 'undefined') {
+  if (typeof globalThis.window !== 'undefined') {
     localStorage.setItem('scrumPokerMuted', String(muted));
   }
-  if (muted && typeof window !== 'undefined' && window.speechSynthesis) {
-    window.speechSynthesis.cancel();
+  if (muted && typeof globalThis.window !== 'undefined' && globalThis.speechSynthesis) {
+    globalThis.speechSynthesis.cancel();
   }
 }
 
 function getAudioContext(): AudioContext {
-  if (!audioCtx) {
-    audioCtx = new AudioContext();
-  }
+  audioCtx ??= new AudioContext();
   return audioCtx;
 }
 
@@ -118,12 +116,12 @@ export function playEmojiSound(emoji: string) {
 let allVoices: SpeechSynthesisVoice[] = [];
 
 function loadVoices() {
-  allVoices = window.speechSynthesis.getVoices();
+  allVoices = globalThis.speechSynthesis.getVoices();
 }
 
-if (typeof window !== 'undefined' && window.speechSynthesis) {
+if (typeof globalThis.window !== 'undefined' && globalThis.speechSynthesis) {
   loadVoices();
-  window.speechSynthesis.addEventListener('voiceschanged', loadVoices);
+  globalThis.speechSynthesis.addEventListener('voiceschanged', loadVoices);
 }
 
 const THAI_RANGE = /[\u0E00-\u0E7F]/;
@@ -144,14 +142,14 @@ function findVoice(lang: string, preferred: string[]): SpeechSynthesisVoice | nu
 
 export function speakMessage(text: string) {
   if (_muted) return;
-  if (typeof window === 'undefined' || !window.speechSynthesis) return;
+  if (typeof globalThis.window === 'undefined' || !globalThis.speechSynthesis) return;
 
   // Re-fetch voices if the initial load got an empty array (Chrome loads async)
   if (allVoices.length === 0) loadVoices();
 
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.rate = 1.05;
-  utterance.pitch = 1.0;
+  utterance.pitch = 1;
   utterance.volume = 0.8;
 
   if (isThai(text)) {
@@ -168,11 +166,11 @@ export function speakMessage(text: string) {
   // but Safari breaks if cancel() is called. Detect Chrome via userAgent.
   const isChrome = /Chrome/.test(navigator.userAgent) && !/Edg/.test(navigator.userAgent);
   if (isChrome) {
-    window.speechSynthesis.cancel();
+    globalThis.speechSynthesis.cancel();
     // Chrome needs a small delay after cancel() or it kills the new utterance
-    setTimeout(() => window.speechSynthesis.speak(utterance), 50);
+    setTimeout(() => globalThis.speechSynthesis.speak(utterance), 50);
   } else {
-    window.speechSynthesis.speak(utterance);
+    globalThis.speechSynthesis.speak(utterance);
   }
 }
 

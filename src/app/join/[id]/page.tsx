@@ -51,8 +51,9 @@ export default function JoinPage() {
 
         <div className="bg-slate-800/50 backdrop-blur border border-slate-700 rounded-2xl p-6 shadow-2xl">
           <div className="mb-6">
-            <label className="block text-sm text-slate-300 mb-1.5">Your Name</label>
+            <label htmlFor="playerName" className="block text-sm text-slate-300 mb-1.5">Your Name</label>
             <input
+              id="playerName"
               type="text"
               value={playerName}
               onChange={(e) => setPlayerName(e.target.value)}

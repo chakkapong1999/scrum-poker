@@ -105,8 +105,9 @@ export default function Home() {
 
           {/* Name field */}
           <div className="mb-4">
-            <label className="block text-sm text-slate-300 mb-1.5">Your Name</label>
+            <label htmlFor="playerName" className="block text-sm text-slate-300 mb-1.5">Your Name</label>
             <input
+              id="playerName"
               type="text"
               value={playerName}
               onChange={(e) => setPlayerName(e.target.value)}
@@ -120,8 +121,9 @@ export default function Home() {
           {activeTab === 'create' ? (
             <>
               <div className="mb-4">
-                <label className="block text-sm text-slate-300 mb-1.5">Room Name</label>
+                <label htmlFor="roomName" className="block text-sm text-slate-300 mb-1.5">Room Name</label>
                 <input
+                  id="roomName"
                   type="text"
                   value={roomName}
                   onChange={(e) => setRoomName(e.target.value)}
@@ -133,8 +135,9 @@ export default function Home() {
               </div>
 
               <div className="mb-6">
-                <label className="block text-sm text-slate-300 mb-1.5">Voting System</label>
+                <label htmlFor="votingSystem" className="block text-sm text-slate-300 mb-1.5">Voting System</label>
                 <select
+                  id="votingSystem"
                   value={votingSystem}
                   onChange={(e) => setVotingSystem(e.target.value)}
                   className="w-full px-4 py-3 bg-slate-900/50 border border-slate-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
@@ -155,8 +158,9 @@ export default function Home() {
           ) : (
             <>
               <div className="mb-6">
-                <label className="block text-sm text-slate-300 mb-1.5">Room Code</label>
+                <label htmlFor="joinCode" className="block text-sm text-slate-300 mb-1.5">Room Code</label>
                 <input
+                  id="joinCode"
                   type="text"
                   value={joinCode}
                   onChange={(e) => setJoinCode(e.target.value.toUpperCase())}

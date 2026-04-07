@@ -188,7 +188,11 @@ app.prepare().then(() => {
       if (player) {
         player.vote = vote;
         room.lastActivity = Date.now();
-        io.to(currentRoomId).emit('room-update', getRoomState(room));
+        // Send lightweight diff instead of full state for vote changes
+        io.to(currentRoomId).emit('vote-update', {
+          playerId: currentPlayerId,
+          vote: vote ? 'voted' : null,
+        });
       }
     });
 

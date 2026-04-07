@@ -1,17 +1,20 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef, useSyncExternalStore } from 'react';
+import { memo, useEffect, useState, useCallback, useRef, useSyncExternalStore } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { getSocket } from '@/lib/socket';
 import { playAllVotedSound, playRevealSound, playPopSound, playEmojiSound, speakMessage, isMuted, setMuted } from '@/lib/sounds';
 import type { RoomState, Player } from '@/types';
 
-function VoteCard({ value, selected, onClick, disabled }: {
+const VoteStats = dynamic(() => import('./VoteStats'), { ssr: false });
+
+const VoteCard = memo(function VoteCard({ value, selected, onClick, disabled }: Readonly<{
   value: string;
   selected: boolean;
   onClick: () => void;
   disabled: boolean;
-}) {
+}>) {
   return (
     <button
       onClick={onClick}
@@ -25,7 +28,7 @@ function VoteCard({ value, selected, onClick, disabled }: {
       {value}
     </button>
   );
-}
+});
 
 interface FloatingEmoji {
   id: number;
@@ -37,14 +40,26 @@ interface ChatBubble {
   message: string;
 }
 
-function PlayerCard({ player, revealed, floatingEmojis, chatBubbles }: {
+function getCardStyle(showVote: boolean, hasVoted: boolean): string {
+  if (showVote) return 'bg-blue-600 text-white card-flip';
+  if (hasVoted) return 'bg-green-600/20 border-2 border-green-500 text-green-400';
+  return 'bg-slate-700/30 border-2 border-slate-600 text-slate-500';
+}
+
+function getCardLabel(showVote: boolean, hasVoted: boolean, vote: string | null): string {
+  if (showVote) return vote!;
+  if (hasVoted) return '✓';
+  return '?';
+}
+
+const PlayerCard = memo(function PlayerCard({ player, revealed, floatingEmojis, chatBubbles }: Readonly<{
   player: Player;
   revealed: boolean;
   floatingEmojis: FloatingEmoji[];
   chatBubbles: ChatBubble[];
-}) {
+}>) {
   const hasVoted = player.vote !== null;
-  const showVote = revealed && player.vote && player.vote !== 'voted';
+  const showVote = revealed && !!player.vote && player.vote !== 'voted';
 
   return (
     <div className="flex flex-col items-center gap-2 float-in relative" style={{ overflow: 'visible' }}>
@@ -72,15 +87,9 @@ function PlayerCard({ player, revealed, floatingEmojis, chatBubbles }: {
         </span>
       ))}
       <div
-        className={`w-16 h-24 rounded-xl flex items-center justify-center text-lg font-bold transition-all ${
-          showVote
-            ? 'bg-blue-600 text-white card-flip'
-            : hasVoted
-              ? 'bg-green-600/20 border-2 border-green-500 text-green-400'
-              : 'bg-slate-700/30 border-2 border-slate-600 text-slate-500'
-        }`}
+        className={`w-16 h-24 rounded-xl flex items-center justify-center text-lg font-bold transition-all ${getCardStyle(showVote, hasVoted)}`}
       >
-        {showVote ? player.vote : hasVoted ? '✓' : '?'}
+        {getCardLabel(showVote, hasVoted, player.vote)}
       </div>
       <div className="flex items-center gap-1">
         <span className="text-sm text-slate-300 truncate max-w-[80px]">{player.name}</span>
@@ -88,67 +97,42 @@ function PlayerCard({ player, revealed, floatingEmojis, chatBubbles }: {
       </div>
     </div>
   );
+});
+
+const REACTION_EMOJIS = ['👍', '👏', '🎉', '🔥', '😂', '🤔', '😱', '💀', '🚀', '❤️', '👀', '🙈', '🍻'];
+
+const QUICK_MESSAGES = [
+  'Let\'s go!', 'Hurry up! 😄', 'Take your time',
+  'Need more info', 'Too complex', 'Easy one!',
+  'Agree 👍', 'Not sure...', 'Let\'s discuss',
+];
+
+function removeById<T extends { id: number }>(items: T[], targetId: number): T[] {
+  return items.filter(item => item.id !== targetId);
 }
 
-function VoteStats({ players }: { players: Player[] }) {
-  const votes = players
-    .map(p => p.vote)
-    .filter((v): v is string => v !== null && v !== 'voted' && v !== '?' && v !== '☕');
+function handleSoundAndTitle(state: RoomState, prev: RoomState | null) {
+  if (state.revealed && prev && !prev.revealed) {
+    playRevealSound();
+    if (document.hidden) document.title = '🎉 Votes Revealed! — Scrum Poker';
+    return;
+  }
+  if (state.revealed || state.players.length === 0) return;
+  const allVotedNow = state.players.every(p => p.vote !== null);
+  const allVotedBefore = prev?.players.length ? prev.players.every(p => p.vote !== null) : false;
+  if (allVotedNow && !allVotedBefore) {
+    playAllVotedSound();
+    if (document.hidden) document.title = '✅ All Voted! — Scrum Poker';
+  }
+}
 
-  const numericVotes = votes.map(Number).filter(n => !isNaN(n));
-
-  if (numericVotes.length === 0) return null;
-
-  const avg = numericVotes.reduce((a, b) => a + b, 0) / numericVotes.length;
-  const min = Math.min(...numericVotes);
-  const max = Math.max(...numericVotes);
-
-  // Vote distribution
-  const distribution = new Map<string, number>();
-  players.forEach(p => {
-    if (p.vote && p.vote !== 'voted') {
-      distribution.set(p.vote, (distribution.get(p.vote) || 0) + 1);
-    }
-  });
-
-  return (
-    <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 float-in">
-      <h3 className="text-lg font-semibold text-white mb-4">Results</h3>
-      <div className="grid grid-cols-3 gap-4 mb-6">
-        <div className="text-center">
-          <div className="text-2xl font-bold text-blue-400">{avg.toFixed(1)}</div>
-          <div className="text-xs text-slate-400">Average</div>
-        </div>
-        <div className="text-center">
-          <div className="text-2xl font-bold text-green-400">{min}</div>
-          <div className="text-xs text-slate-400">Min</div>
-        </div>
-        <div className="text-center">
-          <div className="text-2xl font-bold text-red-400">{max}</div>
-          <div className="text-xs text-slate-400">Max</div>
-        </div>
-      </div>
-      {distribution.size > 0 && (
-        <div className="space-y-2">
-          {Array.from(distribution.entries())
-            .sort((a, b) => b[1] - a[1])
-            .map(([vote, count]) => (
-              <div key={vote} className="flex items-center gap-3">
-                <span className="w-8 text-right font-mono text-sm text-slate-300">{vote}</span>
-                <div className="flex-1 bg-slate-700/50 rounded-full h-6 overflow-hidden">
-                  <div
-                    className="h-full bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-end pr-2 transition-all duration-500"
-                    style={{ width: `${(count / players.length) * 100}%`, minWidth: '2rem' }}
-                  >
-                    <span className="text-xs text-white font-medium">{count}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-        </div>
-      )}
-    </div>
-  );
+function syncMyVote(state: RoomState, socketId: string | undefined, setMyVote: (v: string | null) => void) {
+  const me = state.players.find(p => p.id === socketId);
+  if (state.revealed) {
+    if (me) setMyVote(me.vote);
+  } else if (me?.vote === null) {
+    setMyVote(null);
+  }
 }
 
 export default function RoomPage() {
@@ -164,11 +148,9 @@ export default function RoomPage() {
   const [emojiPickerOpen, setEmojiPickerOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [chatInput, setChatInput] = useState('');
-  const [muted, setMutedState] = useState(isMuted);
+  const [muted, setMutedState] = useState(() => isMuted());
 
   const prevRoomRef = useRef<RoomState | null>(null);
-
-  const REACTION_EMOJIS = ['👍', '👏', '🎉', '🔥', '😂', '🤔', '😱', '💀', '🚀', '❤️', '👀', '🙈', '🍻'];
 
   const myId = useSyncExternalStore(
     (cb) => {
@@ -184,36 +166,37 @@ export default function RoomPage() {
     const socket = getSocket();
 
     const onRoomUpdate = (state: RoomState) => {
-      const prev = prevRoomRef.current;
+      handleSoundAndTitle(state, prevRoomRef.current);
+      prevRoomRef.current = state;
+      setRoom(state);
+      syncMyVote(state, socket.id, setMyVote);
+    };
 
-      // Play reveal sound when votes are revealed
-      if (state.revealed && prev && !prev.revealed) {
-        playRevealSound();
-        if (document.hidden) document.title = '🎉 Votes Revealed! — Scrum Poker';
-      }
-      // Play all-voted sound when everyone has voted (and not yet revealed)
-      else if (!state.revealed && state.players.length > 0) {
-        const allVotedNow = state.players.every(p => p.vote !== null);
-        const allVotedBefore = prev && prev.players.length > 0 && prev.players.every(p => p.vote !== null);
+    socket.on('room-update', onRoomUpdate);
+
+    // Lightweight vote diff — avoids sending full room state on every vote
+    const onVoteUpdate = ({ playerId, vote }: { playerId: string; vote: string | null }) => {
+      setRoom(prev => {
+        if (!prev || prev.revealed) return prev;
+        const players = prev.players.map(p =>
+          p.id === playerId ? { ...p, vote } : p
+        );
+        const next = { ...prev, players };
+
+        // Check if all voted now (and weren't before)
+        const allVotedNow = players.every(p => p.vote !== null);
+        const allVotedBefore = prev.players.every(p => p.vote !== null);
         if (allVotedNow && !allVotedBefore) {
           playAllVotedSound();
           if (document.hidden) document.title = '✅ All Voted! — Scrum Poker';
         }
-      }
 
-      prevRoomRef.current = state;
-      setRoom(state);
-      const socketId = socket.id;
-      if (state.revealed) {
-        const me = state.players.find(p => p.id === socketId);
-        if (me) setMyVote(me.vote);
-      } else {
-        const me = state.players.find(p => p.id === socketId);
-        if (me && me.vote === null) setMyVote(null);
-      }
+        prevRoomRef.current = next;
+        return next;
+      });
     };
 
-    socket.on('room-update', onRoomUpdate);
+    socket.on('vote-update', onVoteUpdate);
 
     let emojiIdCounter = 0;
     const onPlayerEmoji = ({ playerId, emoji }: { playerId: string; emoji: string }) => {
@@ -224,19 +207,7 @@ export default function RoomPage() {
         next.set(playerId, [...existing, { id, emoji }]);
         return next;
       });
-      // Remove after animation completes
-      setTimeout(() => {
-        setFloatingEmojis(prev => {
-          const next = new Map(prev);
-          const existing = next.get(playerId);
-          if (existing) {
-            const filtered = existing.filter(e => e.id !== id);
-            if (filtered.length === 0) next.delete(playerId);
-            else next.set(playerId, filtered);
-          }
-          return next;
-        });
-      }, 2000);
+      scheduleEmojiRemoval(id, playerId);
     };
 
     socket.on('player-emoji', onPlayerEmoji);
@@ -247,22 +218,10 @@ export default function RoomPage() {
       const id = chatIdCounter++;
       setChatBubbles(prev => {
         const next = new Map(prev);
-        // Only show the latest bubble per player
         next.set(playerId, [{ id, message }]);
         return next;
       });
-      setTimeout(() => {
-        setChatBubbles(prev => {
-          const next = new Map(prev);
-          const existing = next.get(playerId);
-          if (existing) {
-            const filtered = existing.filter(b => b.id !== id);
-            if (filtered.length === 0) next.delete(playerId);
-            else next.set(playerId, filtered);
-          }
-          return next;
-        });
-      }, 3000);
+      scheduleChatRemoval(id, playerId);
     };
 
     socket.on('player-chat', onPlayerChat);
@@ -273,21 +232,22 @@ export default function RoomPage() {
         if (res.success && res.state) {
           onRoomUpdate(res.state);
         } else {
-          // Not in a room on the server — try to rejoin using stored name
-          const storedName = sessionStorage.getItem('playerName');
-          if (storedName) {
-            socket.emit('rejoin-room', {
-              roomId: roomId.toUpperCase(),
-              playerName: storedName,
-            }, (rejoinRes: { success: boolean; roomId?: string; error?: string }) => {
-              if (!rejoinRes.success) {
-                setNotJoined(true);
-              }
-            });
-          } else {
-            setNotJoined(true);
-          }
+          rejoinOrRedirect(socket);
         }
+      });
+    };
+
+    const rejoinOrRedirect = (sock: typeof socket) => {
+      const storedName = sessionStorage.getItem('playerName');
+      if (!storedName) {
+        setNotJoined(true);
+        return;
+      }
+      sock.emit('rejoin-room', {
+        roomId: roomId.toUpperCase(),
+        playerName: storedName,
+      }, (rejoinRes: { success: boolean; roomId?: string; error?: string }) => {
+        if (!rejoinRes.success) setNotJoined(true);
       });
     };
 
@@ -302,11 +262,40 @@ export default function RoomPage() {
 
     return () => {
       socket.off('room-update', onRoomUpdate);
+      socket.off('vote-update', onVoteUpdate);
       socket.off('player-emoji', onPlayerEmoji);
       socket.off('player-chat', onPlayerChat);
       socket.off('connect', onReconnect);
     };
   }, [roomId]);
+
+  const scheduleEmojiRemoval = (id: number, playerId: string) => {
+    setTimeout(() => {
+      setFloatingEmojis(prev => {
+        const next = new Map(prev);
+        const existing = next.get(playerId);
+        if (!existing) return prev;
+        const filtered = removeById(existing, id);
+        if (filtered.length === 0) next.delete(playerId);
+        else next.set(playerId, filtered);
+        return next;
+      });
+    }, 2000);
+  };
+
+  const scheduleChatRemoval = (id: number, playerId: string) => {
+    setTimeout(() => {
+      setChatBubbles(prev => {
+        const next = new Map(prev);
+        const existing = next.get(playerId);
+        if (!existing) return prev;
+        const filtered = removeById(existing, id);
+        if (filtered.length === 0) next.delete(playerId);
+        else next.set(playerId, filtered);
+        return next;
+      });
+    }, 3000);
+  };
 
   const handleVote = useCallback((value: string) => {
     const socket = getSocket();
@@ -330,12 +319,6 @@ export default function RoomPage() {
     setChatOpen(false);
   };
 
-  const QUICK_MESSAGES = [
-    'Let\'s go!', 'Hurry up! 😄', 'Take your time',
-    'Need more info', 'Too complex', 'Easy one!',
-    'Agree 👍', 'Not sure...', 'Let\'s discuss',
-  ];
-
   const handleReveal = () => {
     getSocket().emit('reveal-votes');
   };
@@ -352,7 +335,7 @@ export default function RoomPage() {
   };
 
   const copyInviteLink = () => {
-    const link = `${window.location.origin}/join/${roomId}`;
+    const link = `${globalThis.location.origin}/join/${roomId}`;
     navigator.clipboard.writeText(link);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -439,7 +422,7 @@ export default function RoomPage() {
             )}
           </button>
           <div className="px-3 py-2 bg-slate-800/50 rounded-xl text-sm text-slate-300">
-            {room.players.length} player{room.players.length !== 1 ? 's' : ''}
+            {room.players.length} player{room.players.length === 1 ? '' : 's'}
           </div>
         </div>
       </div>
@@ -454,20 +437,20 @@ export default function RoomPage() {
           </h2>
           {isHost && (
             <div className="flex gap-2">
-              {!room.revealed ? (
+              {room.revealed ? (
+                <button
+                  onClick={handleReset}
+                  className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-xl transition-all"
+                >
+                  New Round
+                </button>
+              ) : (
                 <button
                   onClick={handleReveal}
                   disabled={votedCount === 0}
                   className="px-5 py-2 bg-green-600 hover:bg-green-500 disabled:bg-slate-600 disabled:cursor-not-allowed text-white text-sm font-medium rounded-xl transition-all"
                 >
                   Reveal Votes {allVoted && '✨'}
-                </button>
-              ) : (
-                <button
-                  onClick={handleReset}
-                  className="px-5 py-2 bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium rounded-xl transition-all"
-                >
-                  New Round
                 </button>
               )}
             </div>
