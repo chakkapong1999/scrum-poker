@@ -7,7 +7,10 @@ export default defineConfig({
   test: {
     environment: 'happy-dom',
     globals: true,
-    setupFiles: ['./src/__tests__/setup.ts'],
+    setupFiles: ['./src/__tests__/setup.ts'],                                                                                                        
+    coverage: {
+      reporter: ['lcov', 'text'],
+    }                        
   },
   resolve: {
     alias: {
