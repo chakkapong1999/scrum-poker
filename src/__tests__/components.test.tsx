@@ -362,7 +362,7 @@ describe('Join page', () => {
   it('renders join page with room code', async () => {
     const { default: JoinPage } = await import('@/app/join/[id]/page');
     render(<JoinPage />);
-    expect(screen.getByText('Join Scrum Poker')).toBeInTheDocument();
+    expect(screen.getByText('Join Session')).toBeInTheDocument();
     expect(screen.getByText('ABC123')).toBeInTheDocument();
     expect(screen.getByLabelText('Your Name')).toBeInTheDocument();
   });
@@ -479,7 +479,8 @@ describe('RoomPage', () => {
 
     expect(screen.getByText('Sprint Planning')).toBeInTheDocument();
     expect(screen.getByText('Alice')).toBeInTheDocument();
-    expect(screen.getByText('Voting... (0/1)')).toBeInTheDocument();
+    expect(screen.getByText('0/1')).toBeInTheDocument();
+    expect(screen.getByText('voted')).toBeInTheDocument();
   });
 
   it('shows reveal button for host', async () => {
@@ -512,7 +513,7 @@ describe('RoomPage', () => {
     });
 
     expect(screen.getByText('New Round')).toBeInTheDocument();
-    expect(screen.getByText('Votes Revealed!')).toBeInTheDocument();
+    expect(screen.getByText('Revealed')).toBeInTheDocument();
   });
 
   it('handles voting card click', async () => {
@@ -592,7 +593,7 @@ describe('RoomPage', () => {
     });
 
     // Open chat
-    fireEvent.click(screen.getByText('Quick Chat'));
+    fireEvent.click(screen.getByText('Chat'));
     expect(screen.getByText("Let's go!")).toBeInTheDocument();
 
     // Click quick message
@@ -616,7 +617,7 @@ describe('RoomPage', () => {
       });
     });
 
-    fireEvent.click(screen.getByText('Quick Chat'));
+    fireEvent.click(screen.getByText('Chat'));
     const input = screen.getByPlaceholderText('Type a message...');
     fireEvent.change(input, { target: { value: 'Hello team' } });
 
@@ -638,7 +639,7 @@ describe('RoomPage', () => {
       });
     });
 
-    fireEvent.click(screen.getByText('Quick Chat'));
+    fireEvent.click(screen.getByText('Chat'));
     const input = screen.getByPlaceholderText('Type a message...');
     fireEvent.change(input, { target: { value: 'Hey' } });
     fireEvent.keyDown(input, { key: 'Enter' });
@@ -658,7 +659,7 @@ describe('RoomPage', () => {
       });
     });
 
-    fireEvent.click(screen.getByText('Quick Chat'));
+    fireEvent.click(screen.getByText('Chat'));
     const input = screen.getByPlaceholderText('Type a message...');
     fireEvent.change(input, { target: { value: '   ' } });
     vi.clearAllMocks();
@@ -703,7 +704,7 @@ describe('RoomPage', () => {
       });
     });
 
-    fireEvent.click(screen.getByText('Copy Invite Link'));
+    fireEvent.click(screen.getByText('Invite'));
     expect(screen.getByText('Copied!')).toBeInTheDocument();
   });
 
@@ -794,14 +795,14 @@ describe('RoomPage', () => {
       });
     });
 
-    expect(screen.getByText('Voting... (0/2)')).toBeInTheDocument();
+    expect(screen.getByText('0/2')).toBeInTheDocument();
 
     const onVoteUpdate = mockSocketOn.mock.calls.find((c: unknown[]) => c[0] === 'vote-update')![1];
     act(() => {
       onVoteUpdate({ playerId: 'p2', vote: 'voted' });
     });
 
-    expect(screen.getByText('Voting... (1/2)')).toBeInTheDocument();
+    expect(screen.getByText('1/2')).toBeInTheDocument();
   });
 
   it('does not show host controls for non-host', async () => {
@@ -918,7 +919,7 @@ describe('RoomPage', () => {
       });
     });
 
-    expect(screen.getByText(/✨/)).toBeInTheDocument();
+    expect(screen.getByText('All voted!')).toBeInTheDocument();
   });
 
   it('handles player-emoji event and shows floating emoji then removes it', async () => {
@@ -1199,7 +1200,7 @@ describe('RoomPage', () => {
     fireEvent.click(screen.getByText('Reaction'));
     expect(screen.getByText('👍')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByText('Quick Chat'));
+    fireEvent.click(screen.getByText('Chat'));
     expect(screen.queryByText('👍')).not.toBeInTheDocument();
     expect(screen.getByText("Let's go!")).toBeInTheDocument();
   });
