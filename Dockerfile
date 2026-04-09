@@ -28,6 +28,7 @@ COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder /app/server.ts ./server.ts
 COPY --from=builder /app/src/types ./src/types
+COPY --from=builder /app/src/lib/room-utils.ts ./src/lib/room-utils.ts
 COPY --from=builder /app/tsconfig.json ./tsconfig.json
 
 # tsx is needed to run the custom TypeScript server
