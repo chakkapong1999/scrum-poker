@@ -14,10 +14,13 @@ Real-time planning poker app built with Next.js 16, React 19, Socket.IO, and Tai
 
 - `server.ts` — Socket.IO server, room management, all game logic
 - `src/app/page.tsx` — Home page (create/join room)
-- `src/app/room/[id]/page.tsx` — Main voting room (largest file ~530 lines)
+- `src/app/room/[id]/page.tsx` — Main voting room (largest file ~650 lines)
 - `src/app/join/[id]/page.tsx` — Invite join page
 - `src/lib/socket.ts` — Socket.IO client singleton
 - `src/lib/sounds.ts` — Web Audio API sounds + Web Speech API TTS
+- `src/lib/theme.tsx` — Light/dark theme provider (persists to localStorage)
+- `src/lib/room-utils.ts` — Room ID generation, vote masking, voting system lookup
+- `src/components/ThemeToggle.tsx` — Sun/moon theme toggle button
 - `src/types/index.ts` — Shared TypeScript interfaces (Room, Player, RoomState)
 
 ## Commands
@@ -26,12 +29,15 @@ Real-time planning poker app built with Next.js 16, React 19, Socket.IO, and Tai
 - `npm run build` — Build for production (next build)
 - `npm start` — Start production server (NODE_ENV=production tsx server.ts)
 - `npm run lint` — Run ESLint
+- `npm test` — Run tests (vitest run)
+- `npm run test:watch` — Run tests in watch mode
+- `npm run test:coverage` — Run tests with coverage
 
 ## Socket Events
 
 **Client → Server:** `create-room`, `join-room`, `rejoin-room`, `get-room-state`, `vote`, `reveal-votes`, `reset-votes`, `send-emoji`, `send-chat`
 
-**Server → Client:** `room-update`, `player-emoji`, `player-chat`
+**Server → Client:** `room-update`, `vote-update`, `player-emoji`, `player-chat`
 
 ## Important Patterns
 
@@ -41,3 +47,5 @@ Real-time planning poker app built with Next.js 16, React 19, Socket.IO, and Tai
 - Host auto-transfers to first remaining player on disconnect
 - Empty rooms are kept for 60s grace period (allows refresh/rejoin), then cleaned up
 - TTS requires macOS system voices installed (Accessibility > Spoken Content > Manage Voices)
+- Theme (light/dark) is stored in `localStorage('theme')` and toggled via `.dark` class on `<html>`
+- Dockerfile production stage must explicitly COPY any `src/lib/` files imported by `server.ts` (standalone output doesn't include them)
