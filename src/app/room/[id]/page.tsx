@@ -41,16 +41,8 @@ interface ChatBubble {
   message: string;
 }
 
-function getCardStyle(showVote: boolean, hasVoted: boolean): string {
-  if (showVote) return 'bg-gradient-to-br from-blue-500 to-blue-600 text-white card-flip shadow-lg shadow-blue-600/20';
-  if (hasVoted) return 'bg-emerald-500/10 border-emerald-500/40 text-emerald-600 dark:text-emerald-400 glow-green';
-  return 'glass-light text-slate-400 dark:text-slate-600';
-}
-
-function getCardLabel(showVote: boolean, hasVoted: boolean, vote: string | null): string {
-  if (showVote) return vote!;
-  if (hasVoted) return '✓';
-  return '?';
+function getBackClass(hasVoted: boolean): string {
+  return hasVoted ? 'card-back-voted' : 'card-back-idle';
 }
 
 const PlayerCard = memo(function PlayerCard({ player, revealed, floatingEmojis, chatBubbles }: Readonly<{
@@ -90,11 +82,18 @@ const PlayerCard = memo(function PlayerCard({ player, revealed, floatingEmojis, 
           {fe.emoji}
         </span>
       ))}
-      {/* Card */}
-      <div
-        className={`w-16 h-24 rounded-xl flex items-center justify-center text-lg font-bold transition-all border border-transparent ${getCardStyle(showVote, hasVoted)}`}
-      >
-        {getCardLabel(showVote, hasVoted, player.vote)}
+      {/* Card with 3D flip */}
+      <div className="card-flip-container">
+        <div className={`card-flip-inner ${showVote ? 'flipped' : ''}`}>
+          {/* Back face (default — shows ✓ or ?) */}
+          <div className={`card-flip-back ${getBackClass(hasVoted)}`}>
+            {hasVoted ? '✓' : '?'}
+          </div>
+          {/* Front face (revealed vote value) */}
+          <div className="card-flip-front card-front-revealed">
+            {player.vote && player.vote !== 'voted' ? player.vote : ''}
+          </div>
+        </div>
       </div>
       {/* Player info */}
       <div className="flex flex-col items-center gap-0.5">
