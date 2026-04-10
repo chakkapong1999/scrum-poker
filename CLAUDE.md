@@ -2,7 +2,7 @@
 
 # Scrum Poker
 
-Real-time planning poker app built with Next.js 16, React 19, Socket.IO, and Tailwind CSS 4.
+Real-time planning poker app built with Next.js 16.2, React 19, Socket.IO 4, and Tailwind CSS 4.
 
 ## Architecture
 
@@ -12,9 +12,15 @@ Real-time planning poker app built with Next.js 16, React 19, Socket.IO, and Tai
 
 ## Key Files
 
-- `server.ts` — Socket.IO server, room management, all game logic
+- `server.ts` — Socket.IO server, room management, all game logic (~270 lines)
 - `src/app/page.tsx` — Home page (create/join room)
-- `src/app/room/[id]/page.tsx` — Main voting room (largest file ~650 lines)
+- `src/app/room/[id]/page.tsx` — Main voting room orchestrator (~310 lines)
+- `src/app/room/[id]/RoomHeader.tsx` — Room title, ID, voting system selector, host controls
+- `src/app/room/[id]/PlayerArea.tsx` — Grid layout of player cards
+- `src/app/room/[id]/PlayerCard.tsx` — Individual player card with vote display and emoji
+- `src/app/room/[id]/VotingDeck.tsx` — Vote option buttons
+- `src/app/room/[id]/VoteStats.tsx` — Vote statistics after reveal
+- `src/app/room/[id]/InteractionBar.tsx` — Chat and emoji interaction panel
 - `src/app/join/[id]/page.tsx` — Invite join page
 - `src/lib/socket.ts` — Socket.IO client singleton
 - `src/lib/sounds.ts` — Web Audio API sounds + Web Speech API TTS
