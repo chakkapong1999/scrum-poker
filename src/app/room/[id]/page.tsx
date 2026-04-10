@@ -41,10 +41,6 @@ interface ChatBubble {
   message: string;
 }
 
-function getBackClass(hasVoted: boolean): string {
-  return hasVoted ? 'card-back-voted' : 'card-back-idle';
-}
-
 const PlayerCard = memo(function PlayerCard({ player, revealed, floatingEmojis, chatBubbles }: Readonly<{
   player: Player;
   revealed: boolean;
@@ -86,12 +82,12 @@ const PlayerCard = memo(function PlayerCard({ player, revealed, floatingEmojis, 
       <div className="card-flip-container">
         <div className={`card-flip-inner ${showVote ? 'flipped' : ''}`}>
           {/* Back face (default — shows ✓ or ?) */}
-          <div className={`card-flip-back ${getBackClass(hasVoted)}`}>
+          <div className={`card-flip-back ${hasVoted ? 'card-back-voted' : 'card-back-idle'}`}>
             {hasVoted ? '✓' : '?'}
           </div>
           {/* Front face (revealed vote value) */}
           <div className="card-flip-front card-front-revealed">
-            {player.vote && player.vote !== 'voted' ? player.vote : ''}
+            {player.vote ?? ''}
           </div>
         </div>
       </div>
