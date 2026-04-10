@@ -18,7 +18,40 @@ const ROOM_EMPTY_GRACE_MS = 60 * 1000; // keep empty rooms for 60s (allows refre
 const CLEANUP_INTERVAL_MS = 30 * 1000; // check every 30 seconds
 
 app.prepare().then(() => {
+  const startedAt = Date.now();
+
   const httpServer = createServer((req, res) => {
+    // Lightweight liveness probe (uptime monitoring)
+    if (req.url === '/healthz') {
+      res.writeHead(200, { 'Content-Type': 'text/plain' });
+      res.end('ok');
+      return;
+    }
+
+    // Application metrics endpoint
+    if (req.url === '/health') {
+      const mem = process.memoryUsage();
+      let totalPlayers = 0;
+      for (const room of rooms.values()) {
+        totalPlayers += room.players.size;
+      }
+      const payload = {
+        status: 'ok',
+        uptime: Math.floor((Date.now() - startedAt) / 1000),
+        rooms: rooms.size,
+        players: totalPlayers,
+        connections: io?.engine?.clientsCount ?? 0,
+        memory: {
+          rss: Math.round(mem.rss / 1024 / 1024),
+          heapUsed: Math.round(mem.heapUsed / 1024 / 1024),
+          heapTotal: Math.round(mem.heapTotal / 1024 / 1024),
+        },
+      };
+      res.writeHead(200, { 'Content-Type': 'application/json' });
+      res.end(JSON.stringify(payload));
+      return;
+    }
+
     const parsedUrl = parse(req.url!, true);
     handle(req, res, parsedUrl);
   });
