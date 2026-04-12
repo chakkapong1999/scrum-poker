@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/lib/theme";
 import "./globals.css";
@@ -14,8 +14,50 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Scrum Poker",
-  description: "Real-time scrum poker for agile teams",
+  title: {
+    default: "Scrum Poker — Real-time Planning Poker for Agile Teams",
+    template: "%s — Scrum Poker",
+  },
+  description:
+    "Free real-time planning poker for agile teams. Estimate with Fibonacci or T-Shirt sizing, share a room link, and vote together — no sign-up required.",
+  keywords: [
+    "scrum poker",
+    "planning poker",
+    "agile estimation",
+    "story points",
+    "fibonacci",
+    "t-shirt sizing",
+    "sprint planning",
+    "real-time voting",
+  ],
+  applicationName: "Scrum Poker",
+  openGraph: {
+    title: "Scrum Poker — Real-time Planning Poker for Agile Teams",
+    description:
+      "Free real-time planning poker for agile teams. Estimate with Fibonacci or T-Shirt sizing — no sign-up required.",
+    type: "website",
+    locale: "en_US",
+    siteName: "Scrum Poker",
+  },
+  twitter: {
+    card: "summary",
+    title: "Scrum Poker — Real-time Planning Poker",
+    description:
+      "Free real-time planning poker for agile teams. No sign-up required.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#0f172a" },
+  ],
 };
 
 export default function RootLayout({
