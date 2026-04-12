@@ -1,7 +1,7 @@
 <!-- BEGIN:nextjs-agent-rules -->
 # This is NOT the Next.js you know
 
-This project uses **Next.js 16.2** with a custom server (`server.ts`). APIs, conventions, and file structure may differ from your training data.
+This project uses **Next.js 16.2.3** with a custom server (`server.ts`). APIs, conventions, and file structure may differ from your training data.
 
 Before writing any Next.js code, read the relevant guide in `node_modules/next/dist/docs/`:
 - `01-app/` — App Router (routing, layouts, data fetching, server components)

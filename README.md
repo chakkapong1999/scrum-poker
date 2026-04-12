@@ -17,7 +17,7 @@ Real-time planning poker for agile teams. Create a room, share the link, and est
 
 ## Tech Stack
 
-- **Frontend:** Next.js 16.2, React 19, TypeScript, Tailwind CSS 4
+- **Frontend:** Next.js 16.2.3, React 19, TypeScript, Tailwind CSS 4
 - **Real-time:** Socket.IO 4
 - **Server:** Custom Node.js server with tsx
 - **Testing:** Vitest, Testing Library, happy-dom
