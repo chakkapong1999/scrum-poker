@@ -38,20 +38,25 @@ export default function JoinPage() {
 
   return (
     <div className="min-h-dvh flex items-center justify-center p-4">
-      {/* Theme toggle - top right */}
+      {/* Theme toggle */}
       <div className="fixed top-4 right-4 z-20">
         <ThemeToggle />
       </div>
 
+      {/* Decorative suit */}
+      <div className="fixed top-[18%] right-[12%] text-[80px] opacity-[0.02] dark:opacity-[0.03] pointer-events-none select-none font-serif" aria-hidden>
+        ♣
+      </div>
+
       <div className="w-full max-w-md slide-up">
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 dark:from-blue-500/20 dark:to-purple-500/20 border border-blue-500/10 dark:border-blue-500/20 mb-5 glow-purple">
+          <div className="inline-flex items-center justify-center w-20 h-20 rounded-2xl border border-[var(--gold-border)] bg-[var(--gold-light)] mb-5 glow-gold">
             <span className="text-4xl">🃏</span>
           </div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-3">Join Session</h1>
-          <p className="text-slate-400 dark:text-slate-500 text-sm">
+          <h1 className="text-3xl font-serif font-bold text-[var(--foreground)] mb-3">Join Session</h1>
+          <p className="text-[var(--muted)] text-sm">
             You&apos;ve been invited to room{' '}
-            <code className="px-2.5 py-1 glass-light rounded-lg text-blue-600 dark:text-blue-400 font-mono text-sm tracking-wider">
+            <code className="px-2.5 py-1 glass-light rounded-lg text-[var(--primary)] font-mono text-sm tracking-wider font-semibold">
               {roomId.toUpperCase()}
             </code>
           </p>
@@ -59,14 +64,14 @@ export default function JoinPage() {
 
         <div className="glass rounded-2xl p-6 shadow-2xl shadow-black/5 dark:shadow-black/20">
           <div className="mb-6">
-            <label htmlFor="playerName" className="block text-xs font-medium text-slate-500 dark:text-slate-400 mb-1.5 uppercase tracking-wider">Your Name</label>
+            <label htmlFor="playerName" className="block text-xs font-medium text-[var(--muted)] mb-1.5 uppercase tracking-wider">Your Name</label>
             <input
               id="playerName"
               type="text"
               value={playerName}
               onChange={(e) => setPlayerName(e.target.value)}
               placeholder="Enter your name"
-              className="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/50 rounded-xl text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-blue-500/50 input-glow transition-all"
+              className="w-full px-4 py-3 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-xl text-[var(--foreground)] placeholder-[var(--muted-light)] focus:outline-none focus:border-[var(--primary)] input-glow transition-all"
               maxLength={20}
               autoFocus
               onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
@@ -76,7 +81,7 @@ export default function JoinPage() {
           <button
             onClick={handleJoin}
             disabled={loading}
-            className="btn-shine w-full py-3 bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-semibold rounded-xl transition-all transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-600/20"
+            className="btn-shine w-full py-3.5 bg-gradient-to-r from-[var(--primary)] to-[var(--primary-hover)] hover:brightness-110 text-white font-semibold rounded-xl transition-all transform hover:scale-[1.01] active:scale-[0.99] disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-[var(--primary)]/20"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
@@ -86,17 +91,22 @@ export default function JoinPage() {
                 </svg>
                 Joining...
               </span>
-            ) : 'Join Room'}
+            ) : 'Take a Seat'}
           </button>
 
           {error && (
-            <div role="alert" className="mt-4 px-3 py-2 bg-red-500/10 border border-red-500/20 rounded-lg float-in">
-              <p className="text-red-500 dark:text-red-400 text-sm text-center">{error}</p>
+            <div role="alert" className="mt-4 px-3 py-2 bg-[var(--accent-red-light)] border border-[var(--accent-red-border)] rounded-lg float-in">
+              <p className="text-[var(--accent-red)] text-sm text-center">{error}</p>
             </div>
           )}
         </div>
 
-        <p className="text-center text-slate-400 dark:text-slate-600 text-xs mt-6">No sign-up required. Sessions are ephemeral.</p>
+        <div className="text-center mt-6 space-y-1">
+          <p className="text-[var(--muted-light)] text-xs">No sign-up required. Sessions are ephemeral.</p>
+          <p className="text-[var(--muted-light)] text-[11px] opacity-60 font-serif italic tracking-wide">
+            ♠ ♥ ♣ ♦
+          </p>
+        </div>
       </div>
     </div>
   );

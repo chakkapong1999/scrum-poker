@@ -14,13 +14,13 @@ export function RoomHeader({ roomName, roomId, playerCount, copied, muted, onCop
   return (
     <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
       <div className="flex items-center gap-4">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500/10 to-purple-500/10 dark:from-blue-500/20 dark:to-purple-500/20 border border-blue-500/10 dark:border-blue-500/20 flex items-center justify-center">
+        <div className="w-10 h-10 rounded-xl bg-[var(--gold-light)] border border-[var(--gold-border)] flex items-center justify-center">
           <span className="text-lg">🃏</span>
         </div>
         <div>
-          <h1 className="text-xl font-bold text-slate-900 dark:text-white leading-tight">{roomName}</h1>
+          <h1 className="text-xl font-serif font-bold text-[var(--foreground)] leading-tight">{roomName}</h1>
           <div className="flex items-center gap-2 mt-0.5">
-            <code className="text-xs text-slate-400 dark:text-slate-500 font-mono tracking-wider">
+            <code className="text-xs text-[var(--muted)] font-mono tracking-wider">
               {roomId}
             </code>
           </div>
@@ -29,8 +29,8 @@ export function RoomHeader({ roomName, roomId, playerCount, copied, muted, onCop
       <div className="flex items-center gap-2">
         <button
           onClick={onCopyInvite}
-          className={`px-3.5 py-2 glass rounded-xl text-sm transition-all flex items-center gap-2 hover:bg-black/5 dark:hover:bg-white/5 ${
-            copied ? 'text-emerald-600 dark:text-emerald-400 border-emerald-500/30' : 'text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white'
+          className={`px-3.5 py-2 glass rounded-xl text-sm transition-all flex items-center gap-2 hover:bg-[var(--surface-hover)] ${
+            copied ? 'text-[var(--emerald)] border-[var(--emerald-border)]' : 'text-[var(--muted)] hover:text-[var(--foreground)]'
           }`}
         >
           {copied ? (
@@ -51,7 +51,7 @@ export function RoomHeader({ roomName, roomId, playerCount, copied, muted, onCop
         </button>
         <button
           onClick={onToggleMute}
-          className="p-2 glass rounded-xl text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5 transition-all"
+          className="p-2 glass rounded-xl text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition-all"
           title={muted ? 'Unmute sounds' : 'Mute sounds'}
           aria-label={muted ? 'Unmute sounds' : 'Mute sounds'}
         >
@@ -67,7 +67,8 @@ export function RoomHeader({ roomName, roomId, playerCount, copied, muted, onCop
           )}
         </button>
         <ThemeToggle />
-        <div className="px-3 py-2 glass rounded-xl text-xs text-slate-500 dark:text-slate-500 font-medium">
+        <div className="px-3 py-2 glass rounded-xl text-xs text-[var(--muted)] font-medium flex items-center gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-[var(--emerald)] animate-pulse" />
           {playerCount} player{playerCount === 1 ? '' : 's'}
         </div>
       </div>

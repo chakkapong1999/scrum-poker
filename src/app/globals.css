@@ -2,34 +2,86 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* ── Light theme (default) ── */
+/* ═══════════════════════════════════════════
+   "The Poker Table" — Design System
+   Emerald / Gold / Ivory / Walnut
+   ═══════════════════════════════════════════ */
+
+/* ── Light theme ── */
 :root {
   --background: #f5f7fb;
   --foreground: #0f172a;
+  --surface: rgba(255, 255, 255, 0.7);
+  --surface-hover: rgba(255, 255, 255, 0.9);
+  --surface-border: rgba(0, 0, 0, 0.06);
+  --surface-border-hover: rgba(0, 0, 0, 0.12);
+  --muted: #94a3b8;
+  --muted-light: #cbd5e1;
+  --primary: #2563eb;
+  --primary-hover: #3b82f6;
+  --primary-light: rgba(59, 130, 246, 0.08);
+  --primary-border: rgba(59, 130, 246, 0.15);
+  --gold: #8b5cf6;
+  --gold-light: rgba(139, 92, 246, 0.08);
+  --gold-border: rgba(139, 92, 246, 0.2);
+  --accent-red: #dc2626;
+  --accent-red-light: rgba(220, 38, 38, 0.08);
+  --accent-red-border: rgba(220, 38, 38, 0.2);
+  --emerald: #16a34a;
+  --emerald-light: rgba(22, 163, 74, 0.08);
+  --emerald-border: rgba(22, 163, 74, 0.2);
+  --input-bg: rgba(248, 250, 252, 0.6);
+  --input-border: rgba(203, 213, 225, 0.5);
+  --input-focus: rgba(59, 130, 246, 0.3);
+  --felt: rgba(59, 130, 246, 0.03);
 }
 
 /* ── Dark theme ── */
 .dark {
   --background: #06080f;
   --foreground: #e2e8f0;
+  --surface: rgba(15, 23, 42, 0.6);
+  --surface-hover: rgba(15, 23, 42, 0.8);
+  --surface-border: rgba(148, 163, 184, 0.1);
+  --surface-border-hover: rgba(148, 163, 184, 0.2);
+  --muted: #64748b;
+  --muted-light: #475569;
+  --primary: #3b82f6;
+  --primary-hover: #60a5fa;
+  --primary-light: rgba(59, 130, 246, 0.1);
+  --primary-border: rgba(59, 130, 246, 0.25);
+  --gold: #a78bfa;
+  --gold-light: rgba(139, 92, 246, 0.1);
+  --gold-border: rgba(139, 92, 246, 0.25);
+  --accent-red: #ef4444;
+  --accent-red-light: rgba(239, 68, 68, 0.1);
+  --accent-red-border: rgba(239, 68, 68, 0.25);
+  --emerald: #34d399;
+  --emerald-light: rgba(52, 211, 153, 0.1);
+  --emerald-border: rgba(52, 211, 153, 0.25);
+  --input-bg: rgba(15, 23, 42, 0.5);
+  --input-border: rgba(51, 65, 85, 0.5);
+  --input-focus: rgba(59, 130, 246, 0.35);
+  --felt: rgba(59, 130, 246, 0.03);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-jakarta);
+  --font-serif: var(--font-playfair);
   --font-mono: var(--font-geist-mono);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
-  transition: background-color 0.3s ease, color 0.3s ease;
+  font-family: var(--font-jakarta), system-ui, sans-serif;
+  transition: background-color 0.4s ease, color 0.4s ease;
   touch-action: manipulation;
 }
 
-/* ── Ambient background ── */
+/* ── Ambient background — subtle warm orbs ── */
 .bg-ambient {
   position: fixed;
   inset: 0;
@@ -41,25 +93,25 @@ body {
 .bg-ambient::before {
   content: '';
   position: absolute;
-  width: 600px;
-  height: 600px;
-  top: -10%;
+  width: 700px;
+  height: 700px;
+  top: -15%;
   left: -10%;
   border-radius: 50%;
   background: radial-gradient(circle, rgba(59, 130, 246, 0.06) 0%, transparent 70%);
-  animation: drift1 20s ease-in-out infinite;
+  animation: drift1 25s ease-in-out infinite;
 }
 
 .bg-ambient::after {
   content: '';
   position: absolute;
-  width: 500px;
-  height: 500px;
+  width: 550px;
+  height: 550px;
   bottom: -10%;
-  right: -10%;
+  right: -8%;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
-  animation: drift2 25s ease-in-out infinite;
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.05) 0%, transparent 70%);
+  animation: drift2 30s ease-in-out infinite;
 }
 
 .dark .bg-ambient::before {
@@ -67,90 +119,82 @@ body {
 }
 
 .dark .bg-ambient::after {
-  background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
 }
 
 @keyframes drift1 {
   0%, 100% { transform: translate(0, 0); }
-  50% { transform: translate(80px, 60px); }
+  50% { transform: translate(60px, 50px); }
 }
 
 @keyframes drift2 {
   0%, 100% { transform: translate(0, 0); }
-  50% { transform: translate(-60px, -80px); }
+  50% { transform: translate(-50px, -60px); }
 }
 
-/* ── Noise overlay ── */
+/* ── Diamond pattern overlay (poker suit motif) ── */
 .bg-noise {
   position: fixed;
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  opacity: 0.02;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-repeat: repeat;
-  background-size: 256px 256px;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5 L35 30 L30 55 L25 30Z' fill='%23666' fill-opacity='0.3'/%3E%3C/svg%3E");
+  background-size: 60px 60px;
 }
 
 .dark .bg-noise {
   opacity: 0.03;
 }
 
-/* ── Glass card ── */
+/* ── Glass card — warm tinted ── */
 .glass {
-  background: rgba(255, 255, 255, 0.7);
+  background: var(--surface);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--surface-border);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 20px rgba(0, 0, 0, 0.02);
   transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .dark .glass {
-  background: rgba(15, 23, 42, 0.6);
-  border-color: rgba(148, 163, 184, 0.1);
-  box-shadow: none;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 4px 20px rgba(0, 0, 0, 0.05);
 }
 
 .glass-light {
-  background: rgba(255, 255, 255, 0.5);
+  background: var(--surface);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 0, 0, 0.05);
+  border: 1px solid var(--surface-border);
   transition: background 0.3s ease, border-color 0.3s ease;
 }
 
-.dark .glass-light {
-  background: rgba(30, 41, 59, 0.4);
-  border-color: rgba(148, 163, 184, 0.08);
+/* ── Glow effects — emerald & gold ── */
+.glow-emerald {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.2), 0 0 60px rgba(59, 130, 246, 0.06);
 }
 
-/* ── Glow effects ── */
-.glow-blue {
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.15), 0 0 60px rgba(59, 130, 246, 0.06);
+.dark .glow-emerald {
+  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3), 0 0 60px rgba(59, 130, 246, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);
 }
 
-.dark .glow-blue {
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.25), 0 0 60px rgba(59, 130, 246, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+.glow-gold {
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.2), 0 0 60px rgba(139, 92, 246, 0.06);
+}
+
+.dark .glow-gold {
+  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3), 0 0 60px rgba(139, 92, 246, 0.1);
 }
 
 .glow-green {
-  box-shadow: 0 0 15px rgba(34, 197, 94, 0.12), 0 0 40px rgba(34, 197, 94, 0.05);
+  box-shadow: 0 0 15px rgba(22, 163, 74, 0.15), 0 0 40px rgba(22, 163, 74, 0.05);
 }
 
 .dark .glow-green {
-  box-shadow: 0 0 15px rgba(34, 197, 94, 0.2), 0 0 40px rgba(34, 197, 94, 0.08);
+  box-shadow: 0 0 15px rgba(52, 211, 153, 0.2), 0 0 40px rgba(52, 211, 153, 0.08);
 }
 
-.glow-purple {
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.15), 0 0 60px rgba(139, 92, 246, 0.06);
-}
-
-.dark .glow-purple {
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.25), 0 0 60px rgba(139, 92, 246, 0.1);
-}
-
-/* ── Gradient text ── */
+/* ── Gradient text — blue to purple ── */
 .text-gradient {
   background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #6366f1 100%);
   -webkit-background-clip: text;
@@ -158,32 +202,25 @@ body {
   background-clip: text;
 }
 
-.dark .text-gradient {
-  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #818cf8 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* ── Input glow on focus ── */
+/* ── Input styles ── */
 .input-glow:focus {
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), 0 0 20px rgba(59, 130, 246, 0.06);
+  box-shadow: 0 0 0 3px var(--input-focus), 0 0 20px rgba(59, 130, 246, 0.06);
 }
 
 .dark .input-glow:focus {
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15), 0 0 20px rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 3px var(--input-focus), 0 0 20px rgba(59, 130, 246, 0.1);
 }
 
-/* ── Focus-visible ring for keyboard nav ── */
+/* ── Focus-visible ring ── */
 button:focus-visible,
 a:focus-visible,
 select:focus-visible,
 input:focus-visible {
-  outline: 2px solid #3b82f6;
+  outline: 2px solid var(--primary);
   outline-offset: 2px;
 }
 
-/* ── Button shine ── */
+/* ── Button shine — gold sweep ── */
 .btn-shine {
   position: relative;
   overflow: hidden;
@@ -196,8 +233,8 @@ input:focus-visible {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
-  transition: left 0.4s ease;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
+  transition: left 0.5s ease;
 }
 
 .btn-shine:hover::after {
@@ -213,11 +250,11 @@ input:focus-visible {
   transition: stroke-dashoffset 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ── Card Flip 3D ── */
+/* ── Card Flip 3D — poker card ── */
 .card-flip-container {
-  perspective: 600px;
-  width: 4rem;   /* w-16 */
-  height: 6rem;  /* h-24 */
+  perspective: 800px;
+  width: 4.5rem;
+  height: 6.5rem;
 }
 
 .card-flip-inner {
@@ -225,7 +262,7 @@ input:focus-visible {
   width: 100%;
   height: 100%;
   transform-style: preserve-3d;
-  transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: transform 0.7s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .card-flip-inner.flipped {
@@ -242,52 +279,94 @@ input:focus-visible {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.125rem;
+  font-size: 1.25rem;
   font-weight: 700;
+  font-family: var(--font-playfair), Georgia, serif;
 }
 
 .card-flip-front {
   transform: rotateY(180deg);
 }
 
-/* Back face styles — solid colors (no backdrop-filter, breaks backface-visibility) */
+/* Back face — poker card back pattern */
 .card-flip-back.card-back-idle {
-  background: rgba(255, 255, 255, 0.5);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  color: var(--color-slate-400);
+  background: var(--surface);
+  border: 1px solid var(--surface-border);
+  color: var(--muted-light);
 }
 
-.dark .card-flip-back.card-back-idle {
-  background: rgba(30, 41, 59, 0.5);
-  border-color: rgba(148, 163, 184, 0.1);
-  color: var(--color-slate-600);
+.card-flip-back.card-back-idle::before {
+  content: '♦';
+  position: absolute;
+  font-size: 0.6rem;
+  top: 4px;
+  left: 6px;
+  opacity: 0.2;
+  color: var(--muted);
+}
+
+.card-flip-back.card-back-idle::after {
+  content: '♠';
+  position: absolute;
+  font-size: 0.6rem;
+  bottom: 4px;
+  right: 6px;
+  opacity: 0.2;
+  color: var(--muted);
 }
 
 .card-flip-back.card-back-voted {
-  background: rgba(16, 185, 129, 0.1);
-  border: 1px solid rgba(16, 185, 129, 0.4);
-  color: var(--color-emerald-600);
-  box-shadow: 0 0 15px rgba(34, 197, 94, 0.12), 0 0 40px rgba(34, 197, 94, 0.05);
+  background: var(--emerald-light);
+  border: 1.5px solid var(--emerald-border);
+  color: var(--emerald);
+  box-shadow: 0 0 15px rgba(22, 163, 74, 0.12), 0 0 40px rgba(22, 163, 74, 0.05);
 }
 
 .dark .card-flip-back.card-back-voted {
-  color: var(--color-emerald-400);
-  box-shadow: 0 0 15px rgba(34, 197, 94, 0.2), 0 0 40px rgba(34, 197, 94, 0.08);
+  box-shadow: 0 0 15px rgba(52, 211, 153, 0.2), 0 0 40px rgba(52, 211, 153, 0.08);
 }
 
 /* Front face — revealed vote */
 .card-flip-front.card-front-revealed {
-  background: linear-gradient(to bottom right, var(--color-blue-500), var(--color-blue-600));
+  background: linear-gradient(145deg, #2563eb, #1d4ed8);
   color: white;
-  box-shadow: 0 10px 15px -3px rgba(37, 99, 235, 0.2);
+  border: 1.5px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.3);
 }
 
-/* ── Animations ── */
+.dark .card-flip-front.card-front-revealed {
+  background: linear-gradient(145deg, #3b82f6, #2563eb);
+  box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.25);
+}
+
+.card-flip-front.card-front-revealed::before {
+  content: '♠';
+  position: absolute;
+  font-size: 0.55rem;
+  font-weight: 400;
+  top: 5px;
+  left: 7px;
+  opacity: 0.3;
+  color: white;
+}
+
+.card-flip-front.card-front-revealed::after {
+  content: '♣';
+  position: absolute;
+  font-size: 0.55rem;
+  font-weight: 400;
+  bottom: 5px;
+  right: 7px;
+  opacity: 0.3;
+  color: white;
+}
+
+/* ═══════ Animations ═══════ */
 
 @keyframes float-in {
   from {
     opacity: 0;
-    transform: translateY(16px) scale(0.98);
+    transform: translateY(18px) scale(0.97);
   }
   to {
     opacity: 1;
@@ -296,7 +375,7 @@ input:focus-visible {
 }
 
 .float-in {
-  animation: float-in 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: float-in 0.45s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes fade-in {
@@ -321,6 +400,25 @@ input:focus-visible {
 
 .slide-up {
   animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes deal-in {
+  0% {
+    opacity: 0;
+    transform: translateY(-40px) rotateZ(-8deg) scale(0.8);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(4px) rotateZ(1deg) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) rotateZ(0deg) scale(1);
+  }
+}
+
+.deal-in {
+  animation: deal-in 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 @keyframes emoji-float {
@@ -395,6 +493,16 @@ input:focus-visible {
   animation: shimmer 3s ease-in-out infinite;
 }
 
+@keyframes gold-pulse {
+  0%, 100% {
+    box-shadow: 0 0 10px rgba(184, 134, 11, 0.1), 0 0 30px rgba(184, 134, 11, 0.04);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(184, 134, 11, 0.2), 0 0 50px rgba(184, 134, 11, 0.08);
+  }
+}
+
+
 /* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
   .card-flip-inner {
@@ -403,6 +511,7 @@ input:focus-visible {
   .float-in,
   .fade-in,
   .slide-up,
+  .deal-in,
   .emoji-float,
   .chat-bubble,
   .pulse-soft,
@@ -430,15 +539,15 @@ input:focus-visible {
 
 /* ── Vote card hover lift ── */
 .vote-card {
-  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .vote-card:hover:not(:disabled) {
-  transform: translateY(-4px);
+  transform: translateY(-6px);
 }
 
 .vote-card:active:not(:disabled) {
-  transform: translateY(-1px);
+  transform: translateY(-2px);
 }
 
 /* ── Cursor pointer for interactive elements ── */
@@ -448,7 +557,7 @@ select,
   cursor: pointer;
 }
 
-/* ── Scrollbar styling ── */
+/* ── Scrollbar — warm tones ── */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -458,10 +567,35 @@ select,
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.3);
+  background: rgba(138, 126, 114, 0.3);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
+  background: rgba(138, 126, 114, 0.5);
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: rgba(100, 116, 139, 0.3);
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
   background: rgba(100, 116, 139, 0.5);
+}
+
+/* ── Poker table felt area ── */
+.felt-area {
+  background: var(--felt);
+  border: 1px solid var(--surface-border);
+  position: relative;
+}
+
+.felt-area::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(ellipse at center, transparent 50%, var(--background) 100%);
+  opacity: 0.4;
 }

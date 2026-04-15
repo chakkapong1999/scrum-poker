@@ -39,8 +39,8 @@ export function InteractionBar() {
           onClick={() => { setEmojiPickerOpen(!emojiPickerOpen); setChatOpen(false); }}
           className={`px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
             emojiPickerOpen
-              ? 'bg-purple-500/10 dark:bg-purple-500/20 text-purple-600 dark:text-purple-300 border border-purple-500/20 dark:border-purple-500/30'
-              : 'glass text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
+              ? 'bg-[var(--gold-light)] text-[var(--gold)] border border-[var(--gold-border)]'
+              : 'glass text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)]'
           }`}
         >
           <span className="text-base">😄</span>
@@ -50,8 +50,8 @@ export function InteractionBar() {
           onClick={() => { setChatOpen(!chatOpen); setEmojiPickerOpen(false); }}
           className={`px-4 py-2 rounded-xl text-sm font-medium transition-all flex items-center gap-2 ${
             chatOpen
-              ? 'bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-600 dark:text-indigo-300 border border-indigo-500/20 dark:border-indigo-500/30'
-              : 'glass text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-black/5 dark:hover:bg-white/5'
+              ? 'bg-[var(--primary-light)] text-[var(--primary)] border border-[var(--primary-border)]'
+              : 'glass text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)]'
           }`}
         >
           <span className="text-base">💬</span>
@@ -65,7 +65,7 @@ export function InteractionBar() {
               <button
                 key={emoji}
                 onClick={() => sendEmoji(emoji)}
-                className="w-10 h-10 text-xl rounded-xl hover:bg-black/5 dark:hover:bg-white/10 transition-all hover:scale-125 active:scale-95 flex items-center justify-center"
+                className="w-10 h-10 text-xl rounded-xl hover:bg-[var(--gold-light)] transition-all hover:scale-125 active:scale-95 flex items-center justify-center"
               >
                 {emoji}
               </button>
@@ -80,7 +80,7 @@ export function InteractionBar() {
               <button
                 key={msg}
                 onClick={() => sendChat(msg)}
-                className="px-2.5 py-1.5 text-xs glass rounded-lg text-slate-500 dark:text-slate-400 hover:bg-indigo-500/10 dark:hover:bg-indigo-500/20 hover:text-indigo-600 dark:hover:text-indigo-300 hover:border-indigo-500/20 dark:hover:border-indigo-500/30 transition-all active:scale-95"
+                className="px-2.5 py-1.5 text-xs glass rounded-lg text-[var(--muted)] hover:bg-[var(--primary-light)] hover:text-[var(--primary)] hover:border-[var(--primary-border)] transition-all active:scale-95"
               >
                 {msg}
               </button>
@@ -93,14 +93,14 @@ export function InteractionBar() {
               onChange={(e) => setChatInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && sendChat(chatInput)}
               placeholder="Type a message..."
-              className="flex-1 px-3 py-2 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700/50 rounded-xl text-sm text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 input-glow transition-all"
+              className="flex-1 px-3 py-2 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-xl text-sm text-[var(--foreground)] placeholder-[var(--muted-light)] focus:outline-none focus:border-[var(--primary)] input-glow transition-all"
               maxLength={50}
               autoFocus
             />
             <button
               onClick={() => sendChat(chatInput)}
               disabled={!chatInput.trim()}
-              className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 disabled:bg-slate-200 dark:disabled:bg-slate-700/50 disabled:text-slate-400 dark:disabled:text-slate-600 disabled:cursor-not-allowed text-white text-sm font-medium rounded-xl transition-all"
+              className="px-4 py-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)] disabled:bg-[var(--muted-light)] disabled:text-[var(--surface)] disabled:cursor-not-allowed text-white text-sm font-medium rounded-xl transition-all"
             >
               Send
             </button>
