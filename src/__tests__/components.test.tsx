@@ -370,7 +370,7 @@ describe('Join page', () => {
   it('shows error when submitting without a name', async () => {
     const { default: JoinPage } = await import('@/app/join/[id]/page');
     render(<JoinPage />);
-    fireEvent.click(screen.getByRole('button', { name: 'Join Room' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Take a Seat' }));
     expect(screen.getByText('Please enter your name')).toBeInTheDocument();
   });
 
@@ -378,7 +378,7 @@ describe('Join page', () => {
     const { default: JoinPage } = await import('@/app/join/[id]/page');
     render(<JoinPage />);
     fireEvent.change(screen.getByLabelText('Your Name'), { target: { value: 'Charlie' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Join Room' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Take a Seat' }));
     expect(mockSocketEmit).toHaveBeenCalledWith('join-room', expect.objectContaining({
       roomId: 'ABC123',
       playerName: 'Charlie',
@@ -389,7 +389,7 @@ describe('Join page', () => {
     const { default: JoinPage } = await import('@/app/join/[id]/page');
     render(<JoinPage />);
     fireEvent.change(screen.getByLabelText('Your Name'), { target: { value: 'Charlie' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Join Room' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Take a Seat' }));
 
     const callback = mockSocketEmit.mock.calls[0][2];
     act(() => callback({ success: true, roomId: 'ABC123' }));
@@ -400,7 +400,7 @@ describe('Join page', () => {
     const { default: JoinPage } = await import('@/app/join/[id]/page');
     render(<JoinPage />);
     fireEvent.change(screen.getByLabelText('Your Name'), { target: { value: 'Charlie' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Join Room' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Take a Seat' }));
 
     const callback = mockSocketEmit.mock.calls[0][2];
     act(() => callback({ success: false }));
@@ -411,7 +411,7 @@ describe('Join page', () => {
     const { default: JoinPage } = await import('@/app/join/[id]/page');
     render(<JoinPage />);
     fireEvent.change(screen.getByLabelText('Your Name'), { target: { value: 'Charlie' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Join Room' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Take a Seat' }));
 
     const callback = mockSocketEmit.mock.calls[0][2];
     act(() => callback({ success: false, error: 'Room is full' }));
@@ -430,7 +430,7 @@ describe('Join page', () => {
     const { default: JoinPage } = await import('@/app/join/[id]/page');
     render(<JoinPage />);
     fireEvent.change(screen.getByLabelText('Your Name'), { target: { value: 'Charlie' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Join Room' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Take a Seat' }));
     expect(screen.getByText('Joining...')).toBeInTheDocument();
   });
 });
@@ -919,7 +919,7 @@ describe('RoomPage', () => {
       });
     });
 
-    expect(screen.getByText('All voted!')).toBeInTheDocument();
+    expect(screen.getByText('All in!')).toBeInTheDocument();
   });
 
   it('handles player-emoji event and shows floating emoji then removes it', async () => {

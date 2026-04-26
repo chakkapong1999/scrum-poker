@@ -263,7 +263,7 @@ export default function RoomPage() {
           <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl glass mb-4">
             <span className="text-3xl animate-bounce">🃏</span>
           </div>
-          <p className="text-slate-400 dark:text-slate-500 text-sm">Connecting to room...</p>
+          <p className="text-[var(--muted)] text-sm">Connecting to room...</p>
         </div>
       </div>
     );

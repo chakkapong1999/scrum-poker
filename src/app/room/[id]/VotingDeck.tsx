@@ -9,7 +9,7 @@ export function VotingDeck({ votingSystem, myVote, onVote }: Readonly<{
 }>) {
   return (
     <div className="mt-8 slide-up">
-      <h3 className="text-xs text-slate-400 dark:text-slate-500 mb-4 text-center uppercase tracking-wider font-medium">Pick your estimate</h3>
+      <h3 className="text-xs text-[var(--muted)] mb-4 text-center uppercase tracking-widest font-medium font-serif">Pick your estimate</h3>
       <div className="flex flex-wrap gap-3 justify-center">
         {votingSystem.map(value => (
           <VoteCard
