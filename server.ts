@@ -74,6 +74,8 @@ app.prepare().then(() => {
         players: new Map(),
         revealed: false,
         votingSystem: getVotingSystem(votingSystem),
+        votingSystemKey: votingSystem === 'tshirt' ? 'tshirt' : 'fibonacci',
+        story: null,
         lastActivity: Date.now(),
       };
 
@@ -209,6 +211,27 @@ app.prepare().then(() => {
       if (!player?.isHost) return;
 
       room.revealed = true;
+      room.lastActivity = Date.now();
+      io.to(currentRoomId).emit('room-update', getRoomState(room));
+    });
+
+    socket.on('set-story', ({ story }: { story: { title: string; ref?: string; tags?: string[] } | null }) => {
+      if (!currentRoomId || !currentPlayerId) return;
+      const room = rooms.get(currentRoomId);
+      if (!room) return;
+
+      const player = room.players.get(currentPlayerId);
+      if (!player?.isHost) return;
+
+      if (story && typeof story.title === 'string') {
+        room.story = {
+          title: story.title.slice(0, 200),
+          ref: story.ref?.slice(0, 30),
+          tags: Array.isArray(story.tags) ? story.tags.slice(0, 6).map(t => String(t).slice(0, 20)) : undefined,
+        };
+      } else {
+        room.story = null;
+      }
       room.lastActivity = Date.now();
       io.to(currentRoomId).emit('room-update', getRoomState(room));
     });

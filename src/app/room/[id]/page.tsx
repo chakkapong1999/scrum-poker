@@ -4,13 +4,14 @@ import { useEffect, useState, useCallback, useRef, useSyncExternalStore } from '
 import { useParams, useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { getSocket } from '@/lib/socket';
-import { playAllVotedSound, playRevealSound, speakMessage, isMuted, setMuted } from '@/lib/sounds';
+import { playAllVotedSound, playRevealSound, playEmojiSound, playPopSound, speakMessage, isMuted, setMuted } from '@/lib/sounds';
+import { rememberRoom } from '@/lib/recent-rooms';
 import { RoomHeader } from './RoomHeader';
 import { PlayerArea } from './PlayerArea';
-import { InteractionBar } from './InteractionBar';
-import { VotingDeck } from './VotingDeck';
+import { DeckBar } from './DeckBar';
+import { StoryCard } from './StoryCard';
 import type { FloatingEmoji, ChatBubble } from './PlayerCard';
-import type { RoomState } from '@/types';
+import type { RoomState, Story } from '@/types';
 
 const VoteStats = dynamic(() => import('./VoteStats'), { ssr: false });
 
@@ -33,24 +34,16 @@ function handleSoundAndTitle(state: RoomState, prev: RoomState | null) {
   }
 }
 
-function applyVoteUpdate(
-  prev: RoomState | null,
-  playerId: string,
-  vote: string | null,
-): RoomState | null {
+function applyVoteUpdate(prev: RoomState | null, playerId: string, vote: string | null): RoomState | null {
   if (!prev || prev.revealed) return prev;
-  const players = prev.players.map(p =>
-    p.id === playerId ? { ...p, vote } : p
-  );
+  const players = prev.players.map(p => p.id === playerId ? { ...p, vote } : p);
   const next = { ...prev, players };
-
   const allVotedNow = players.every(p => p.vote !== null);
   const allVotedBefore = prev.players.every(p => p.vote !== null);
   if (allVotedNow && !allVotedBefore) {
     playAllVotedSound();
     if (document.hidden) document.title = '✅ All Voted! — Scrum Poker';
   }
-
   return next;
 }
 
@@ -95,6 +88,7 @@ export default function RoomPage() {
       prevRoomRef.current = state;
       setRoom(state);
       syncMyVote(state, socket.id, setMyVote);
+      rememberRoom(state.id, state.name);
     };
 
     socket.on('room-update', onRoomUpdate);
@@ -139,20 +133,14 @@ export default function RoomPage() {
 
     const requestOrRejoin = () => {
       socket.emit('get-room-state', (res: { success: boolean; state?: RoomState }) => {
-        if (res.success && res.state) {
-          onRoomUpdate(res.state);
-        } else {
-          rejoinOrRedirect(socket);
-        }
+        if (res.success && res.state) onRoomUpdate(res.state);
+        else rejoinOrRedirect(socket);
       });
     };
 
     const rejoinOrRedirect = (sock: typeof socket) => {
       const storedName = sessionStorage.getItem('playerName');
-      if (!storedName) {
-        setNotJoined(true);
-        return;
-      }
+      if (!storedName) { setNotJoined(true); return; }
       sock.emit('rejoin-room', {
         roomId: roomId.toUpperCase(),
         playerName: storedName,
@@ -163,10 +151,7 @@ export default function RoomPage() {
 
     requestOrRejoin();
 
-    const onReconnect = () => {
-      setNotJoined(false);
-      requestOrRejoin();
-    };
+    const onReconnect = () => { setNotJoined(false); requestOrRejoin(); };
     socket.on('connect', onReconnect);
 
     return () => {
@@ -213,13 +198,25 @@ export default function RoomPage() {
     socket.emit('vote', { vote: newVote });
   }, [myVote]);
 
-  const handleReveal = () => {
-    getSocket().emit('reveal-votes');
-  };
-
+  const handleReveal = () => { getSocket().emit('reveal-votes'); };
   const handleReset = () => {
     getSocket().emit('reset-votes');
     setMyVote(null);
+  };
+
+  const handleEmoji = (e: string) => {
+    playEmojiSound(e);
+    getSocket().emit('send-emoji', { emoji: e });
+  };
+
+  const handleChat = (m: string) => {
+    playPopSound();
+    speakMessage(m);
+    getSocket().emit('send-chat', { message: m });
+  };
+
+  const handleSetStory = (story: Story | null) => {
+    getSocket().emit('set-story', { story });
   };
 
   const toggleMute = () => {
@@ -235,22 +232,22 @@ export default function RoomPage() {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const handleLeave = () => {
+    router.push('/');
+  };
+
   const me = room?.players.find(p => p.id === myId);
   const isHost = me?.isHost ?? false;
-  const allVoted = room?.players.every(p => p.vote !== null) ?? false;
+  const allVoted = (room?.players.length ?? 0) > 0 && (room?.players.every(p => p.vote !== null) ?? false);
   const votedCount = room?.players.filter(p => p.vote !== null).length ?? 0;
 
   useEffect(() => {
-    if (notJoined) {
-      router.replace(`/join/${roomId}`);
-    }
+    if (notJoined) router.replace(`/join/${roomId}`);
   }, [notJoined, roomId, router]);
 
   useEffect(() => {
     const onVisibilityChange = () => {
-      if (!document.hidden) {
-        document.title = 'Scrum Poker';
-      }
+      if (!document.hidden) document.title = 'Scrum Poker';
     };
     document.addEventListener('visibilitychange', onVisibilityChange);
     return () => document.removeEventListener('visibilitychange', onVisibilityChange);
@@ -258,52 +255,60 @@ export default function RoomPage() {
 
   if (!room) {
     return (
-      <div className="min-h-dvh flex items-center justify-center">
-        <div className="text-center fade-in">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl glass mb-4">
-            <span className="text-3xl animate-bounce">🃏</span>
-          </div>
-          <p className="text-[var(--muted)] text-sm">Connecting to room...</p>
+      <div style={{ minHeight: '100dvh', display: 'grid', placeItems: 'center' }}>
+        <div className="fade-in" style={{ textAlign: 'center' }}>
+          <span className="logo-mark" style={{ width: 36, height: 36, fontSize: 20, marginBottom: 14 }}>♠</span>
+          <p className="muted" style={{ fontSize: 13, marginTop: 14 }}>Connecting to room…</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-dvh p-4 sm:p-6 max-w-5xl mx-auto fade-in">
+    <div className="room-shell fade-in">
       <RoomHeader
         roomName={room.name}
         roomId={roomId}
-        playerCount={room.players.length}
+        votingSystemKey={room.votingSystemKey}
+        votedCount={votedCount}
+        total={room.players.length}
         copied={copied}
         muted={muted}
         onCopyInvite={copyInviteLink}
         onToggleMute={toggleMute}
+        onLeave={handleLeave}
       />
 
-      <PlayerArea
-        players={room.players}
+      <div className="stage">
+        <StoryCard story={room.story} isHost={isHost} onSet={handleSetStory} />
+
+        <PlayerArea
+          players={room.players}
+          revealed={room.revealed}
+          floatingEmojis={floatingEmojis}
+          chatBubbles={chatBubbles}
+        />
+
+        {!room.revealed && allVoted && (
+          <div className="chip chip-accent fade-up pulse">All in — host can reveal</div>
+        )}
+
+        {room.revealed && <VoteStats players={room.players} />}
+      </div>
+
+      <DeckBar
+        votingSystem={room.votingSystem}
+        myVote={myVote}
         revealed={room.revealed}
-        isHost={isHost}
         votedCount={votedCount}
-        allVoted={allVoted}
-        floatingEmojis={floatingEmojis}
-        chatBubbles={chatBubbles}
+        total={room.players.length}
+        isHost={isHost}
+        onVote={handleVote}
         onReveal={handleReveal}
         onReset={handleReset}
+        onEmoji={handleEmoji}
+        onChat={handleChat}
       />
-
-      <InteractionBar />
-
-      {room.revealed && <VoteStats players={room.players} />}
-
-      {!room.revealed && (
-        <VotingDeck
-          votingSystem={room.votingSystem}
-          myVote={myVote}
-          onVote={handleVote}
-        />
-      )}
     </div>
   );
 }

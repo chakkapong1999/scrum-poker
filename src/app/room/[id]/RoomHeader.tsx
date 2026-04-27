@@ -1,77 +1,118 @@
 'use client';
 
-import { ThemeToggle } from '@/components/ThemeToggle';
+import { Logo } from '@/components/Logo';
+import { SettingsMenu, ThemeToggle } from '@/components/SettingsMenu';
 
-export function RoomHeader({ roomName, roomId, playerCount, copied, muted, onCopyInvite, onToggleMute }: Readonly<{
+function CopyIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <rect x="9" y="9" width="13" height="13" rx="2" />
+      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+    </svg>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+}
+
+function MuteIcon({ muted }: { muted: boolean }) {
+  if (muted) {
+    return (
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        <path d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+        <line x1="17" y1="9" x2="22" y2="14" />
+        <line x1="22" y1="9" x2="17" y2="14" />
+      </svg>
+    );
+  }
+  return (
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+    </svg>
+  );
+}
+
+export function ProgressRing({ value, total, size = 36 }: { value: number; total: number; size?: number }) {
+  const r = (size - 6) / 2;
+  const cir = 2 * Math.PI * r;
+  const pct = total ? value / total : 0;
+  const offset = cir * (1 - pct);
+  const cx = size / 2;
+  const stroke = pct === 1 ? 'var(--accent)' : 'var(--ink-2)';
+  return (
+    <svg width={size} height={size} className="progress-ring" style={{ transform: 'rotate(-90deg)' }} aria-hidden>
+      <circle cx={cx} cy={cx} r={r} fill="none" stroke="var(--line)" strokeWidth="3" />
+      <circle
+        cx={cx} cy={cx} r={r}
+        fill="none" stroke={stroke} strokeWidth="3"
+        strokeDasharray={cir} strokeDashoffset={offset} strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+export function RoomHeader({
+  roomName,
+  roomId,
+  votingSystemKey,
+  votedCount,
+  total,
+  copied,
+  muted,
+  onCopyInvite,
+  onToggleMute,
+  onLeave,
+}: Readonly<{
   roomName: string;
   roomId: string;
-  playerCount: number;
+  votingSystemKey: string;
+  votedCount: number;
+  total: number;
   copied: boolean;
   muted: boolean;
   onCopyInvite: () => void;
   onToggleMute: () => void;
+  onLeave: () => void;
 }>) {
   return (
-    <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-      <div className="flex items-center gap-4">
-        <div className="w-10 h-10 rounded-xl bg-[var(--gold-light)] border border-[var(--gold-border)] flex items-center justify-center">
-          <span className="text-lg">🃏</span>
-        </div>
-        <div>
-          <h1 className="text-xl font-serif font-bold text-[var(--foreground)] leading-tight">{roomName}</h1>
-          <div className="flex items-center gap-2 mt-0.5">
-            <code className="text-xs text-[var(--muted)] font-mono tracking-wider">
-              {roomId}
-            </code>
-          </div>
+    <div className="header-bar between">
+      <div className="row" style={{ gap: 14, minWidth: 0 }}>
+        <Logo />
+        <span style={{ height: 18, width: 1, background: 'var(--line)' }} />
+        <div className="col" style={{ minWidth: 0 }}>
+          <span style={{ fontSize: 14, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 240 }}>
+            {roomName}
+          </span>
+          <span className="cap" style={{ marginTop: 2 }}>{roomId} · {votingSystemKey}</span>
         </div>
       </div>
-      <div className="flex items-center gap-2">
-        <button
-          onClick={onCopyInvite}
-          className={`px-3.5 py-2 glass rounded-xl text-sm transition-all flex items-center gap-2 hover:bg-[var(--surface-hover)] ${
-            copied ? 'text-[var(--emerald)] border-[var(--emerald-border)]' : 'text-[var(--muted)] hover:text-[var(--foreground)]'
-          }`}
-        >
-          {copied ? (
-            <>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              <span className="text-xs">Copied!</span>
-            </>
-          ) : (
-            <>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-              </svg>
-              <span className="hidden sm:inline text-xs">Invite</span>
-            </>
-          )}
+      <div className="row" style={{ gap: 8 }}>
+        <div className="row" style={{ gap: 6 }}>
+          <ProgressRing value={votedCount} total={total} />
+          <span className="num" style={{ fontSize: 13, color: 'var(--ink-2)', marginRight: 4 }}>
+            {votedCount}/{total}
+          </span>
+        </div>
+        <button className="btn btn-sm" onClick={onCopyInvite}>
+          {copied ? (<><CheckIcon /> copied</>) : (<><CopyIcon /> invite</>)}
         </button>
         <button
+          className="btn btn-ghost btn-icon"
           onClick={onToggleMute}
-          className="p-2 glass rounded-xl text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition-all"
           title={muted ? 'Unmute sounds' : 'Mute sounds'}
           aria-label={muted ? 'Unmute sounds' : 'Mute sounds'}
         >
-          {muted ? (
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
-            </svg>
-          ) : (
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-            </svg>
-          )}
+          <MuteIcon muted={muted} />
         </button>
+        <SettingsMenu />
         <ThemeToggle />
-        <div className="px-3 py-2 glass rounded-xl text-xs text-[var(--muted)] font-medium flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-[var(--emerald)] animate-pulse" />
-          {playerCount} player{playerCount === 1 ? '' : 's'}
-        </div>
+        <button className="btn btn-ghost btn-sm" onClick={onLeave}>leave</button>
       </div>
-    </header>
+    </div>
   );
 }

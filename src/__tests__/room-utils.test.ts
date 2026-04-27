@@ -52,6 +52,8 @@ describe('getRoomState', () => {
       players: new Map(),
       revealed: false,
       votingSystem: FIBONACCI,
+      votingSystemKey: 'fibonacci',
+      story: null,
       lastActivity: Date.now(),
       ...overrides,
     };

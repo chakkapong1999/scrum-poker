@@ -26,6 +26,8 @@ export function getRoomState(room: Room): RoomState {
     })),
     revealed: room.revealed,
     votingSystem: room.votingSystem,
+    votingSystemKey: room.votingSystemKey,
+    story: room.story,
   };
 }
 
