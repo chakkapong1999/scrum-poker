@@ -1,5 +1,4 @@
 import { createServer } from 'http';
-import { parse } from 'url';
 import next from 'next';
 import { Server as SocketIOServer } from 'socket.io';
 import type { Room, Player } from './src/types';
@@ -52,8 +51,7 @@ app.prepare().then(() => {
       return;
     }
 
-    const parsedUrl = parse(req.url!, true);
-    handle(req, res, parsedUrl);
+    handle(req, res);
   });
 
   const io = new SocketIOServer(httpServer, {

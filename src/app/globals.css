@@ -202,6 +202,13 @@ body {
   background-clip: text;
 }
 
+.dark .text-gradient {
+  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #818cf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
 /* ── Input styles ── */
 .input-glow:focus {
   box-shadow: 0 0 0 3px var(--input-focus), 0 0 20px rgba(59, 130, 246, 0.06);
@@ -492,16 +499,6 @@ input:focus-visible {
   background-size: 200% 100%;
   animation: shimmer 3s ease-in-out infinite;
 }
-
-@keyframes gold-pulse {
-  0%, 100% {
-    box-shadow: 0 0 10px rgba(184, 134, 11, 0.1), 0 0 30px rgba(184, 134, 11, 0.04);
-  }
-  50% {
-    box-shadow: 0 0 20px rgba(184, 134, 11, 0.2), 0 0 50px rgba(184, 134, 11, 0.08);
-  }
-}
-
 
 /* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {

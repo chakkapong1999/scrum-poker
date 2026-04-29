@@ -100,7 +100,7 @@ export function InteractionBar() {
             <button
               onClick={() => sendChat(chatInput)}
               disabled={!chatInput.trim()}
-              className="px-4 py-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)] disabled:bg-[var(--muted-light)] disabled:text-[var(--surface)] disabled:cursor-not-allowed text-white text-sm font-medium rounded-xl transition-all"
+              className="px-4 py-2 bg-[var(--primary)] hover:bg-[var(--primary-hover)] disabled:bg-[var(--muted-light)] disabled:text-[var(--muted)] disabled:cursor-not-allowed text-white text-sm font-medium rounded-xl transition-all"
             >
               Send
             </button>
