@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef, useState } from 'react';
 import type { Player } from '@/types';
 import { PlayerCard } from './PlayerCard';
 import type { FloatingEmoji, ChatBubble } from './PlayerCard';
@@ -38,7 +39,7 @@ function VoteProgress({ voted, total }: { voted: number; total: number }) {
   );
 }
 
-export function PlayerArea({ players, revealed, isHost, votedCount, allVoted, floatingEmojis, chatBubbles, onReveal, onReset }: Readonly<{
+export function PlayerArea({ players, revealed, isHost, votedCount, allVoted, floatingEmojis, chatBubbles, onReveal, onReset, canCompleteStory, onCompleteStory }: Readonly<{
   players: Player[];
   revealed: boolean;
   isHost: boolean;
@@ -48,10 +49,35 @@ export function PlayerArea({ players, revealed, isHost, votedCount, allVoted, fl
   chatBubbles: Map<string, ChatBubble[]>;
   onReveal: () => void;
   onReset: () => void;
+  canCompleteStory: boolean;
+  onCompleteStory: (finalPoint: string) => void;
 }>) {
+  const [showSaveInput, setShowSaveInput] = useState(false);
+  const [pointDraft, setPointDraft] = useState('');
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (!revealed || !canCompleteStory) {
+      setShowSaveInput(false);
+      setPointDraft('');
+    }
+  }, [revealed, canCompleteStory]);
+
+  useEffect(() => {
+    if (showSaveInput) inputRef.current?.focus();
+  }, [showSaveInput]);
+
+  const submitPoint = () => {
+    const value = pointDraft.trim();
+    if (!value) return;
+    onCompleteStory(value);
+    setShowSaveInput(false);
+    setPointDraft('');
+  };
+
   return (
     <div className="glass felt-area rounded-2xl p-6 sm:p-8 mb-6" style={{ overflow: 'visible' }}>
-      <div className="flex items-center justify-between mb-6 relative z-10">
+      <div className="flex items-center justify-between mb-6 relative z-10 gap-3 flex-wrap">
         <div className="flex items-center gap-4">
           <VoteProgress voted={votedCount} total={players.length} />
           {revealed && (
@@ -68,14 +94,56 @@ export function PlayerArea({ players, revealed, isHost, votedCount, allVoted, fl
           )}
         </div>
         {isHost && (
-          <div className="flex gap-2">
+          <div className="flex gap-2 items-center">
             {revealed ? (
-              <button
-                onClick={onReset}
-                className="btn-shine px-5 py-2.5 bg-gradient-to-r from-[var(--primary)] to-[var(--primary-hover)] hover:brightness-110 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-[var(--primary)]/20"
-              >
-                New Round
-              </button>
+              <>
+                {canCompleteStory && (
+                  showSaveInput ? (
+                    <div className="flex items-center gap-2">
+                      <input
+                        ref={inputRef}
+                        value={pointDraft}
+                        onChange={e => setPointDraft(e.target.value)}
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') submitPoint();
+                          if (e.key === 'Escape') { setShowSaveInput(false); setPointDraft(''); }
+                        }}
+                        placeholder="Point"
+                        maxLength={10}
+                        className="w-20 px-3 py-2 rounded-xl bg-[var(--felt)] border border-[var(--primary-border)] text-sm text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--primary)] tabular-nums"
+                      />
+                      <button
+                        onClick={submitPoint}
+                        disabled={!pointDraft.trim()}
+                        className="btn-shine px-4 py-2 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:brightness-110 disabled:from-[var(--muted-light)] disabled:to-[var(--muted-light)] disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-all"
+                      >
+                        Save & Next
+                      </button>
+                      <button
+                        onClick={() => { setShowSaveInput(false); setPointDraft(''); }}
+                        className="px-3 py-2 text-sm text-[var(--muted)] hover:text-[var(--foreground)]"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => setShowSaveInput(true)}
+                      className="btn-shine px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:brightness-110 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-emerald-600/20"
+                    >
+                      Save & Next Story
+                    </button>
+                  )
+                )}
+                {!showSaveInput && (
+                  <button
+                    onClick={onReset}
+                    className="btn-shine px-5 py-2.5 bg-gradient-to-r from-[var(--primary)] to-[var(--primary-hover)] hover:brightness-110 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-[var(--primary)]/20"
+                  >
+                    New Round
+                  </button>
+                )}
+              </>
             ) : (
               <button
                 onClick={onReveal}

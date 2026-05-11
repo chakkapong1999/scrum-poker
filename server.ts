@@ -1,7 +1,8 @@
 import { createServer } from 'http';
 import next from 'next';
 import { Server as SocketIOServer } from 'socket.io';
-import type { Room, Player } from './src/types';
+import { randomUUID } from 'crypto';
+import type { Room, Player, Story } from './src/types';
 import { generateRoomId, getRoomState, getVotingSystem } from './src/lib/room-utils';
 
 const dev = process.env.NODE_ENV !== 'production';
@@ -73,6 +74,8 @@ app.prepare().then(() => {
         revealed: false,
         votingSystem: getVotingSystem(votingSystem),
         lastActivity: Date.now(),
+        stories: [],
+        currentStoryId: null,
       };
 
       const player: Player = {
@@ -182,6 +185,7 @@ app.prepare().then(() => {
       if (!currentRoomId || !currentPlayerId) return;
       const room = rooms.get(currentRoomId);
       if (!room || room.revealed) return;
+      if (!room.currentStoryId) return;
 
       // Validate vote value against room's voting system
       if (vote !== null && !room.votingSystem.includes(vote)) return;
@@ -223,6 +227,95 @@ app.prepare().then(() => {
       room.lastActivity = Date.now();
       room.players.forEach(p => { p.vote = null; });
       io.to(currentRoomId).emit('room-update', getRoomState(room));
+    });
+
+    const requireHost = (): Room | null => {
+      if (!currentRoomId || !currentPlayerId) return null;
+      const room = rooms.get(currentRoomId);
+      if (!room) return null;
+      const player = room.players.get(currentPlayerId);
+      if (!player?.isHost) return null;
+      return room;
+    };
+
+    const resetVotingState = (room: Room) => {
+      room.revealed = false;
+      room.players.forEach(p => { p.vote = null; });
+    };
+
+    socket.on('add-story', ({ title }: { title: string }) => {
+      const room = requireHost();
+      if (!room) return;
+      const trimmed = title.trim().slice(0, 200);
+      if (!trimmed) return;
+      const story: Story = {
+        id: randomUUID(),
+        title: trimmed,
+        finalPoint: null,
+        completed: false,
+      };
+      room.stories.push(story);
+      if (!room.currentStoryId) {
+        room.currentStoryId = story.id;
+        resetVotingState(room);
+      }
+      room.lastActivity = Date.now();
+      io.to(room.id).emit('room-update', getRoomState(room));
+    });
+
+    socket.on('update-story', ({ storyId, title }: { storyId: string; title: string }) => {
+      const room = requireHost();
+      if (!room) return;
+      const story = room.stories.find(s => s.id === storyId);
+      if (!story) return;
+      const trimmed = title.trim().slice(0, 200);
+      if (!trimmed) return;
+      story.title = trimmed;
+      room.lastActivity = Date.now();
+      io.to(room.id).emit('room-update', getRoomState(room));
+    });
+
+    socket.on('delete-story', ({ storyId }: { storyId: string }) => {
+      const room = requireHost();
+      if (!room) return;
+      const idx = room.stories.findIndex(s => s.id === storyId);
+      if (idx < 0) return;
+      room.stories.splice(idx, 1);
+      if (room.currentStoryId === storyId) {
+        const next = room.stories.find(s => !s.completed) ?? null;
+        room.currentStoryId = next ? next.id : null;
+        resetVotingState(room);
+      }
+      room.lastActivity = Date.now();
+      io.to(room.id).emit('room-update', getRoomState(room));
+    });
+
+    socket.on('select-story', ({ storyId }: { storyId: string }) => {
+      const room = requireHost();
+      if (!room) return;
+      if (room.currentStoryId === storyId) return;
+      const story = room.stories.find(s => s.id === storyId);
+      if (!story) return;
+      room.currentStoryId = storyId;
+      resetVotingState(room);
+      room.lastActivity = Date.now();
+      io.to(room.id).emit('room-update', getRoomState(room));
+    });
+
+    socket.on('complete-story', ({ finalPoint }: { finalPoint: unknown }) => {
+      const room = requireHost();
+      if (!room || !room.currentStoryId) return;
+      const story = room.stories.find(s => s.id === room.currentStoryId);
+      if (!story) return;
+      const trimmed = typeof finalPoint === 'string' ? finalPoint.trim().slice(0, 10) : '';
+      if (!trimmed) return;
+      story.finalPoint = trimmed;
+      story.completed = true;
+      const next = room.stories.find(s => !s.completed);
+      room.currentStoryId = next ? next.id : null;
+      resetVotingState(room);
+      room.lastActivity = Date.now();
+      io.to(room.id).emit('room-update', getRoomState(room));
     });
 
     socket.on('disconnect', () => {

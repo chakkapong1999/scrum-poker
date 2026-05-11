@@ -9,6 +9,8 @@ import { RoomHeader } from './RoomHeader';
 import { PlayerArea } from './PlayerArea';
 import { InteractionBar } from './InteractionBar';
 import { VotingDeck } from './VotingDeck';
+import { StoryList } from './StoryList';
+import { EmptyRoom } from './EmptyRoom';
 import type { FloatingEmoji, ChatBubble } from './PlayerCard';
 import type { RoomState } from '@/types';
 
@@ -74,6 +76,21 @@ export default function RoomPage() {
   const [floatingEmojis, setFloatingEmojis] = useState<Map<string, FloatingEmoji[]>>(new Map());
   const [chatBubbles, setChatBubbles] = useState<Map<string, ChatBubble[]>>(new Map());
   const [muted, setMutedState] = useState(isMuted);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  useEffect(() => {
+    try {
+      if (localStorage.getItem('storySidebarCollapsed') === '1') setSidebarCollapsed(true);
+    } catch {}
+  }, []);
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed(prev => {
+      const next = !prev;
+      try { localStorage.setItem('storySidebarCollapsed', next ? '1' : '0'); } catch {}
+      return next;
+    });
+  };
 
   const prevRoomRef = useRef<RoomState | null>(null);
 
@@ -222,6 +239,30 @@ export default function RoomPage() {
     setMyVote(null);
   };
 
+  const handleAddStory = (title: string) => {
+    getSocket().emit('add-story', { title });
+  };
+
+  const handleUpdateStory = (storyId: string, title: string) => {
+    getSocket().emit('update-story', { storyId, title });
+  };
+
+  const handleDeleteStory = (storyId: string) => {
+    getSocket().emit('delete-story', { storyId });
+  };
+
+  const handleSelectStory = (storyId: string) => {
+    getSocket().emit('select-story', { storyId });
+    setMyVote(null);
+  };
+
+  const handleCompleteStory = (finalPoint: string) => {
+    const trimmed = finalPoint.trim();
+    if (!trimmed) return;
+    getSocket().emit('complete-story', { finalPoint: trimmed });
+    setMyVote(null);
+  };
+
   const toggleMute = () => {
     const next = !muted;
     setMutedState(next);
@@ -239,6 +280,9 @@ export default function RoomPage() {
   const isHost = me?.isHost ?? false;
   const allVoted = room?.players.every(p => p.vote !== null) ?? false;
   const votedCount = room?.players.filter(p => p.vote !== null).length ?? 0;
+  const stories = room?.stories ?? [];
+  const currentStory = stories.find(s => s.id === room?.currentStoryId) ?? null;
+  const canCompleteStory = !!(room?.revealed && currentStory && votedCount > 0);
 
   useEffect(() => {
     if (notJoined) {
@@ -269,8 +313,25 @@ export default function RoomPage() {
     );
   }
 
+  if (stories.length === 0) {
+    return (
+      <div className="min-h-dvh p-4 sm:p-6 max-w-7xl mx-auto fade-in flex flex-col">
+        <RoomHeader
+          roomName={room.name}
+          roomId={roomId}
+          playerCount={room.players.length}
+          copied={copied}
+          muted={muted}
+          onCopyInvite={copyInviteLink}
+          onToggleMute={toggleMute}
+        />
+        <EmptyRoom isHost={isHost} onAdd={handleAddStory} />
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-dvh p-4 sm:p-6 max-w-5xl mx-auto fade-in">
+    <div className="min-h-dvh p-4 sm:p-6 max-w-7xl mx-auto fade-in">
       <RoomHeader
         roomName={room.name}
         roomId={roomId}
@@ -281,29 +342,84 @@ export default function RoomPage() {
         onToggleMute={toggleMute}
       />
 
-      <PlayerArea
-        players={room.players}
-        revealed={room.revealed}
-        isHost={isHost}
-        votedCount={votedCount}
-        allVoted={allVoted}
-        floatingEmojis={floatingEmojis}
-        chatBubbles={chatBubbles}
-        onReveal={handleReveal}
-        onReset={handleReset}
-      />
+      <div
+        className={`lg:grid lg:gap-6 lg:items-start ${
+          sidebarCollapsed ? 'lg:grid-cols-[44px_1fr]' : 'lg:grid-cols-[260px_1fr]'
+        }`}
+      >
+        <aside className="lg:sticky lg:top-4">
+          <StoryList
+            stories={stories}
+            currentStoryId={room.currentStoryId ?? null}
+            isHost={isHost}
+            collapsed={sidebarCollapsed}
+            onToggleCollapse={toggleSidebar}
+            onAdd={handleAddStory}
+            onUpdate={handleUpdateStory}
+            onDelete={handleDeleteStory}
+            onSelect={handleSelectStory}
+          />
+        </aside>
 
-      <InteractionBar />
+        <main className="min-w-0">
+          {currentStory && (
+            <div className="mb-3 px-3 py-2 rounded-lg bg-[var(--primary-light)] border border-[var(--primary-border)] flex items-center gap-2">
+              <span className="text-[9px] uppercase tracking-widest text-[var(--primary)] font-semibold shrink-0">
+                Now
+              </span>
+              <span className="text-sm font-semibold text-[var(--foreground)] truncate">
+                {currentStory.title}
+              </span>
+            </div>
+          )}
 
-      {room.revealed && <VoteStats players={room.players} />}
+          <PlayerArea
+            players={room.players}
+            revealed={room.revealed}
+            isHost={isHost}
+            votedCount={votedCount}
+            allVoted={allVoted}
+            floatingEmojis={floatingEmojis}
+            chatBubbles={chatBubbles}
+            onReveal={handleReveal}
+            onReset={handleReset}
+            canCompleteStory={canCompleteStory}
+            onCompleteStory={handleCompleteStory}
+          />
 
-      {!room.revealed && (
-        <VotingDeck
-          votingSystem={room.votingSystem}
-          myVote={myVote}
-          onVote={handleVote}
-        />
-      )}
+          <InteractionBar />
+
+          {room.revealed && <VoteStats players={room.players} />}
+
+          {!room.revealed && currentStory && (
+            <VotingDeck
+              votingSystem={room.votingSystem}
+              myVote={myVote}
+              onVote={handleVote}
+            />
+          )}
+
+          {!room.revealed && !currentStory && (
+            <div className="glass rounded-2xl p-10 sm:p-16 flex flex-col items-center text-center gap-4">
+              <div className="w-16 h-16 rounded-2xl bg-[var(--primary-light)] border border-[var(--primary-border)] flex items-center justify-center">
+                <svg className="w-8 h-8 text-[var(--primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2M9 12h6M9 16h4" />
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-lg font-serif font-semibold text-[var(--foreground)] mb-1">
+                  All stories estimated
+                </h2>
+                <p className="text-sm text-[var(--muted)] max-w-sm">
+                  {isHost
+                    ? 'Pick a story from the sidebar to revisit, or add a new one.'
+                    : 'Waiting for the host to pick the next story…'}
+                </p>
+              </div>
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   );
 }

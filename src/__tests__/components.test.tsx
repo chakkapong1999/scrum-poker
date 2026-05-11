@@ -474,6 +474,8 @@ describe('RoomPage', () => {
         players: [{ id: 'test-socket-id', name: 'Alice', vote: null, isHost: true }],
         revealed: false,
         votingSystem: ['1', '2', '3', '5', '8'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -493,6 +495,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: false,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: 'voted', isHost: true }],
         votingSystem: ['1', '2', '3'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -509,6 +513,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: true,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: '5', isHost: true }],
         votingSystem: ['1', '2', '3', '5'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -526,6 +532,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: false,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: null, isHost: true }],
         votingSystem: ['1', '2', '3'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -544,6 +552,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: false,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: null, isHost: true }],
         votingSystem: ['1', '2', '3'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -564,6 +574,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: false,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: null, isHost: true }],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -589,6 +601,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: false,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: null, isHost: true }],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -614,6 +628,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: false,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: null, isHost: true }],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -636,6 +652,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: false,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: null, isHost: true }],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -656,6 +674,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: false,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: null, isHost: true }],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -678,6 +698,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: false,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: null, isHost: true }],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -701,6 +723,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: false,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: null, isHost: true }],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -718,6 +742,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: false,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: 'voted', isHost: true }],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -736,6 +762,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: true,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: '5', isHost: true }],
         votingSystem: ['1', '5'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -757,6 +785,8 @@ describe('RoomPage', () => {
           { id: 'p2', name: 'Bob', vote: null, isHost: false },
         ],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -773,6 +803,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: false,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: null, isHost: true }],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -792,6 +824,8 @@ describe('RoomPage', () => {
           { id: 'p2', name: 'Bob', vote: null, isHost: false },
         ],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -818,6 +852,8 @@ describe('RoomPage', () => {
           { id: 'p2', name: 'Bob', vote: null, isHost: true },
         ],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -916,6 +952,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: false,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: 'voted', isHost: true }],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -936,6 +974,8 @@ describe('RoomPage', () => {
           { id: 'p2', name: 'Bob', vote: null, isHost: false },
         ],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -968,6 +1008,8 @@ describe('RoomPage', () => {
           { id: 'p2', name: 'Bob', vote: null, isHost: false },
         ],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -997,6 +1039,8 @@ describe('RoomPage', () => {
           { id: 'p2', name: 'Bob', vote: null, isHost: false },
         ],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -1035,6 +1079,8 @@ describe('RoomPage', () => {
           { id: 'p2', name: 'Bob', vote: null, isHost: false },
         ],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -1068,6 +1114,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: false,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: null, isHost: true }],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -1099,6 +1147,8 @@ describe('RoomPage', () => {
           { id: 'p2', name: 'Bob', vote: 'voted', isHost: false },
         ],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -1121,6 +1171,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: false,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: 'voted', isHost: true }],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -1131,6 +1183,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: true,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: '5', isHost: true }],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
     expect(playRevealSound).toHaveBeenCalled();
@@ -1165,6 +1219,8 @@ describe('RoomPage', () => {
           { id: 'p2', name: 'Bob', vote: '5', isHost: false },
         ],
         votingSystem: ['1', '5', '8'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -1194,6 +1250,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: false,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: null, isHost: true }],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 

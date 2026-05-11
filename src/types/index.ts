@@ -5,6 +5,13 @@ export interface Player {
   isHost: boolean;
 }
 
+export interface Story {
+  id: string;
+  title: string;
+  finalPoint: string | null;
+  completed: boolean;
+}
+
 export interface Room {
   id: string;
   name: string;
@@ -12,6 +19,8 @@ export interface Room {
   revealed: boolean;
   votingSystem: string[];
   lastActivity: number;
+  stories: Story[];
+  currentStoryId: string | null;
 }
 
 export interface RoomState {
@@ -20,6 +29,8 @@ export interface RoomState {
   players: Player[];
   revealed: boolean;
   votingSystem: string[];
+  stories: Story[];
+  currentStoryId: string | null;
 }
 
 export const FIBONACCI: string[] = ['0', '1', '2', '3', '5', '8', '13', '21', '34', '55', '89', '?', '☕'];
