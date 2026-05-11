@@ -11,6 +11,7 @@ import { InteractionBar } from './InteractionBar';
 import { VotingDeck } from './VotingDeck';
 import { StoryList } from './StoryList';
 import { EmptyRoom } from './EmptyRoom';
+import { SummaryPage } from './SummaryPage';
 import type { FloatingEmoji, ChatBubble } from './PlayerCard';
 import type { RoomState } from '@/types';
 
@@ -330,6 +331,29 @@ export default function RoomPage() {
     );
   }
 
+  const allEstimated = stories.length > 0 && stories.every(s => s.completed);
+  if (allEstimated && !currentStory) {
+    return (
+      <div className="min-h-dvh p-4 sm:p-6 max-w-7xl mx-auto fade-in flex flex-col">
+        <RoomHeader
+          roomName={room.name}
+          roomId={roomId}
+          playerCount={room.players.length}
+          copied={copied}
+          muted={muted}
+          onCopyInvite={copyInviteLink}
+          onToggleMute={toggleMute}
+        />
+        <SummaryPage
+          stories={stories}
+          isHost={isHost}
+          onAdd={handleAddStory}
+          onSelect={handleSelectStory}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-dvh p-4 sm:p-6 max-w-7xl mx-auto fade-in">
       <RoomHeader
@@ -385,6 +409,7 @@ export default function RoomPage() {
             onReset={handleReset}
             canCompleteStory={canCompleteStory}
             onCompleteStory={handleCompleteStory}
+            votingSystem={room.votingSystem}
           />
 
           <InteractionBar />
@@ -399,25 +424,6 @@ export default function RoomPage() {
             />
           )}
 
-          {!room.revealed && !currentStory && (
-            <div className="glass rounded-2xl p-10 sm:p-16 flex flex-col items-center text-center gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-[var(--primary-light)] border border-[var(--primary-border)] flex items-center justify-center">
-                <svg className="w-8 h-8 text-[var(--primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2M9 12h6M9 16h4" />
-                </svg>
-              </div>
-              <div>
-                <h2 className="text-lg font-serif font-semibold text-[var(--foreground)] mb-1">
-                  All stories estimated
-                </h2>
-                <p className="text-sm text-[var(--muted)] max-w-sm">
-                  {isHost
-                    ? 'Pick a story from the sidebar to revisit, or add a new one.'
-                    : 'Waiting for the host to pick the next story…'}
-                </p>
-              </div>
-            </div>
-          )}
         </main>
       </div>
     </div>

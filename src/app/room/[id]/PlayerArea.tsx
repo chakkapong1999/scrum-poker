@@ -39,7 +39,25 @@ function VoteProgress({ voted, total }: { voted: number; total: number }) {
   );
 }
 
-export function PlayerArea({ players, revealed, isHost, votedCount, allVoted, floatingEmojis, chatBubbles, onReveal, onReset, canCompleteStory, onCompleteStory }: Readonly<{
+function suggestedPoint(players: Player[], votingSystem: string[]): string {
+  const numericVotes = players
+    .map(p => p.vote)
+    .filter((v): v is string => v !== null && v !== 'voted')
+    .map(Number)
+    .filter(n => !Number.isNaN(n));
+  if (numericVotes.length === 0) return '';
+  const avg = numericVotes.reduce((a, b) => a + b, 0) / numericVotes.length;
+  const target = Math.ceil(avg);
+  const numericDeck = votingSystem
+    .map(v => ({ raw: v, n: Number(v) }))
+    .filter(x => !Number.isNaN(x.n))
+    .sort((a, b) => a.n - b.n);
+  if (numericDeck.length === 0) return String(target);
+  const snap = numericDeck.find(x => x.n >= target) ?? numericDeck[numericDeck.length - 1];
+  return snap.raw;
+}
+
+export function PlayerArea({ players, revealed, isHost, votedCount, allVoted, floatingEmojis, chatBubbles, onReveal, onReset, canCompleteStory, onCompleteStory, votingSystem }: Readonly<{
   players: Player[];
   revealed: boolean;
   isHost: boolean;
@@ -51,6 +69,7 @@ export function PlayerArea({ players, revealed, isHost, votedCount, allVoted, fl
   onReset: () => void;
   canCompleteStory: boolean;
   onCompleteStory: (finalPoint: string) => void;
+  votingSystem: string[];
 }>) {
   const [showSaveInput, setShowSaveInput] = useState(false);
   const [pointDraft, setPointDraft] = useState('');
@@ -66,6 +85,11 @@ export function PlayerArea({ players, revealed, isHost, votedCount, allVoted, fl
   useEffect(() => {
     if (showSaveInput) inputRef.current?.focus();
   }, [showSaveInput]);
+
+  const openSaveInput = () => {
+    setPointDraft(suggestedPoint(players, votingSystem));
+    setShowSaveInput(true);
+  };
 
   const submitPoint = () => {
     const value = pointDraft.trim();
@@ -128,7 +152,7 @@ export function PlayerArea({ players, revealed, isHost, votedCount, allVoted, fl
                     </div>
                   ) : (
                     <button
-                      onClick={() => setShowSaveInput(true)}
+                      onClick={openSaveInput}
                       className="btn-shine px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:brightness-110 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-emerald-600/20"
                     >
                       Save & Next Story
