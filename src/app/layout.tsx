@@ -22,8 +22,32 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Scrum Poker",
-  description: "Real-time scrum poker for agile teams",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'),
+  title: {
+    default: "Scrum Poker — Free Real-Time Planning Poker for Agile Teams",
+    template: "%s | Scrum Poker",
+  },
+  description: "Free online scrum poker tool for agile teams. Estimate story points in real-time with Fibonacci or T-shirt sizing. No sign-up required.",
+  keywords: ["scrum poker", "planning poker", "agile estimation", "story points", "sprint planning", "fibonacci poker", "free scrum tool"],
+  authors: [{ name: "Scrum Poker" }],
+  openGraph: {
+    type: "website",
+    locale: "en_US",
+    url: "/",
+    siteName: "Scrum Poker",
+    title: "Scrum Poker — Free Real-Time Planning Poker for Agile Teams",
+    description: "Free online scrum poker tool for agile teams. Estimate story points in real-time with Fibonacci or T-shirt sizing. No sign-up required.",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Scrum Poker — Free Real-Time Planning Poker for Agile Teams",
+    description: "Free online scrum poker tool for agile teams. Estimate story points in real-time with Fibonacci or T-shirt sizing. No sign-up required.",
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: { index: true, follow: true },
+  },
 };
 
 export default function RootLayout({
