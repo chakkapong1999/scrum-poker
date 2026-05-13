@@ -305,10 +305,14 @@ export default function RoomPage() {
     return (
       <div className="min-h-dvh flex items-center justify-center">
         <div className="text-center fade-in">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl glass mb-4">
-            <span className="text-3xl animate-bounce">🃏</span>
-          </div>
-          <p className="text-[var(--muted)] text-sm">Connecting to room...</p>
+          <pre className="text-[10px] sm:text-xs leading-tight text-[var(--muted)] select-none whitespace-pre">
+{`┌──────────────────────────┐
+│  connecting to room…     │
+└──────────────────────────┘`}
+          </pre>
+          <p className="text-xs text-[var(--accent)] mt-3 font-mono">
+            <span className="term-prompt">socket.connect()</span><span className="term-cursor" />
+          </p>
         </div>
       </div>
     );
@@ -387,9 +391,9 @@ export default function RoomPage() {
 
         <main className="min-w-0">
           {currentStory && (
-            <div className="mb-3 px-3 py-2 rounded-lg bg-[var(--primary-light)] border border-[var(--primary-border)] flex items-center gap-2">
-              <span className="text-[9px] uppercase tracking-widest text-[var(--primary)] font-semibold shrink-0">
-                Now
+            <div className="mb-3 px-3 py-2 rounded bg-[var(--accent-light)] border border-[var(--accent-border)] flex items-center gap-2">
+              <span className="text-[10px] uppercase tracking-widest text-[var(--accent)] font-semibold shrink-0">
+                [ now ]
               </span>
               <span className="text-sm font-semibold text-[var(--foreground)] truncate">
                 {currentStory.title}

@@ -6,34 +6,37 @@ import { PlayerCard } from './PlayerCard';
 import type { FloatingEmoji, ChatBubble } from './PlayerCard';
 
 function VoteProgress({ voted, total }: { voted: number; total: number }) {
-  const radius = 18;
+  const radius = 16;
   const circumference = 2 * Math.PI * radius;
   const progress = total > 0 ? voted / total : 0;
   const offset = circumference * (1 - progress);
+  const complete = progress === 1 && total > 0;
 
   return (
     <div className="flex items-center gap-2.5">
-      <svg width="44" height="44" className="progress-ring">
+      <svg width="40" height="40" className="progress-ring">
         <circle
-          cx="22" cy="22" r={radius}
+          cx="20" cy="20" r={radius}
           fill="none"
           stroke="var(--surface-border)"
-          strokeWidth="3"
+          strokeWidth="2"
         />
         <circle
-          cx="22" cy="22" r={radius}
+          cx="20" cy="20" r={radius}
           fill="none"
-          stroke={progress === 1 ? 'var(--emerald)' : 'var(--primary)'}
-          strokeWidth="3"
-          strokeLinecap="round"
+          stroke={complete ? 'var(--accent)' : 'var(--foreground)'}
+          strokeWidth="2"
+          strokeLinecap="butt"
           strokeDasharray={circumference}
           strokeDashoffset={offset}
           className="progress-ring-circle"
         />
       </svg>
-      <div className="flex flex-col">
-        <span className="text-sm font-semibold text-[var(--foreground)] tabular-nums">{voted}/{total}</span>
-        <span className="text-[11px] text-[var(--muted)]">voted</span>
+      <div className="flex flex-col leading-tight">
+        <span className="text-sm font-semibold text-[var(--foreground)] tabular-nums">
+          {voted}<span className="text-[var(--muted)]">/</span>{total}
+        </span>
+        <span className="text-[10px] text-[var(--muted)] uppercase tracking-wider">voted</span>
       </div>
     </div>
   );
@@ -56,6 +59,9 @@ function suggestedPoint(players: Player[], votingSystem: string[]): string {
   const snap = numericDeck.find(x => x.n >= target) ?? numericDeck[numericDeck.length - 1];
   return snap.raw;
 }
+
+const primaryBtn = 'btn-shine px-4 py-2 bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:bg-[var(--surface-hover)] disabled:text-[var(--muted)] disabled:cursor-not-allowed text-[#08090b] text-xs font-semibold uppercase tracking-widest rounded transition-colors';
+const secondaryBtn = 'px-4 py-2 border border-[var(--surface-border)] hover:border-[var(--accent)] hover:text-[var(--accent)] text-[var(--foreground)] text-xs font-semibold uppercase tracking-widest rounded transition-colors';
 
 export function PlayerArea({ players, revealed, isHost, votedCount, allVoted, floatingEmojis, chatBubbles, onReveal, onReset, canCompleteStory, onCompleteStory, votingSystem }: Readonly<{
   players: Player[];
@@ -100,30 +106,28 @@ export function PlayerArea({ players, revealed, isHost, votedCount, allVoted, fl
   };
 
   return (
-    <div className="glass felt-area rounded-2xl p-6 sm:p-8 mb-6" style={{ overflow: 'visible' }}>
-      <div className="flex items-center justify-between mb-6 relative z-10 gap-3 flex-wrap">
+    <div className="surface rounded p-5 sm:p-6 mb-5" style={{ overflow: 'visible' }}>
+      <div className="flex items-center justify-between mb-5 relative z-10 gap-3 flex-wrap">
         <div className="flex items-center gap-4">
           <VoteProgress voted={votedCount} total={players.length} />
           {revealed && (
-            <span className="text-sm font-medium text-[var(--emerald)] flex items-center gap-1.5">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-              </svg>
-              Revealed
+            <span className="text-[10px] uppercase tracking-widest text-[var(--accent)] font-semibold border border-[var(--accent-border)] bg-[var(--accent-light)] px-2 py-1 rounded">
+              [ revealed ]
             </span>
           )}
           {!revealed && allVoted && votedCount > 0 && (
-            <span className="text-sm text-[var(--gold)] font-semibold pulse-soft">All in!</span>
+            <span className="text-[10px] uppercase tracking-widest text-[var(--warn)] font-semibold pulse-soft border border-[var(--warn-border)] bg-[var(--warn-light)] px-2 py-1 rounded">
+              [ all in ]
+            </span>
           )}
         </div>
         {isHost && (
-          <div className="flex gap-2 items-center">
+          <div className="flex gap-1.5 items-center">
             {revealed ? (
               <>
                 {canCompleteStory && (
                   showSaveInput ? (
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5">
                       <input
                         ref={inputRef}
                         value={pointDraft}
@@ -132,56 +136,42 @@ export function PlayerArea({ players, revealed, isHost, votedCount, allVoted, fl
                           if (e.key === 'Enter') submitPoint();
                           if (e.key === 'Escape') { setShowSaveInput(false); setPointDraft(''); }
                         }}
-                        placeholder="Point"
+                        placeholder="pt"
                         maxLength={10}
-                        className="w-20 px-3 py-2 rounded-xl bg-[var(--felt)] border border-[var(--primary-border)] text-sm text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--primary)] tabular-nums"
+                        className="w-16 px-2 py-2 rounded bg-[var(--input-bg)] border border-[var(--input-border)] text-xs text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none tabular-nums text-center"
                       />
-                      <button
-                        onClick={submitPoint}
-                        disabled={!pointDraft.trim()}
-                        className="btn-shine px-4 py-2 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:brightness-110 disabled:from-[var(--muted-light)] disabled:to-[var(--muted-light)] disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-all"
-                      >
-                        Save & Next
+                      <button onClick={submitPoint} disabled={!pointDraft.trim()} className={primaryBtn}>
+                        save&amp;next
                       </button>
                       <button
                         onClick={() => { setShowSaveInput(false); setPointDraft(''); }}
-                        className="px-3 py-2 text-sm text-[var(--muted)] hover:text-[var(--foreground)]"
+                        className="px-2 py-2 text-xs text-[var(--muted)] hover:text-[var(--foreground)] uppercase tracking-widest"
                       >
-                        Cancel
+                        esc
                       </button>
                     </div>
                   ) : (
-                    <button
-                      onClick={openSaveInput}
-                      className="btn-shine px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:brightness-110 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-emerald-600/20"
-                    >
-                      Save & Next Story
+                    <button onClick={openSaveInput} className={primaryBtn}>
+                      save &amp; next
                     </button>
                   )
                 )}
                 {!showSaveInput && (
-                  <button
-                    onClick={onReset}
-                    className="btn-shine px-5 py-2.5 bg-gradient-to-r from-[var(--primary)] to-[var(--primary-hover)] hover:brightness-110 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-[var(--primary)]/20"
-                  >
-                    New Round
+                  <button onClick={onReset} className={secondaryBtn}>
+                    new round
                   </button>
                 )}
               </>
             ) : (
-              <button
-                onClick={onReveal}
-                disabled={votedCount === 0}
-                className="btn-shine px-5 py-2.5 bg-gradient-to-r from-emerald-600 to-emerald-500 hover:brightness-110 disabled:from-[var(--muted-light)] disabled:to-[var(--muted-light)] disabled:cursor-not-allowed disabled:shadow-none text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-emerald-600/20"
-              >
-                Reveal Votes
+              <button onClick={onReveal} disabled={votedCount === 0} className={primaryBtn}>
+                reveal
               </button>
             )}
           </div>
         )}
       </div>
 
-      <div className="flex flex-wrap gap-6 justify-center pt-4 pb-2 relative z-10">
+      <div className="flex flex-wrap gap-5 justify-center pt-3 pb-1 relative z-10">
         {players.map(player => (
           <PlayerCard
             key={player.id}
