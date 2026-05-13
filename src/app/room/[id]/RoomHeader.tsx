@@ -11,65 +11,47 @@ export function RoomHeader({ roomName, roomId, playerCount, copied, muted, onCop
   onCopyInvite: () => void;
   onToggleMute: () => void;
 }>) {
+  const btnBase = 'h-8 px-2.5 inline-flex items-center gap-1.5 surface text-[var(--muted)] hover:text-[var(--foreground)] hover:border-[var(--surface-border-hover)] text-[10px] tracking-widest uppercase transition-colors';
+
   return (
-    <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-      <div className="flex items-center gap-4">
-        <div className="w-10 h-10 rounded-xl bg-[var(--gold-light)] border border-[var(--gold-border)] flex items-center justify-center">
-          <span className="text-lg">🃏</span>
-        </div>
-        <div>
-          <h1 className="text-xl font-serif font-bold text-[var(--foreground)] leading-tight">{roomName}</h1>
-          <div className="flex items-center gap-2 mt-0.5">
-            <code className="text-xs text-[var(--muted)] font-mono tracking-wider">
-              {roomId}
-            </code>
+    <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-[var(--surface-border)]">
+      <div className="flex items-center gap-3 min-w-0">
+        <span className="text-[var(--accent)] text-sm shrink-0">$</span>
+        <div className="min-w-0">
+          <h1 className="text-base font-semibold text-[var(--foreground)] tracking-tight truncate">
+            {roomName}
+            <span className="text-[var(--muted)] font-normal ml-2">
+              ~ <code className="text-[var(--accent)] tracking-wider">{roomId}</code>
+            </span>
+          </h1>
+          <div className="text-[10px] text-[var(--muted)] mt-0.5 tracking-wider uppercase">
+            {'// session_id: '}{roomId.toLowerCase()}
           </div>
         </div>
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
         <button
           onClick={onCopyInvite}
-          className={`px-3.5 py-2 glass rounded-xl text-sm transition-all flex items-center gap-2 hover:bg-[var(--surface-hover)] ${
-            copied ? 'text-[var(--emerald)] border-[var(--emerald-border)]' : 'text-[var(--muted)] hover:text-[var(--foreground)]'
-          }`}
+          className={`${btnBase} ${copied ? 'text-[var(--accent)] border-[var(--accent-border)]' : ''}`}
+          title="Copy invite link"
         >
-          {copied ? (
-            <>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              <span className="text-xs">Copied!</span>
-            </>
-          ) : (
-            <>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-              </svg>
-              <span className="hidden sm:inline text-xs">Invite</span>
-            </>
-          )}
+          <span>{copied ? '[ok]' : '[+]'}</span>
+          <span className="hidden sm:inline">{copied ? 'copied' : 'invite'}</span>
         </button>
         <button
           onClick={onToggleMute}
-          className="p-2 glass rounded-xl text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition-all"
+          className={btnBase}
           title={muted ? 'Unmute sounds' : 'Mute sounds'}
           aria-label={muted ? 'Unmute sounds' : 'Mute sounds'}
         >
-          {muted ? (
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
-            </svg>
-          ) : (
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-            </svg>
-          )}
+          <span className="text-[var(--accent)]">{muted ? '×' : '♪'}</span>
+          <span className="hidden sm:inline">{muted ? 'mute' : 'sound'}</span>
         </button>
         <ThemeToggle />
-        <div className="px-3 py-2 glass rounded-xl text-xs text-[var(--muted)] font-medium flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-[var(--emerald)] animate-pulse" />
-          {playerCount} player{playerCount === 1 ? '' : 's'}
+        <div className="h-8 px-2.5 surface inline-flex items-center gap-1.5 text-[10px] tracking-widest uppercase text-[var(--muted)]">
+          <span className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] pulse-soft" />
+          <span className="tabular-nums">{playerCount}</span>
+          <span>online</span>
         </div>
       </div>
     </header>

@@ -17,41 +17,44 @@ export function EmptyRoom({ isHost, onAdd }: Readonly<{
 
   return (
     <div className="flex-1 flex items-center justify-center px-4 py-8">
-      <div className="glass rounded-3xl p-8 sm:p-14 w-full max-w-xl flex flex-col items-center text-center gap-5 fade-in">
-        <div className="w-20 h-20 rounded-3xl bg-[var(--primary-light)] border border-[var(--primary-border)] flex items-center justify-center">
-          <svg className="w-10 h-10 text-[var(--primary)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2M9 12h6M9 16h4" />
-          </svg>
-        </div>
+      <div className="surface rounded p-6 sm:p-10 w-full max-w-xl flex flex-col gap-5 fade-in">
+        <pre className="text-[10px] sm:text-xs leading-tight text-[var(--muted)] select-none whitespace-pre overflow-x-auto">
+{`┌────────────────────────────────────┐
+│  backlog ~ empty                   │
+│                                    │
+│  no stories detected.              │
+└────────────────────────────────────┘`}
+        </pre>
 
-        <div className="space-y-1.5">
-          <h2 className="text-2xl font-serif font-bold text-[var(--foreground)]">
-            No stories yet
+        <div>
+          <h2 className="text-base font-semibold text-[var(--foreground)]">
+            <span className="text-[var(--accent)]">$</span> add_first_story
           </h2>
-          <p className="text-sm text-[var(--muted)] max-w-sm">
-            {isHost
-              ? 'Add your first story to get the team voting.'
-              : 'Waiting for the host to add a story…'}
+          <p className="text-xs text-[var(--muted)] mt-1">
+            {'// '}{isHost ? 'add a story to start estimating' : 'waiting for host to add a story…'}
           </p>
         </div>
 
         {isHost && (
-          <div className="flex flex-col sm:flex-row gap-2 w-full max-w-md mt-2">
-            <input
-              autoFocus
-              value={draft}
-              onChange={e => setDraft(e.target.value)}
-              onKeyDown={e => { if (e.key === 'Enter') submit(); }}
-              placeholder="e.g. Login page redesign"
-              maxLength={200}
-              className="flex-1 px-4 py-3 rounded-xl bg-[var(--felt)] border border-[var(--surface-border)] text-sm text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--primary)]"
-            />
+          <div className="flex flex-col sm:flex-row gap-2 w-full mt-1">
+            <div className="flex-1 flex items-center gap-1.5 px-2.5 bg-[var(--input-bg)] border border-[var(--input-border)] rounded focus-within:border-[var(--accent)] transition-colors">
+              <span className="text-[var(--accent)] text-xs">&gt;</span>
+              <input
+                autoFocus
+                value={draft}
+                onChange={e => setDraft(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter') submit(); }}
+                placeholder="login_page_redesign"
+                maxLength={200}
+                className="flex-1 py-2.5 bg-transparent text-sm text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none"
+              />
+            </div>
             <button
               onClick={submit}
               disabled={!draft.trim()}
-              className="btn-shine px-6 py-3 bg-gradient-to-r from-[var(--primary)] to-[var(--primary-hover)] hover:brightness-110 disabled:from-[var(--muted-light)] disabled:to-[var(--muted-light)] disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-[var(--primary)]/20"
+              className="btn-shine px-5 py-2.5 bg-[var(--accent)] hover:bg-[var(--accent-hover)] disabled:bg-[var(--surface-hover)] disabled:text-[var(--muted)] disabled:cursor-not-allowed text-[#08090b] text-xs font-semibold uppercase tracking-widest rounded transition-colors"
             >
-              Add story
+              add story
             </button>
           </div>
         )}
