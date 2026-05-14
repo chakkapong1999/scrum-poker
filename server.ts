@@ -19,6 +19,7 @@ const CLEANUP_INTERVAL_MS = 30 * 1000; // check every 30 seconds
 
 app.prepare().then(() => {
   const startedAt = Date.now();
+  let healthPlayerCache = { count: 0, updatedAt: 0 };
 
   const httpServer = createServer((req, res) => {
     // Lightweight liveness probe (uptime monitoring)
@@ -28,18 +29,20 @@ app.prepare().then(() => {
       return;
     }
 
-    // Application metrics endpoint
+    // Application metrics endpoint — player count cached for 5 s to avoid O(n) per probe
     if (req.url === '/health') {
-      const mem = process.memoryUsage();
-      let totalPlayers = 0;
-      for (const room of rooms.values()) {
-        totalPlayers += room.players.size;
+      const now = Date.now();
+      if (now - healthPlayerCache.updatedAt > 5000) {
+        let total = 0;
+        for (const room of rooms.values()) total += room.players.size;
+        healthPlayerCache = { count: total, updatedAt: now };
       }
+      const mem = process.memoryUsage();
       const payload = {
         status: 'ok',
-        uptime: Math.floor((Date.now() - startedAt) / 1000),
+        uptime: Math.floor((now - startedAt) / 1000),
         rooms: rooms.size,
-        players: totalPlayers,
+        players: healthPlayerCache.count,
         connections: io?.engine?.clientsCount ?? 0,
         memory: {
           rss: Math.round(mem.rss / 1024 / 1024),
@@ -57,6 +60,9 @@ app.prepare().then(() => {
 
   const io = new SocketIOServer(httpServer, {
     cors: { origin: '*' },
+    pingInterval: 25000,
+    pingTimeout: 20000,
+    maxHttpBufferSize: 1e5,
   });
 
   io.on('connection', (socket) => {

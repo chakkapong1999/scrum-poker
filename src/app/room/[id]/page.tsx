@@ -107,6 +107,35 @@ export default function RoomPage() {
 
   useEffect(() => {
     const socket = getSocket();
+    const pendingTimeouts: ReturnType<typeof setTimeout>[] = [];
+
+    const scheduleEmojiRemoval = (id: number, playerId: string) => {
+      pendingTimeouts.push(setTimeout(() => {
+        setFloatingEmojis(prev => {
+          const next = new Map(prev);
+          const existing = next.get(playerId);
+          if (!existing) return prev;
+          const filtered = removeById(existing, id);
+          if (filtered.length === 0) next.delete(playerId);
+          else next.set(playerId, filtered);
+          return next;
+        });
+      }, 2000));
+    };
+
+    const scheduleChatRemoval = (id: number, playerId: string) => {
+      pendingTimeouts.push(setTimeout(() => {
+        setChatBubbles(prev => {
+          const next = new Map(prev);
+          const existing = next.get(playerId);
+          if (!existing) return prev;
+          const filtered = removeById(existing, id);
+          if (filtered.length === 0) next.delete(playerId);
+          else next.set(playerId, filtered);
+          return next;
+        });
+      }, 3000));
+    };
 
     const onRoomUpdate = (state: RoomState) => {
       handleSoundAndTitle(state, prevRoomRef.current);
@@ -133,7 +162,7 @@ export default function RoomPage() {
       setFloatingEmojis(prev => {
         const next = new Map(prev);
         const existing = next.get(playerId) || [];
-        next.set(playerId, [...existing, { id, emoji }]);
+        next.set(playerId, [...existing.slice(-4), { id, emoji }]);
         return next;
       });
       scheduleEmojiRemoval(id, playerId);
@@ -193,36 +222,9 @@ export default function RoomPage() {
       socket.off('player-emoji', onPlayerEmoji);
       socket.off('player-chat', onPlayerChat);
       socket.off('connect', onReconnect);
+      pendingTimeouts.forEach(clearTimeout);
     };
   }, [roomId]);
-
-  const scheduleEmojiRemoval = (id: number, playerId: string) => {
-    setTimeout(() => {
-      setFloatingEmojis(prev => {
-        const next = new Map(prev);
-        const existing = next.get(playerId);
-        if (!existing) return prev;
-        const filtered = removeById(existing, id);
-        if (filtered.length === 0) next.delete(playerId);
-        else next.set(playerId, filtered);
-        return next;
-      });
-    }, 2000);
-  };
-
-  const scheduleChatRemoval = (id: number, playerId: string) => {
-    setTimeout(() => {
-      setChatBubbles(prev => {
-        const next = new Map(prev);
-        const existing = next.get(playerId);
-        if (!existing) return prev;
-        const filtered = removeById(existing, id);
-        if (filtered.length === 0) next.delete(playerId);
-        else next.set(playerId, filtered);
-        return next;
-      });
-    }, 3000);
-  };
 
   const handleVote = useCallback((value: string) => {
     const socket = getSocket();

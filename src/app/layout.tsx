@@ -61,6 +61,10 @@ export default function RootLayout({
       className={`${playfair.variable} ${jakarta.variable} ${geistMono.variable} h-full antialiased dark`}
       suppressHydrationWarning
     >
+      <head>
+        {/* Runs before hydration to remove 'dark' for light-theme users, preventing flash */}
+        <script dangerouslySetInnerHTML={{ __html: `try{var t=localStorage.getItem('theme');if(t==='light'||(t!=='dark'&&window.matchMedia('(prefers-color-scheme: light)').matches))document.documentElement.classList.remove('dark');}catch(e){}` }} />
+      </head>
       <body className="min-h-full flex flex-col">
         <ThemeProvider>
           <div className="bg-ambient" />

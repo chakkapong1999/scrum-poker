@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Player } from '@/types';
 import { PlayerCard } from './PlayerCard';
 import type { FloatingEmoji, ChatBubble } from './PlayerCard';
@@ -86,8 +86,10 @@ export function PlayerArea({ players, revealed, isHost, votedCount, allVoted, fl
     if (showSaveInput) inputRef.current?.focus();
   }, [showSaveInput]);
 
+  const suggested = useMemo(() => suggestedPoint(players, votingSystem), [players, votingSystem]);
+
   const openSaveInput = () => {
-    setPointDraft(suggestedPoint(players, votingSystem));
+    setPointDraft(suggested);
     setShowSaveInput(true);
   };
 
