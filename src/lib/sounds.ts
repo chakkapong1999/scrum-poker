@@ -122,6 +122,11 @@ function loadVoices() {
 if (globalThis.window !== undefined && globalThis.speechSynthesis) {
   loadVoices();
   globalThis.speechSynthesis.addEventListener('voiceschanged', loadVoices);
+  globalThis.window.addEventListener('beforeunload', () => {
+    globalThis.speechSynthesis?.removeEventListener('voiceschanged', loadVoices);
+    audioCtx?.close();
+    audioCtx = null;
+  }, { once: true });
 }
 
 const THAI_RANGE = /[\u0E00-\u0E7F]/;
