@@ -23,7 +23,7 @@ export const VoteCard = memo(function VoteCard({ value, selected, onClick, disab
     <button
       onClick={onClick}
       disabled={disabled}
-      className={`vote-card w-[4.5rem] h-[6.5rem] rounded-xl text-lg font-bold font-serif relative ${
+      className={`vote-card w-[4.5rem] h-[6.5rem] rounded-xl text-lg font-bold font-sans relative ${
         selected
           ? 'bg-[var(--primary)] text-white glow-emerald ring-1 ring-[var(--primary-border)] -translate-y-3'
           : 'glass-light text-[var(--foreground)] hover:border-[var(--surface-border-hover)] hover:bg-[var(--surface-hover)]'

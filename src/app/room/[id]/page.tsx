@@ -374,7 +374,7 @@ export default function RoomPage() {
 
       <div
         className={`lg:grid lg:gap-6 lg:items-start ${
-          sidebarCollapsed ? 'lg:grid-cols-[44px_1fr]' : 'lg:grid-cols-[260px_1fr]'
+          sidebarCollapsed ? 'lg:grid-cols-[44px_1fr]' : 'lg:grid-cols-[320px_1fr]'
         }`}
       >
         <aside className="lg:sticky lg:top-4">

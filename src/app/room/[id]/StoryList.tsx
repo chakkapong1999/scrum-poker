@@ -25,8 +25,20 @@ export function StoryList({
   onSelect: (storyId: string) => void;
 }>) {
   const [draft, setDraft] = useState('');
+  const [extracted, setExtracted] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState('');
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLInputElement>) => {
+    const text = e.clipboardData.getData('text');
+    const urlMatch = text.match(/https?:\/\/[^/\s]+\/browse\/([A-Z][A-Z0-9]+-\d+)/i);
+    if (urlMatch) {
+      e.preventDefault();
+      setDraft(urlMatch[1].toUpperCase());
+      setExtracted(true);
+      setTimeout(() => setExtracted(false), 2000);
+    }
+  };
 
   const handleAdd = () => {
     const value = draft.trim();
@@ -189,14 +201,24 @@ export function StoryList({
 
       {isHost && (
         <div className="flex gap-1.5">
-          <input
-            value={draft}
-            onChange={e => setDraft(e.target.value)}
-            onKeyDown={e => { if (e.key === 'Enter') handleAdd(); }}
-            placeholder="Add a story…"
-            maxLength={200}
-            className="flex-1 px-2.5 py-1.5 rounded-lg bg-[var(--felt)] border border-[var(--surface-border)] text-xs text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--primary)]"
-          />
+          <div className="relative flex-1">
+            <input
+              value={draft}
+              onChange={e => { setDraft(e.target.value); setExtracted(false); }}
+              onKeyDown={e => { if (e.key === 'Enter') handleAdd(); }}
+              onPaste={handlePaste}
+              placeholder="Add a story"
+              maxLength={200}
+              className={`w-full px-2.5 py-1.5 rounded-lg bg-[var(--felt)] border text-xs text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none transition-colors ${
+                extracted ? 'border-[var(--emerald)] text-[var(--emerald)]' : 'border-[var(--surface-border)] focus:border-[var(--primary)]'
+              }`}
+            />
+            {extracted && (
+              <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-[var(--emerald)] font-medium pointer-events-none">
+                ✓ extracted
+              </span>
+            )}
+          </div>
           <button
             onClick={handleAdd}
             disabled={!draft.trim()}
