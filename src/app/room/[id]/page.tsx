@@ -259,6 +259,10 @@ export default function RoomPage() {
     setMyVote(null);
   };
 
+  const handleTransferHost = (targetPlayerId: string) => {
+    getSocket().emit('transfer-host', { targetPlayerId });
+  };
+
   const handleCompleteStory = (finalPoint: string) => {
     const trimmed = finalPoint.trim();
     if (!trimmed) return;
@@ -403,6 +407,7 @@ export default function RoomPage() {
             players={room.players}
             revealed={room.revealed}
             isHost={isHost}
+            myId={myId}
             votedCount={votedCount}
             allVoted={allVoted}
             floatingEmojis={floatingEmojis}
@@ -411,6 +416,7 @@ export default function RoomPage() {
             onReset={handleReset}
             canCompleteStory={canCompleteStory}
             onCompleteStory={handleCompleteStory}
+            onMakeHost={handleTransferHost}
             votingSystem={room.votingSystem}
           />
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { memo } from 'react';
+import { memo, useState, useEffect } from 'react';
 import type { Player } from '@/types';
 
 export interface FloatingEmoji {
@@ -37,12 +37,21 @@ export const VoteCard = memo(function VoteCard({ value, selected, onClick, disab
   );
 });
 
-export const PlayerCard = memo(function PlayerCard({ player, revealed, floatingEmojis, chatBubbles }: Readonly<{
+export const PlayerCard = memo(function PlayerCard({ player, revealed, floatingEmojis, chatBubbles, onMakeHost }: Readonly<{
   player: Player;
   revealed: boolean;
   floatingEmojis: FloatingEmoji[];
   chatBubbles: ChatBubble[];
+  onMakeHost?: () => void;
 }>) {
+  const [confirming, setConfirming] = useState(false);
+
+  useEffect(() => {
+    if (!confirming) return;
+    const t = setTimeout(() => setConfirming(false), 3000);
+    return () => clearTimeout(t);
+  }, [confirming]);
+
   const hasVoted = player.vote !== null;
   const showVote = revealed && !!player.vote && player.vote !== 'voted';
 
@@ -92,6 +101,25 @@ export const PlayerCard = memo(function PlayerCard({ player, revealed, floatingE
             <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-[var(--gold-light)] text-[var(--gold)] border border-[var(--gold-border)] font-semibold tracking-wide">HOST</span>
           )}
         </div>
+        {onMakeHost && (
+          <button
+            onClick={() => {
+              if (confirming) {
+                onMakeHost();
+                setConfirming(false);
+              } else {
+                setConfirming(true);
+              }
+            }}
+            className={`text-[10px] px-2 py-0.5 rounded-full border transition-all font-medium ${
+              confirming
+                ? 'bg-[var(--gold-light)] text-[var(--gold)] border-[var(--gold-border)]'
+                : 'glass text-[var(--muted)] hover:text-[var(--gold)] hover:border-[var(--gold-border)]'
+            }`}
+          >
+            {confirming ? 'Confirm?' : '👑 Make Host'}
+          </button>
+        )}
       </div>
     </div>
   );

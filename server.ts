@@ -324,6 +324,23 @@ app.prepare().then(() => {
       io.to(room.id).emit('room-update', getRoomState(room));
     });
 
+    socket.on('transfer-host', ({ targetPlayerId }: { targetPlayerId: string }) => {
+      if (!currentRoomId || !currentPlayerId) return;
+      const room = rooms.get(currentRoomId);
+      if (!room) return;
+
+      const currentPlayer = room.players.get(currentPlayerId);
+      if (!currentPlayer?.isHost) return;
+
+      const targetPlayer = room.players.get(targetPlayerId);
+      if (!targetPlayer || targetPlayer.id === currentPlayerId) return;
+
+      currentPlayer.isHost = false;
+      targetPlayer.isHost = true;
+      room.lastActivity = Date.now();
+      io.to(currentRoomId).emit('room-update', getRoomState(room));
+    });
+
     socket.on('disconnect', () => {
       if (!currentRoomId || !currentPlayerId) return;
       const room = rooms.get(currentRoomId);
