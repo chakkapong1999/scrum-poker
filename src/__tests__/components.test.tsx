@@ -50,6 +50,7 @@ beforeEach(() => {
   mockSocketEmit.mockReset();
   mockSocketOn.mockReset();
   mockSocketOff.mockReset();
+  sessionStorage.clear();
 });
 
 // ─── VoteStats ──────────────────────────────────────────────────────────────
@@ -895,7 +896,7 @@ describe('RoomPage', () => {
   });
 
   it('handles get-room-state failure with stored name (rejoin)', async () => {
-    vi.spyOn(sessionStorage, 'getItem').mockReturnValue('StoredAlice');
+    sessionStorage.setItem('playerName', 'StoredAlice');
     const { default: RoomPage } = await import('@/app/room/[id]/page');
     render(<RoomPage />);
 
@@ -911,7 +912,6 @@ describe('RoomPage', () => {
   });
 
   it('redirects to join page when no stored name', async () => {
-    vi.spyOn(sessionStorage, 'getItem').mockReturnValue(null);
     const { default: RoomPage } = await import('@/app/room/[id]/page');
     render(<RoomPage />);
 
@@ -924,7 +924,7 @@ describe('RoomPage', () => {
   });
 
   it('redirects when rejoin fails', async () => {
-    vi.spyOn(sessionStorage, 'getItem').mockReturnValue('Alice');
+    sessionStorage.setItem('playerName', 'Alice');
     const { default: RoomPage } = await import('@/app/room/[id]/page');
     render(<RoomPage />);
 
