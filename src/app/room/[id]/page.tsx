@@ -21,6 +21,11 @@ function removeById<T extends { id: number }>(items: T[], targetId: number): T[]
   return items.filter(item => item.id !== targetId);
 }
 
+function notifyAllVoted() {
+  playAllVotedSound();
+  if (document.hidden) document.title = '✅ All Voted! — Scrum Poker';
+}
+
 function handleSoundAndTitle(state: RoomState, prev: RoomState | null) {
   if (state.revealed && prev && !prev.revealed) {
     playRevealSound();
@@ -30,10 +35,7 @@ function handleSoundAndTitle(state: RoomState, prev: RoomState | null) {
   if (state.revealed || state.players.length === 0) return;
   const allVotedNow = state.players.every(p => p.vote !== null);
   const allVotedBefore = prev?.players.length ? prev.players.every(p => p.vote !== null) : false;
-  if (allVotedNow && !allVotedBefore) {
-    playAllVotedSound();
-    if (document.hidden) document.title = '✅ All Voted! — Scrum Poker';
-  }
+  if (allVotedNow && !allVotedBefore) notifyAllVoted();
 }
 
 function applyVoteUpdate(
@@ -49,10 +51,7 @@ function applyVoteUpdate(
 
   const allVotedNow = players.every(p => p.vote !== null);
   const allVotedBefore = prev.players.every(p => p.vote !== null);
-  if (allVotedNow && !allVotedBefore) {
-    playAllVotedSound();
-    if (document.hidden) document.title = '✅ All Voted! — Scrum Poker';
-  }
+  if (allVotedNow && !allVotedBefore) notifyAllVoted();
 
   return next;
 }
@@ -285,8 +284,8 @@ export default function RoomPage() {
 
   const me = room?.players.find(p => p.id === myId);
   const isHost = me?.isHost ?? false;
-  const allVoted = room?.players.every(p => p.vote !== null) ?? false;
-  const votedCount = room?.players.filter(p => p.vote !== null).length ?? 0;
+  const votedCount = room?.players.reduce((n, p) => p.vote !== null ? n + 1 : n, 0) ?? 0;
+  const allVoted = room ? votedCount === room.players.length : false;
   const stories = room?.stories ?? [];
   const currentStory = stories.find(s => s.id === room?.currentStoryId) ?? null;
   const canCompleteStory = !!(room?.revealed && currentStory && votedCount > 0);

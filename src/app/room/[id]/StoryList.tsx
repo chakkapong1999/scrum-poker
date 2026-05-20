@@ -150,7 +150,7 @@ export function StoryList({
                 ) : (
                   <button
                     type="button"
-                    onClick={() => isHost && onSelect(story.id)}
+                    onClick={() => onSelect(story.id)}
                     disabled={!isHost}
                     className={`flex-1 text-left text-xs truncate ${
                       isCurrent ? 'text-[var(--foreground)] font-semibold' : 'text-[var(--foreground)]'

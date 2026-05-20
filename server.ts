@@ -142,7 +142,6 @@ app.prepare().then(() => {
         isHost: false,
       };
 
-      // If no host remains, this player becomes host
       const hasHost = Array.from(room.players.values()).some(p => p.isHost);
       if (!hasHost) player.isHost = true;
 
@@ -193,14 +192,12 @@ app.prepare().then(() => {
       if (!room || room.revealed) return;
       if (!room.currentStoryId) return;
 
-      // Validate vote value against room's voting system
       if (vote !== null && !room.votingSystem.includes(vote)) return;
 
       const player = room.players.get(currentPlayerId);
       if (player) {
         player.vote = vote;
         room.lastActivity = Date.now();
-        // Send lightweight diff instead of full state for vote changes
         io.to(currentRoomId).emit('vote-update', {
           playerId: currentPlayerId,
           vote: vote ? 'voted' : null,

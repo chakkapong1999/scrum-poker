@@ -87,7 +87,7 @@ export function SummaryPage({
               </span>
               <button
                 type="button"
-                onClick={() => isHost && onSelect(story.id)}
+                onClick={() => onSelect(story.id)}
                 disabled={!isHost}
                 className={`flex-1 text-left text-sm text-[var(--foreground)] truncate ${
                   isHost ? 'cursor-pointer hover:underline' : 'cursor-default'
