@@ -61,7 +61,7 @@ app.prepare().then(() => {
   const io = new SocketIOServer(httpServer, {
     cors: { origin: '*' },
     pingInterval: 25000,
-    pingTimeout: 90000,
+    pingTimeout: 300000,
     maxHttpBufferSize: 1e5,
   });
 
