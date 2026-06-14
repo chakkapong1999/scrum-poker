@@ -12,9 +12,9 @@ Real-time planning poker app built with Next.js 16.2.3, React 19, Socket.IO 4, a
 
 ## Key Files
 
-- `server.ts` — Socket.IO server, room management, all game logic (~269 lines)
+- `server.ts` — Socket.IO server, room management, all game logic (~410 lines)
 - `src/app/page.tsx` — Home page (create/join room)
-- `src/app/room/[id]/page.tsx` — Main voting room orchestrator (~310 lines)
+- `src/app/room/[id]/page.tsx` — Main voting room orchestrator (~474 lines)
 - `src/app/room/[id]/RoomHeader.tsx` — Room title, ID, voting system selector, host controls
 - `src/app/room/[id]/PlayerArea.tsx` — Grid layout of player cards
 - `src/app/room/[id]/PlayerCard.tsx` — Individual player card with vote display and emoji
@@ -38,6 +38,15 @@ Real-time planning poker app built with Next.js 16.2.3, React 19, Socket.IO 4, a
 - `npm test` — Run tests (vitest run)
 - `npm run test:watch` — Run tests in watch mode
 - `npm run test:coverage` — Run tests with coverage
+
+## Environment
+
+- `PORT` — HTTP server port (default: `3000`)
+- `NODE_ENV` — Set to `production` for production server
+
+## Testing
+
+Test files live in `src/__tests__/`: `components.test.tsx`, `room-utils.test.ts`, `sounds.test.ts`, `types.test.ts`. Setup file: `src/__tests__/setup.ts`.
 
 ## Socket Events
 
