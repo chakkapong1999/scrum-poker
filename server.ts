@@ -13,6 +13,11 @@ const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
 
 const rooms = new Map<string, Room>();
+
+/** Server-side guard — clients enforce maxLength, but raw socket clients may not */
+function sanitizeName(value: unknown): string {
+  return String(value ?? '').trim().slice(0, 20);
+}
 const ROOM_TTL_MS = 30 * 60 * 1000; // 30 minutes idle timeout
 const ROOM_EMPTY_GRACE_MS = 60 * 1000; // keep empty rooms for 60s (allows refresh)
 const CLEANUP_INTERVAL_MS = 30 * 1000; // check every 30 seconds
@@ -69,13 +74,21 @@ app.prepare().then(() => {
     let currentRoomId: string | null = null;
     let currentPlayerId: string | null = null;
 
-    socket.on('create-room', ({ playerName, roomName, votingSystem }: { playerName: string; roomName: string; votingSystem: string }, callback) => {
-      const roomId = generateRoomId();
+    socket.on('create-room', ({ playerName, roomName, votingSystem, asSpectator }: { playerName: string; roomName: string; votingSystem: string; asSpectator?: boolean }, callback) => {
+      const name = sanitizeName(playerName);
+      if (!name) {
+        callback({ success: false, error: 'Name is required' });
+        return;
+      }
+
+      // Guard against the (unlikely) ID collision overwriting a live room
+      let roomId = generateRoomId();
+      while (rooms.has(roomId)) roomId = generateRoomId();
       const playerId = socket.id;
 
       const room: Room = {
         id: roomId,
-        name: roomName || 'Scrum Poker',
+        name: String(roomName ?? '').trim().slice(0, 30) || 'Scrum Poker',
         players: new Map(),
         revealed: false,
         votingSystem: getVotingSystem(votingSystem),
@@ -86,9 +99,10 @@ app.prepare().then(() => {
 
       const player: Player = {
         id: playerId,
-        name: playerName,
+        name,
         vote: null,
         isHost: true,
+        isSpectator: !!asSpectator,
       };
 
       room.players.set(playerId, player);
@@ -102,19 +116,26 @@ app.prepare().then(() => {
       io.to(roomId).emit('room-update', getRoomState(room));
     });
 
-    socket.on('join-room', ({ roomId, playerName }: { roomId: string; playerName: string }, callback) => {
-      const room = rooms.get(roomId.toUpperCase());
+    socket.on('join-room', ({ roomId, playerName, asSpectator }: { roomId: string; playerName: string; asSpectator?: boolean }, callback) => {
+      const room = rooms.get(String(roomId ?? '').toUpperCase());
       if (!room) {
         callback({ success: false, error: 'Room not found' });
+        return;
+      }
+
+      const name = sanitizeName(playerName);
+      if (!name) {
+        callback({ success: false, error: 'Name is required' });
         return;
       }
 
       const playerId = socket.id;
       const player: Player = {
         id: playerId,
-        name: playerName,
+        name,
         vote: null,
         isHost: false,
+        isSpectator: !!asSpectator,
       };
 
       room.players.set(playerId, player);
@@ -127,19 +148,26 @@ app.prepare().then(() => {
       io.to(room.id).emit('room-update', getRoomState(room));
     });
 
-    socket.on('rejoin-room', ({ roomId, playerName }: { roomId: string; playerName: string }, callback) => {
-      const room = rooms.get(roomId.toUpperCase());
+    socket.on('rejoin-room', ({ roomId, playerName, asSpectator }: { roomId: string; playerName: string; asSpectator?: boolean }, callback) => {
+      const room = rooms.get(String(roomId ?? '').toUpperCase());
       if (!room) {
         callback({ success: false, error: 'Room not found' });
+        return;
+      }
+
+      const name = sanitizeName(playerName);
+      if (!name) {
+        callback({ success: false, error: 'Name is required' });
         return;
       }
 
       const playerId = socket.id;
       const player: Player = {
         id: playerId,
-        name: playerName,
+        name,
         vote: null,
         isHost: false,
+        isSpectator: !!asSpectator,
       };
 
       const hasHost = Array.from(room.players.values()).some(p => p.isHost);
@@ -170,15 +198,17 @@ app.prepare().then(() => {
 
     socket.on('send-emoji', ({ emoji }: { emoji: string }) => {
       if (!currentRoomId || !currentPlayerId) return;
+      const safeEmoji = String(emoji ?? '').slice(0, 16);
+      if (!safeEmoji.trim()) return;
       io.to(currentRoomId).emit('player-emoji', {
         playerId: currentPlayerId,
-        emoji,
+        emoji: safeEmoji,
       });
     });
 
     socket.on('send-chat', ({ message }: { message: string }) => {
       if (!currentRoomId || !currentPlayerId) return;
-      const trimmed = message.slice(0, 50);
+      const trimmed = String(message ?? '').trim().slice(0, 50);
       if (!trimmed) return;
       io.to(currentRoomId).emit('player-chat', {
         playerId: currentPlayerId,
@@ -195,7 +225,7 @@ app.prepare().then(() => {
       if (vote !== null && !room.votingSystem.includes(vote)) return;
 
       const player = room.players.get(currentPlayerId);
-      if (player) {
+      if (player && !player.isSpectator) {
         player.vote = vote;
         room.lastActivity = Date.now();
         io.to(currentRoomId).emit('vote-update', {

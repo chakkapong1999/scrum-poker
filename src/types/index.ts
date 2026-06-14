@@ -3,6 +3,7 @@ export interface Player {
   name: string;
   vote: string | null;
   isHost: boolean;
+  isSpectator?: boolean;
 }
 
 export interface Story {

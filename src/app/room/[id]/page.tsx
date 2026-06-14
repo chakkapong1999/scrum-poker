@@ -26,15 +26,21 @@ function notifyAllVoted() {
   if (document.hidden) document.title = '✅ All Voted! — Scrum Poker';
 }
 
+function votersOf(players: RoomState['players']) {
+  return players.filter(p => !p.isSpectator);
+}
+
 function handleSoundAndTitle(state: RoomState, prev: RoomState | null) {
   if (state.revealed && prev && !prev.revealed) {
     playRevealSound();
     if (document.hidden) document.title = '🎉 Votes Revealed! — Scrum Poker';
     return;
   }
-  if (state.revealed || state.players.length === 0) return;
-  const allVotedNow = state.players.every(p => p.vote !== null);
-  const allVotedBefore = prev?.players.length ? prev.players.every(p => p.vote !== null) : false;
+  const voters = votersOf(state.players);
+  if (state.revealed || voters.length === 0) return;
+  const prevVoters = prev ? votersOf(prev.players) : [];
+  const allVotedNow = voters.every(p => p.vote !== null);
+  const allVotedBefore = prevVoters.length ? prevVoters.every(p => p.vote !== null) : false;
   if (allVotedNow && !allVotedBefore) notifyAllVoted();
 }
 
@@ -49,8 +55,9 @@ function applyVoteUpdate(
   );
   const next = { ...prev, players };
 
-  const allVotedNow = players.every(p => p.vote !== null);
-  const allVotedBefore = prev.players.every(p => p.vote !== null);
+  const voters = votersOf(players);
+  const allVotedNow = voters.length > 0 && voters.every(p => p.vote !== null);
+  const allVotedBefore = votersOf(prev.players).every(p => p.vote !== null);
   if (allVotedNow && !allVotedBefore) notifyAllVoted();
 
   return next;
@@ -202,6 +209,7 @@ export default function RoomPage() {
       sock.emit('rejoin-room', {
         roomId: roomId.toUpperCase(),
         playerName: storedName,
+        asSpectator: sessionStorage.getItem('isSpectator') === '1',
       }, (rejoinRes: { success: boolean; roomId?: string; error?: string }) => {
         if (!rejoinRes.success) setNotJoined(true);
       });
@@ -275,17 +283,34 @@ export default function RoomPage() {
     setMuted(next);
   };
 
-  const copyInviteLink = () => {
+  const copyInviteLink = async () => {
     const link = `${globalThis.location.origin}/join/${roomId}`;
-    navigator.clipboard.writeText(link);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      // navigator.clipboard is unavailable on insecure (http) origins
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(link);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = link;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        textarea.remove();
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard access denied — leave the button state unchanged
+    }
   };
 
   const me = room?.players.find(p => p.id === myId);
   const isHost = me?.isHost ?? false;
-  const votedCount = room?.players.reduce((n, p) => p.vote !== null ? n + 1 : n, 0) ?? 0;
-  const allVoted = room ? votedCount === room.players.length : false;
+  const voters = room ? votersOf(room.players) : [];
+  const votedCount = voters.reduce((n, p) => p.vote !== null ? n + 1 : n, 0);
+  const allVoted = room ? votedCount === voters.length : false;
   const stories = room?.stories ?? [];
   const currentStory = stories.find(s => s.id === room?.currentStoryId) ?? null;
   const canCompleteStory = !!(room?.revealed && currentStory && votedCount > 0);
@@ -310,10 +335,12 @@ export default function RoomPage() {
     return (
       <div className="min-h-dvh flex items-center justify-center">
         <div className="text-center fade-in">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl glass mb-4">
-            <span className="text-3xl animate-bounce">🃏</span>
+          <div className="card-fan card-fan-animated mb-4" aria-hidden>
+            <span className="mini-card">♠</span>
+            <span className="mini-card"><span className="red">♥</span></span>
+            <span className="mini-card">♣</span>
           </div>
-          <p className="text-[var(--muted)] text-sm">Connecting to room...</p>
+          <p className="text-[var(--muted)] text-sm font-serif italic">Connecting to room...</p>
         </div>
       </div>
     );
@@ -392,8 +419,8 @@ export default function RoomPage() {
 
         <main className="min-w-0">
           {currentStory && (
-            <div className="mb-3 px-3 py-2 rounded-lg bg-[var(--primary-light)] border border-[var(--primary-border)] flex items-center gap-2">
-              <span className="text-[9px] uppercase tracking-widest text-[var(--primary)] font-semibold shrink-0">
+            <div className="mb-3 px-3.5 py-2 rounded-lg bg-[var(--gold-light)] border border-[var(--gold-border)] border-l-2 border-l-[var(--gold)] flex items-center gap-2.5">
+              <span className="text-[9px] uppercase tracking-[0.25em] text-[var(--gold)] font-bold shrink-0 font-serif">
                 Now
               </span>
               <span className="text-sm font-semibold text-[var(--foreground)] truncate">
@@ -421,14 +448,23 @@ export default function RoomPage() {
 
           <InteractionBar />
 
-          {room.revealed && <VoteStats players={room.players} />}
+          {room.revealed && <VoteStats players={voters} />}
 
-          {!room.revealed && currentStory && (
+          {!room.revealed && currentStory && !me?.isSpectator && (
             <VotingDeck
               votingSystem={room.votingSystem}
               myVote={myVote}
               onVote={handleVote}
             />
+          )}
+
+          {!room.revealed && currentStory && me?.isSpectator && (
+            <div className="mt-8 text-center slide-up">
+              <div className="deco-rule max-w-xs mx-auto mb-4 text-[10px]" aria-hidden>♠</div>
+              <p className="text-sm text-[var(--muted)] font-serif italic">
+                You&apos;re watching this round
+              </p>
+            </div>
           )}
 
         </main>

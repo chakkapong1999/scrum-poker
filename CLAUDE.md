@@ -41,7 +41,7 @@ Real-time planning poker app built with Next.js 16.2.3, React 19, Socket.IO 4, a
 
 ## Socket Events
 
-**Client → Server:** `create-room` (votingSystem is a string key: `'fibonacci'` or `'tshirt'`), `join-room`, `rejoin-room`, `get-room-state`, `vote`, `reveal-votes`, `reset-votes`, `send-emoji`, `send-chat`
+**Client → Server:** `create-room` (votingSystem is a string key: `'fibonacci'` or `'tshirt'`), `join-room`, `rejoin-room`, `get-room-state`, `vote`, `reveal-votes`, `reset-votes`, `send-emoji`, `send-chat` — `create-room`/`join-room`/`rejoin-room` accept optional `asSpectator: boolean`
 
 **Server → Client:** `room-update`, `vote-update`, `player-emoji`, `player-chat`
 
@@ -50,6 +50,7 @@ Real-time planning poker app built with Next.js 16.2.3, React 19, Socket.IO 4, a
 - Room IDs are uppercase 6-char alphanumeric, excluding ambiguous chars (I, O, 0, 1) — see `ROOM_ID_CHARS` in `room-utils.ts`
 - `votingSystem` is stored as `string[]` on the room — resolved from key (`'fibonacci'` | `'tshirt'`) via `getVotingSystem()` in `room-utils.ts`
 - Vote masking: server sends `'voted'` instead of actual vote value until `revealed === true`
+- Spectators (`Player.isSpectator`) can't vote (server-enforced) and are excluded from vote progress/stats; spectator choice persists in `sessionStorage('isSpectator')`
 - Host auto-transfers to first remaining player on disconnect
 - Room cleanup: 30-minute idle timeout (`ROOM_TTL_MS`) + 60-second grace period for empty rooms (`ROOM_EMPTY_GRACE_MS`), checked every 30s
 - `/healthz` endpoint on the HTTP server for liveness probes

@@ -44,18 +44,19 @@ export function SummaryPage({
 
   return (
     <div className="flex-1 flex items-start justify-center px-4 py-8">
-      <div className="glass rounded-3xl p-6 sm:p-10 w-full max-w-3xl flex flex-col gap-6 fade-in">
+      <div className="panel rounded-3xl p-6 sm:p-10 w-full max-w-3xl flex flex-col gap-6 fade-in [--radius:1.5rem]">
         <div className="flex flex-col items-center text-center gap-3">
-          <div className="w-16 h-16 rounded-2xl bg-[var(--emerald-light)] border border-[var(--emerald-border)] flex items-center justify-center">
-            <svg className="w-8 h-8 text-[var(--emerald)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="w-16 h-16 rounded-full bg-[var(--gold-light)] border border-[var(--gold-border)] flex items-center justify-center">
+            <svg className="w-8 h-8 text-[var(--gold)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
           <div>
-            <h2 className="text-2xl font-serif font-bold text-[var(--foreground)]">
+            <h2 className="text-3xl font-serif font-bold gold-foil">
               All stories estimated
             </h2>
-            <p className="text-sm text-[var(--muted)] mt-1">
+            <div className="deco-rule max-w-50 mx-auto mt-2 mb-2 text-[9px]" aria-hidden>♦</div>
+            <p className="text-sm text-[var(--muted)] font-serif italic">
               Nice work — the team finished {estimated} {estimated === 1 ? 'story' : 'stories'}.
             </p>
           </div>
@@ -63,14 +64,14 @@ export function SummaryPage({
 
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-xl bg-[var(--felt)] border border-[var(--surface-border)] px-4 py-3">
-            <div className="text-[10px] uppercase tracking-widest text-[var(--muted)]">Stories</div>
-            <div className="text-2xl font-serif font-bold text-[var(--foreground)] tabular-nums">
+            <div className="text-[10px] uppercase tracking-[0.25em] text-[var(--muted)]">Stories</div>
+            <div className="text-3xl font-serif font-semibold text-[var(--foreground)] tabular-nums">
               {stories.length}
             </div>
           </div>
-          <div className="rounded-xl bg-[var(--felt)] border border-[var(--surface-border)] px-4 py-3">
-            <div className="text-[10px] uppercase tracking-widest text-[var(--muted)]">Total points</div>
-            <div className="text-2xl font-serif font-bold text-[var(--foreground)] tabular-nums">
+          <div className="rounded-xl bg-[var(--gold-light)] border border-[var(--gold-border)] px-4 py-3">
+            <div className="text-[10px] uppercase tracking-[0.25em] text-[var(--gold)]">Total points</div>
+            <div className="text-3xl font-serif font-semibold gold-foil tabular-nums">
               {total !== null ? total : '—'}
             </div>
           </div>
@@ -120,12 +121,12 @@ export function SummaryPage({
                 }}
                 placeholder="Next story title…"
                 maxLength={200}
-                className="flex-1 px-4 py-3 rounded-xl bg-[var(--felt)] border border-[var(--surface-border)] text-sm text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none focus:border-[var(--primary)]"
+                className="flex-1 px-4 py-3 rounded-lg bg-[var(--input-bg)] border border-[var(--input-border)] text-sm text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none input-glow transition-all"
               />
               <button
                 onClick={submit}
                 disabled={!draft.trim()}
-                className="btn-shine px-6 py-3 bg-gradient-to-r from-[var(--primary)] to-[var(--primary-hover)] hover:brightness-110 disabled:from-[var(--muted-light)] disabled:to-[var(--muted-light)] disabled:cursor-not-allowed text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-[var(--primary)]/20"
+                className="btn-shine btn-felt px-6 py-3 text-sm font-semibold rounded-lg tracking-wide"
               >
                 Add story
               </button>
@@ -139,7 +140,7 @@ export function SummaryPage({
           ) : (
             <button
               onClick={() => setShowAdd(true)}
-              className="btn-shine px-6 py-3 bg-gradient-to-r from-[var(--primary)] to-[var(--primary-hover)] hover:brightness-110 text-white text-sm font-semibold rounded-xl transition-all shadow-lg shadow-[var(--primary)]/20 self-center"
+              className="btn-shine btn-felt px-6 py-3 text-sm font-semibold rounded-lg tracking-wide self-center"
             >
               + Add another story
             </button>

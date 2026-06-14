@@ -12,7 +12,7 @@ vi.mock('next/navigation', () => ({
 
 // Mock next/dynamic
 vi.mock('next/dynamic', () => ({
-  default: (loader: () => Promise<{ default: React.ComponentType<Record<string, unknown>> }>) => {
+  default: () => {
     return function DynamicComponent() {
       return null;
     };
@@ -166,7 +166,7 @@ describe('Home page', () => {
   it('shows error when creating without a name', async () => {
     const { default: Home } = await import('@/app/page');
     render(<Home />);
-    fireEvent.click(screen.getAllByText('Create Room').find(el => el.tagName === 'BUTTON' && el.closest('.bg-gradient-to-r'))!);
+    fireEvent.click(screen.getAllByText('Create Room').find(el => el.tagName === 'BUTTON' && el.closest('.btn-felt'))!);
     expect(screen.getByText('Please enter your name')).toBeInTheDocument();
   });
 
@@ -730,7 +730,7 @@ describe('RoomPage', () => {
     });
 
     fireEvent.click(screen.getByText('Invite'));
-    expect(screen.getByText('Copied!')).toBeInTheDocument();
+    expect(await screen.findByText('Copied!')).toBeInTheDocument();
   });
 
   it('handles reveal votes click', async () => {
@@ -1261,5 +1261,50 @@ describe('RoomPage', () => {
     fireEvent.click(screen.getByText('Chat'));
     expect(screen.queryByText('👍')).not.toBeInTheDocument();
     expect(screen.getByText("Let's go!")).toBeInTheDocument();
+  });
+
+  it('hides voting deck and shows watching note for spectators', async () => {
+    const { default: RoomPage } = await import('@/app/room/[id]/page');
+    render(<RoomPage />);
+
+    const onRoomUpdate = mockSocketOn.mock.calls.find((c: unknown[]) => c[0] === 'room-update')![1];
+    act(() => {
+      onRoomUpdate({
+        id: 'ABC123', name: 'Test', revealed: false,
+        players: [
+          { id: 'test-socket-id', name: 'Alice', vote: null, isHost: true, isSpectator: true },
+          { id: 'p2', name: 'Bob', vote: null, isHost: false },
+        ],
+        votingSystem: ['1', '2', '3'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
+      });
+    });
+
+    expect(screen.queryByText('Pick your card')).not.toBeInTheDocument();
+    expect(screen.getByText("You're watching this round")).toBeInTheDocument();
+  });
+
+  it('excludes spectators from vote progress', async () => {
+    const { default: RoomPage } = await import('@/app/room/[id]/page');
+    render(<RoomPage />);
+
+    const onRoomUpdate = mockSocketOn.mock.calls.find((c: unknown[]) => c[0] === 'room-update')![1];
+    act(() => {
+      onRoomUpdate({
+        id: 'ABC123', name: 'Test', revealed: false,
+        players: [
+          { id: 'test-socket-id', name: 'Alice', vote: 'voted', isHost: true },
+          { id: 'p2', name: 'Watcher', vote: null, isHost: false, isSpectator: true },
+        ],
+        votingSystem: ['1', '2', '3'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
+      });
+    });
+
+    // 1 of 1 voters (spectator excluded from the denominator)
+    expect(screen.getByText('1/1')).toBeInTheDocument();
+    expect(screen.getByText('watching')).toBeInTheDocument();
   });
 });

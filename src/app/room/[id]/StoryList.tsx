@@ -65,10 +65,10 @@ export function StoryList({
   return (
     <>
       {collapsed && (
-        <div className="hidden lg:flex glass rounded-xl p-2 mb-4 flex-col items-center gap-2">
+        <div className="hidden lg:flex glass rounded-lg p-2 mb-4 flex-col items-center gap-2">
           <button
             onClick={onToggleCollapse}
-            className="p-1.5 rounded-lg text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition-all"
+            className="p-1.5 rounded-md text-[var(--muted)] hover:text-[var(--gold)] hover:bg-[var(--surface-hover)] transition-all"
             title="Expand stories"
             aria-label="Expand stories"
           >
@@ -76,7 +76,7 @@ export function StoryList({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
-          <div className="text-[10px] text-[var(--muted)] tabular-nums [writing-mode:vertical-rl] rotate-180 tracking-wider">
+          <div className="text-[10px] text-[var(--muted)] tabular-nums [writing-mode:vertical-rl] rotate-180 tracking-wider font-mono">
             {stories.length - remaining}/{stories.length}
           </div>
         </div>
@@ -84,17 +84,17 @@ export function StoryList({
 
     <div className={`glass rounded-xl p-3 mb-4 ${collapsed ? 'lg:hidden' : ''}`}>
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-[10px] font-medium text-[var(--muted)] uppercase tracking-widest">
+        <h3 className="text-[10px] font-semibold text-[var(--gold)] uppercase tracking-[0.25em] font-serif">
           Stories
         </h3>
         <div className="flex items-center gap-2">
-          <span className="text-[10px] text-[var(--muted)] tabular-nums">
+          <span className="text-[10px] text-[var(--muted)] tabular-nums font-mono">
             {stories.length - remaining}/{stories.length} done
           </span>
           {onToggleCollapse && (
             <button
               onClick={onToggleCollapse}
-              className="hidden lg:inline-flex p-1 rounded-md text-[var(--muted)] hover:text-[var(--foreground)] hover:bg-[var(--surface-hover)] transition-all"
+              className="hidden lg:inline-flex p-1 rounded-md text-[var(--muted)] hover:text-[var(--gold)] hover:bg-[var(--surface-hover)] transition-all"
               title="Collapse sidebar"
               aria-label="Collapse sidebar"
             >
@@ -107,10 +107,8 @@ export function StoryList({
       </div>
 
       {stories.length === 0 && (
-        <div className="flex flex-col items-center text-center gap-2 py-6 mb-3 rounded-lg border border-dashed border-[var(--surface-border)] bg-[var(--felt)]">
-          <svg className="w-8 h-8 text-[var(--muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2M9 12h6M9 16h4" />
-          </svg>
+        <div className="flex flex-col items-center text-center gap-2 py-6 mb-3 rounded-lg border border-dashed border-[var(--gold-border)] bg-[var(--felt)]">
+          <span className="text-xl text-[var(--gold)] opacity-50 font-serif" aria-hidden>♦</span>
           <p className="text-xs text-[var(--muted)] px-3">
             {isHost ? 'No stories yet. Add one below to start estimating.' : 'Waiting for host to add stories…'}
           </p>
@@ -125,13 +123,13 @@ export function StoryList({
             return (
               <li
                 key={story.id}
-                className={`flex items-center gap-1.5 px-2 py-1 rounded-lg border transition-all ${
+                className={`flex items-center gap-1.5 px-2 py-1 rounded-lg border-l-2 border transition-all ${
                   isCurrent
-                    ? 'bg-[var(--primary-light)] border-[var(--primary-border)]'
-                    : 'bg-[var(--felt)] border-[var(--surface-border)]'
+                    ? 'bg-[var(--gold-light)] border-[var(--gold-border)] border-l-[var(--gold)]'
+                    : 'bg-[var(--felt)] border-[var(--surface-border)] border-l-transparent'
                 }`}
               >
-                <span className="text-[10px] text-[var(--muted)] font-mono w-5 tabular-nums shrink-0">
+                <span className={`text-[10px] font-mono w-5 tabular-nums shrink-0 ${isCurrent ? 'text-[var(--gold)]' : 'text-[var(--muted)]'}`}>
                   #{idx + 1}
                 </span>
 
@@ -145,7 +143,7 @@ export function StoryList({
                       if (e.key === 'Enter') saveEdit();
                       if (e.key === 'Escape') { setEditingId(null); setEditDraft(''); }
                     }}
-                    className="flex-1 bg-transparent border-b border-[var(--primary)] text-xs text-[var(--foreground)] outline-none px-1 py-0.5"
+                    className="flex-1 bg-transparent border-b border-[var(--gold)] text-xs text-[var(--foreground)] outline-none px-1 py-0.5"
                   />
                 ) : (
                   <button
@@ -173,7 +171,7 @@ export function StoryList({
                   <div className="flex items-center shrink-0">
                     <button
                       onClick={() => startEdit(story)}
-                      className="p-0.5 text-[var(--muted)] hover:text-[var(--foreground)] transition-colors"
+                      className="p-0.5 text-[var(--muted)] hover:text-[var(--gold)] transition-colors"
                       aria-label="Edit story"
                       title="Edit"
                     >
@@ -209,8 +207,8 @@ export function StoryList({
               onPaste={handlePaste}
               placeholder="Add a story"
               maxLength={200}
-              className={`w-full px-2.5 py-1.5 rounded-lg bg-[var(--felt)] border text-xs text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none transition-colors ${
-                extracted ? 'border-[var(--emerald)] text-[var(--emerald)]' : 'border-[var(--surface-border)] focus:border-[var(--primary)]'
+              className={`w-full px-2.5 py-1.5 rounded-lg bg-[var(--input-bg)] border text-xs text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none transition-colors ${
+                extracted ? 'border-[var(--emerald)] text-[var(--emerald)]' : 'border-[var(--input-border)] focus:border-[var(--gold-border)]'
               }`}
             />
             {extracted && (
@@ -222,7 +220,7 @@ export function StoryList({
           <button
             onClick={handleAdd}
             disabled={!draft.trim()}
-            className="px-3 py-1.5 bg-gradient-to-r from-[var(--primary)] to-[var(--primary-hover)] hover:brightness-110 disabled:from-[var(--muted-light)] disabled:to-[var(--muted-light)] disabled:cursor-not-allowed text-white text-xs font-semibold rounded-lg transition-all"
+            className="btn-felt px-3 py-1.5 text-xs font-semibold rounded-lg"
           >
             Add
           </button>

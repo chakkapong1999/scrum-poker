@@ -2,170 +2,153 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* ═══════════════════════════════════════════
-   "The Poker Table" — Design System
-   Emerald / Gold / Ivory / Walnut
-   ═══════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════
+   "The Midnight Card Room" — Design System
+   Ink-green felt · Brass · Ivory cards · Oxblood
+   Display: Fraunces · Body: Schibsted Grotesk
+   ═══════════════════════════════════════════════ */
 
-/* ── Light theme ── */
+/* ── Light theme — The Ivory Parlor ── */
 :root {
-  --background: #f5f7fb;
-  --foreground: #0f172a;
-  --surface: rgba(255, 255, 255, 0.7);
-  --surface-hover: rgba(255, 255, 255, 0.9);
-  --surface-border: rgba(0, 0, 0, 0.06);
-  --surface-border-hover: rgba(0, 0, 0, 0.12);
-  --muted: #94a3b8;
-  --muted-light: #cbd5e1;
-  --primary: #2563eb;
-  --primary-hover: #3b82f6;
-  --primary-light: rgba(59, 130, 246, 0.08);
-  --primary-border: rgba(59, 130, 246, 0.15);
-  --gold: #8b5cf6;
-  --gold-light: rgba(139, 92, 246, 0.08);
-  --gold-border: rgba(139, 92, 246, 0.2);
-  --accent-red: #dc2626;
-  --accent-red-light: rgba(220, 38, 38, 0.08);
-  --accent-red-border: rgba(220, 38, 38, 0.2);
-  --emerald: #16a34a;
-  --emerald-light: rgba(22, 163, 74, 0.08);
-  --emerald-border: rgba(22, 163, 74, 0.2);
-  --input-bg: rgba(248, 250, 252, 0.6);
-  --input-border: rgba(203, 213, 225, 0.5);
-  --input-focus: rgba(59, 130, 246, 0.3);
-  --felt: rgba(59, 130, 246, 0.03);
+  --background: #f0ebdd;
+  --foreground: #22291f;
+  --surface: rgba(255, 253, 245, 0.78);
+  --surface-hover: rgba(255, 253, 245, 0.95);
+  --surface-border: rgba(58, 66, 50, 0.14);
+  --surface-border-hover: rgba(58, 66, 50, 0.26);
+  --muted: #6f7a66;
+  --muted-light: #a7af99;
+  --primary: #1e5b45;
+  --primary-hover: #27735a;
+  --primary-light: rgba(30, 91, 69, 0.08);
+  --primary-border: rgba(30, 91, 69, 0.24);
+  --gold: #92701f;
+  --gold-bright: #b08a30;
+  --gold-light: rgba(146, 112, 31, 0.1);
+  --gold-border: rgba(146, 112, 31, 0.35);
+  --accent-red: #a93a2e;
+  --accent-red-light: rgba(169, 58, 46, 0.08);
+  --accent-red-border: rgba(169, 58, 46, 0.25);
+  --emerald: #1e7a52;
+  --emerald-light: rgba(30, 122, 82, 0.09);
+  --emerald-border: rgba(30, 122, 82, 0.28);
+  --input-bg: rgba(255, 255, 255, 0.6);
+  --input-border: rgba(58, 66, 50, 0.2);
+  --input-focus: rgba(146, 112, 31, 0.28);
+  --felt: rgba(30, 91, 69, 0.05);
+  --felt-deep: linear-gradient(168deg, rgba(30, 91, 69, 0.09) 0%, rgba(30, 91, 69, 0.045) 55%, rgba(146, 112, 31, 0.05) 100%);
+  --card-face: #fdfaf0;
+  --card-ink: #28301f;
+  --card-red: #a93a2e;
+  --card-edge: rgba(58, 66, 50, 0.22);
+  --seal-bg: rgba(30, 91, 69, 0.1);
 }
 
-/* ── Dark theme ── */
+/* ── Dark theme — The Midnight Card Room ── */
 .dark {
-  --background: #06080f;
-  --foreground: #e2e8f0;
-  --surface: rgba(15, 23, 42, 0.6);
-  --surface-hover: rgba(15, 23, 42, 0.8);
-  --surface-border: rgba(148, 163, 184, 0.1);
-  --surface-border-hover: rgba(148, 163, 184, 0.2);
-  --muted: #64748b;
-  --muted-light: #475569;
-  --primary: #3b82f6;
-  --primary-hover: #60a5fa;
-  --primary-light: rgba(59, 130, 246, 0.1);
-  --primary-border: rgba(59, 130, 246, 0.25);
-  --gold: #a78bfa;
-  --gold-light: rgba(139, 92, 246, 0.1);
-  --gold-border: rgba(139, 92, 246, 0.25);
-  --accent-red: #ef4444;
-  --accent-red-light: rgba(239, 68, 68, 0.1);
-  --accent-red-border: rgba(239, 68, 68, 0.25);
-  --emerald: #34d399;
-  --emerald-light: rgba(52, 211, 153, 0.1);
-  --emerald-border: rgba(52, 211, 153, 0.25);
-  --input-bg: rgba(15, 23, 42, 0.5);
-  --input-border: rgba(51, 65, 85, 0.5);
-  --input-focus: rgba(59, 130, 246, 0.35);
-  --felt: rgba(59, 130, 246, 0.03);
+  --background: #0b1210;
+  --foreground: #e9e1cb;
+  --surface: rgba(23, 35, 29, 0.66);
+  --surface-hover: rgba(31, 47, 38, 0.85);
+  --surface-border: rgba(233, 225, 203, 0.09);
+  --surface-border-hover: rgba(212, 168, 67, 0.32);
+  --muted: #8b9684;
+  --muted-light: #576252;
+  --primary: #2d8a62;
+  --primary-hover: #37a273;
+  --primary-light: rgba(45, 138, 98, 0.12);
+  --primary-border: rgba(45, 138, 98, 0.32);
+  --gold: #d4a843;
+  --gold-bright: #e8c463;
+  --gold-light: rgba(212, 168, 67, 0.1);
+  --gold-border: rgba(212, 168, 67, 0.32);
+  --accent-red: #e06a55;
+  --accent-red-light: rgba(224, 106, 85, 0.1);
+  --accent-red-border: rgba(224, 106, 85, 0.28);
+  --emerald: #46c08a;
+  --emerald-light: rgba(70, 192, 138, 0.1);
+  --emerald-border: rgba(70, 192, 138, 0.3);
+  --input-bg: rgba(10, 18, 14, 0.55);
+  --input-border: rgba(233, 225, 203, 0.13);
+  --input-focus: rgba(212, 168, 67, 0.28);
+  --felt: rgba(45, 138, 98, 0.06);
+  --felt-deep: radial-gradient(ellipse 120% 90% at 50% -10%, rgba(45, 138, 98, 0.16) 0%, rgba(23, 48, 36, 0.4) 45%, rgba(10, 20, 15, 0.55) 100%);
+  --card-face: #f4eeda;
+  --card-ink: #28301f;
+  --card-red: #b04434;
+  --card-edge: rgba(40, 48, 31, 0.35);
+  --seal-bg: rgba(30, 91, 69, 0.12);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-jakarta);
-  --font-serif: var(--font-playfair);
-  --font-mono: var(--font-geist-mono);
+  --font-sans: var(--font-body);
+  --font-serif: var(--font-display);
+  --font-mono: var(--font-mono-plex);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-jakarta), system-ui, sans-serif;
+  font-family: var(--font-body), system-ui, sans-serif;
   transition: background-color 0.4s ease, color 0.4s ease;
   touch-action: manipulation;
 }
 
-/* ── Ambient background — subtle warm orbs ── */
+/* ── Ambient background — lamplight over the table ── */
 .bg-ambient {
   position: fixed;
   inset: 0;
   z-index: 0;
   overflow: hidden;
   pointer-events: none;
+  background:
+    radial-gradient(ellipse 90% 55% at 50% -12%, rgba(30, 91, 69, 0.1) 0%, transparent 60%),
+    radial-gradient(ellipse 60% 45% at 85% 110%, rgba(146, 112, 31, 0.07) 0%, transparent 65%);
 }
 
-.bg-ambient::before {
-  content: '';
-  position: absolute;
-  width: 700px;
-  height: 700px;
-  top: -15%;
-  left: -10%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.06) 0%, transparent 70%);
-  animation: drift1 25s ease-in-out infinite;
+.dark .bg-ambient {
+  background:
+    radial-gradient(ellipse 90% 60% at 50% -15%, rgba(58, 160, 113, 0.13) 0%, transparent 62%),
+    radial-gradient(ellipse 70% 50% at 88% 112%, rgba(212, 168, 67, 0.06) 0%, transparent 60%),
+    radial-gradient(ellipse 140% 100% at 50% 50%, transparent 55%, rgba(0, 0, 0, 0.42) 100%);
 }
 
-.bg-ambient::after {
-  content: '';
-  position: absolute;
-  width: 550px;
-  height: 550px;
-  bottom: -10%;
-  right: -8%;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(139, 92, 246, 0.05) 0%, transparent 70%);
-  animation: drift2 30s ease-in-out infinite;
-}
-
-.dark .bg-ambient::before {
-  background: radial-gradient(circle, rgba(59, 130, 246, 0.08) 0%, transparent 70%);
-}
-
-.dark .bg-ambient::after {
-  background: radial-gradient(circle, rgba(139, 92, 246, 0.06) 0%, transparent 70%);
-}
-
-@keyframes drift1 {
-  0%, 100% { transform: translate(0, 0); }
-  50% { transform: translate(60px, 50px); }
-}
-
-@keyframes drift2 {
-  0%, 100% { transform: translate(0, 0); }
-  50% { transform: translate(-50px, -60px); }
-}
-
-/* ── Diamond pattern overlay (poker suit motif) ── */
+/* ── Grain — old paper / felt tooth ── */
 .bg-noise {
   position: fixed;
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  opacity: 0.025;
-  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30 5 L35 30 L30 55 L25 30Z' fill='%23666' fill-opacity='0.3'/%3E%3C/svg%3E");
-  background-size: 60px 60px;
+  opacity: 0.05;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
 }
 
 .dark .bg-noise {
-  opacity: 0.03;
+  opacity: 0.07;
 }
 
-/* ── Glass card — warm tinted ── */
+/* ── Surfaces ── */
 .glass {
   background: var(--surface);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--surface-border);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04), 0 4px 20px rgba(0, 0, 0, 0.02);
+  box-shadow: 0 1px 2px rgba(20, 26, 16, 0.05), 0 8px 28px rgba(20, 26, 16, 0.05);
   transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 @media (max-width: 768px) {
   .glass {
-    backdrop-filter: blur(6px);
-    -webkit-backdrop-filter: blur(6px);
+    backdrop-filter: blur(7px);
+    -webkit-backdrop-filter: blur(7px);
   }
 }
 
 .dark .glass {
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1), 0 4px 20px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.25), 0 10px 32px rgba(0, 0, 0, 0.22);
 }
 
 .glass-light {
@@ -176,65 +159,72 @@ body {
   transition: background 0.3s ease, border-color 0.3s ease;
 }
 
-/* ── Glow effects — emerald & gold ── */
-.glow-emerald {
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.2), 0 0 60px rgba(59, 130, 246, 0.06);
+/* ── Panel — double-framed club stationery ── */
+.panel {
+  position: relative;
+  background: var(--surface);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--gold-border);
+  box-shadow:
+    0 1px 2px rgba(20, 26, 16, 0.06),
+    0 18px 50px -12px rgba(20, 26, 16, 0.18);
 }
 
-.dark .glow-emerald {
-  box-shadow: 0 0 20px rgba(59, 130, 246, 0.3), 0 0 60px rgba(59, 130, 246, 0.1), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+.dark .panel {
+  box-shadow:
+    inset 0 1px 0 rgba(233, 225, 203, 0.05),
+    0 24px 60px -16px rgba(0, 0, 0, 0.55);
 }
 
-.glow-gold {
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.2), 0 0 60px rgba(139, 92, 246, 0.06);
+.panel::before {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border: 1px solid var(--gold-border);
+  border-radius: calc(var(--radius, 1rem) - 6px);
+  opacity: 0.55;
+  pointer-events: none;
 }
 
-.dark .glow-gold {
-  box-shadow: 0 0 20px rgba(139, 92, 246, 0.3), 0 0 60px rgba(139, 92, 246, 0.1);
-}
-
-.glow-green {
-  box-shadow: 0 0 15px rgba(22, 163, 74, 0.15), 0 0 40px rgba(22, 163, 74, 0.05);
-}
-
-.dark .glow-green {
-  box-shadow: 0 0 15px rgba(52, 211, 153, 0.2), 0 0 40px rgba(52, 211, 153, 0.08);
-}
-
-/* ── Gradient text — blue to purple ── */
-.text-gradient {
-  background: linear-gradient(135deg, #3b82f6 0%, #8b5cf6 50%, #6366f1 100%);
+/* ── Gold foil text ── */
+.text-gradient,
+.gold-foil {
+  background: linear-gradient(170deg, #8a6a1d 8%, #c79a35 38%, #7c5e16 52%, #caa040 72%, #97742a 95%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-.dark .text-gradient {
-  background: linear-gradient(135deg, #60a5fa 0%, #a78bfa 50%, #818cf8 100%);
+.dark .text-gradient,
+.dark .gold-foil {
+  background: linear-gradient(170deg, #a8803a 5%, #ecca74 35%, #b9913c 52%, #f3dc94 70%, #c49b45 95%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-/* ── Input styles ── */
-.input-glow:focus {
-  box-shadow: 0 0 0 3px var(--input-focus), 0 0 20px rgba(59, 130, 246, 0.06);
+/* ── Decorative rule: ──── ♦ ──── ── */
+.deco-rule {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--gold);
 }
 
-.dark .input-glow:focus {
-  box-shadow: 0 0 0 3px var(--input-focus), 0 0 20px rgba(59, 130, 246, 0.1);
+.deco-rule::before,
+.deco-rule::after {
+  content: '';
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(90deg, transparent, var(--gold-border));
 }
 
-/* ── Focus-visible ring ── */
-button:focus-visible,
-a:focus-visible,
-select:focus-visible,
-input:focus-visible {
-  outline: 2px solid var(--primary);
-  outline-offset: 2px;
+.deco-rule::after {
+  background: linear-gradient(90deg, var(--gold-border), transparent);
 }
 
-/* ── Button shine — gold sweep ── */
+/* ── Buttons ── */
 .btn-shine {
   position: relative;
   overflow: hidden;
@@ -247,12 +237,102 @@ input:focus-visible {
   left: -100%;
   width: 100%;
   height: 100%;
-  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.12), transparent);
-  transition: left 0.5s ease;
+  background: linear-gradient(90deg, transparent, rgba(255, 248, 224, 0.18), transparent);
+  transition: left 0.55s ease;
 }
 
 .btn-shine:hover::after {
   left: 100%;
+}
+
+/* Felt-green primary action */
+.btn-felt {
+  background: linear-gradient(170deg, #27745a 0%, #1c5742 100%);
+  color: #f2eedf;
+  border: 1px solid rgba(212, 168, 67, 0.38);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.12),
+    0 8px 22px -8px rgba(22, 70, 53, 0.55);
+  transition: filter 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-felt:hover:not(:disabled) {
+  filter: brightness(1.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.16),
+    0 10px 26px -8px rgba(22, 70, 53, 0.65);
+}
+
+.btn-felt:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn-felt:disabled {
+  background: var(--surface);
+  color: var(--muted-light);
+  border-color: var(--surface-border);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* Brass marquee action — the "Reveal" moment */
+.btn-gold {
+  background: linear-gradient(172deg, #e8c463 0%, #c89a38 48%, #a87e24 100%);
+  color: #241a06;
+  border: 1px solid rgba(120, 88, 20, 0.55);
+  text-shadow: 0 1px 0 rgba(255, 244, 205, 0.4);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 248, 219, 0.55),
+    0 8px 24px -8px rgba(146, 112, 31, 0.6);
+  transition: filter 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn-gold:hover:not(:disabled) {
+  filter: brightness(1.07);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 248, 219, 0.6),
+    0 12px 30px -8px rgba(146, 112, 31, 0.7);
+}
+
+.btn-gold:active:not(:disabled) {
+  transform: translateY(1px);
+}
+
+.btn-gold:disabled {
+  background: var(--surface);
+  color: var(--muted-light);
+  border-color: var(--surface-border);
+  text-shadow: none;
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
+/* Quiet outlined action */
+.btn-ghost {
+  background: transparent;
+  color: var(--muted);
+  border: 1px solid var(--surface-border);
+  transition: color 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+}
+
+.btn-ghost:hover:not(:disabled) {
+  color: var(--foreground);
+  border-color: var(--surface-border-hover);
+  background: var(--surface-hover);
+}
+
+/* ── Inputs ── */
+.input-glow:focus {
+  box-shadow: 0 0 0 3px var(--input-focus);
+  border-color: var(--gold-border) !important;
+}
+
+button:focus-visible,
+a:focus-visible,
+select:focus-visible,
+input:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
 }
 
 /* ── Progress ring ── */
@@ -264,7 +344,71 @@ input:focus-visible {
   transition: stroke-dashoffset 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ── Card Flip 3D — poker card ── */
+/* ═══════ Playing cards ═══════ */
+
+/* Deck card (your hand) */
+.vote-card {
+  transition: transform 0.25s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.25s ease, border-color 0.25s ease;
+  font-family: var(--font-display), Georgia, serif;
+}
+
+.vote-card:hover:not(:disabled) {
+  transform: translateY(-8px) rotate(-1deg);
+}
+
+.vote-card:active:not(:disabled) {
+  transform: translateY(-3px);
+}
+
+.playing-card {
+  position: relative;
+  background:
+    linear-gradient(155deg, rgba(255, 255, 255, 0.5) 0%, transparent 45%),
+    var(--card-face);
+  color: var(--card-ink);
+  border: 1px solid var(--card-edge);
+  border-radius: 0.65rem;
+  box-shadow:
+    0 1px 2px rgba(20, 26, 16, 0.18),
+    0 6px 16px -6px rgba(20, 26, 16, 0.28);
+}
+
+.playing-card::before {
+  content: '';
+  position: absolute;
+  inset: 4px;
+  border: 1px solid rgba(146, 112, 31, 0.28);
+  border-radius: 0.4rem;
+  pointer-events: none;
+}
+
+.playing-card-selected {
+  border-color: var(--gold-bright);
+  box-shadow:
+    0 0 0 2px var(--gold-border),
+    0 14px 30px -8px rgba(146, 112, 31, 0.5),
+    0 4px 10px rgba(20, 26, 16, 0.25);
+}
+
+.playing-card-selected::before {
+  border-color: rgba(146, 112, 31, 0.55);
+}
+
+.card-suit-corner {
+  position: absolute;
+  font-size: 0.55rem;
+  line-height: 1;
+  opacity: 0.45;
+  pointer-events: none;
+  font-family: var(--font-display), Georgia, serif;
+}
+
+.card-suit-corner-tl { top: 7px; left: 8px; }
+.card-suit-corner-br { bottom: 7px; right: 8px; transform: rotate(180deg); }
+
+.card-suit-red { color: var(--card-red); }
+
+/* ── Card flip (players at the table) ── */
 .card-flip-container {
   perspective: 800px;
   width: 4.5rem;
@@ -289,90 +433,116 @@ input:focus-visible {
   inset: 0;
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
-  border-radius: 0.75rem;
+  border-radius: 0.65rem;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
-  font-weight: 700;
-  font-family: var(--font-jakarta), system-ui, sans-serif;
+  font-size: 1.4rem;
+  font-weight: 600;
+  font-family: var(--font-display), Georgia, serif;
 }
 
 .card-flip-front {
   transform: rotateY(180deg);
 }
 
-/* Back face — poker card back pattern */
+/* Empty seat — no card played yet */
 .card-flip-back.card-back-idle {
-  background: var(--surface);
-  border: 1px solid var(--surface-border);
+  background: var(--felt);
+  border: 1.5px dashed var(--surface-border-hover);
   color: var(--muted-light);
+  font-size: 1rem;
+  font-weight: 400;
 }
 
-.card-flip-back.card-back-idle::before {
-  content: '♦';
-  position: absolute;
-  font-size: 0.6rem;
-  top: 4px;
-  left: 6px;
-  opacity: 0.2;
-  color: var(--muted);
-}
-
-.card-flip-back.card-back-idle::after {
-  content: '♠';
-  position: absolute;
-  font-size: 0.6rem;
-  bottom: 4px;
-  right: 6px;
-  opacity: 0.2;
-  color: var(--muted);
-}
-
+/* Card placed face-down — brass-laced lattice back */
 .card-flip-back.card-back-voted {
-  background: var(--emerald-light);
-  border: 1.5px solid var(--emerald-border);
-  color: var(--emerald);
-  box-shadow: 0 0 15px rgba(22, 163, 74, 0.12), 0 0 40px rgba(22, 163, 74, 0.05);
+  background:
+    repeating-linear-gradient(45deg, rgba(212, 168, 67, 0.14) 0 1.5px, transparent 1.5px 7px),
+    repeating-linear-gradient(-45deg, rgba(212, 168, 67, 0.14) 0 1.5px, transparent 1.5px 7px),
+    linear-gradient(165deg, #236049 0%, #143626 100%);
+  border: 1px solid rgba(212, 168, 67, 0.5);
+  box-shadow:
+    inset 0 0 0 3px rgba(244, 238, 218, 0.07),
+    0 8px 20px -6px rgba(10, 20, 15, 0.5);
 }
 
-.dark .card-flip-back.card-back-voted {
-  box-shadow: 0 0 15px rgba(52, 211, 153, 0.2), 0 0 40px rgba(52, 211, 153, 0.08);
+.card-back-seal {
+  width: 1.9rem;
+  height: 1.9rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  color: #f0e1b4;
+  background: rgba(10, 26, 18, 0.55);
+  border: 1px solid rgba(212, 168, 67, 0.65);
+  box-shadow: 0 0 12px rgba(212, 168, 67, 0.25);
 }
 
-/* Front face — revealed vote */
+/* Revealed — ivory face, ink numeral */
 .card-flip-front.card-front-revealed {
-  background: linear-gradient(145deg, #2563eb, #1d4ed8);
-  color: white;
-  border: 1.5px solid rgba(255, 255, 255, 0.1);
-  box-shadow: 0 10px 25px -5px rgba(37, 99, 235, 0.3);
-}
-
-.dark .card-flip-front.card-front-revealed {
-  background: linear-gradient(145deg, #3b82f6, #2563eb);
-  box-shadow: 0 10px 25px -5px rgba(59, 130, 246, 0.25);
+  background:
+    linear-gradient(155deg, rgba(255, 255, 255, 0.5) 0%, transparent 45%),
+    var(--card-face);
+  color: var(--card-ink);
+  border: 1px solid var(--card-edge);
+  box-shadow:
+    0 1px 2px rgba(20, 26, 16, 0.18),
+    0 10px 24px -8px rgba(20, 26, 16, 0.35);
 }
 
 .card-flip-front.card-front-revealed::before {
-  content: '♠';
+  content: '';
   position: absolute;
-  font-size: 0.55rem;
-  font-weight: 400;
-  top: 5px;
-  left: 7px;
-  opacity: 0.3;
-  color: white;
+  inset: 4px;
+  border: 1px solid rgba(146, 112, 31, 0.3);
+  border-radius: 0.4rem;
+  pointer-events: none;
 }
 
-.card-flip-front.card-front-revealed::after {
-  content: '♣';
+/* Spectator seat — at the table, but not in the hand */
+.spectator-seat {
+  width: 4.5rem;
+  height: 6.5rem;
+  border-radius: 0.65rem;
+  border: 1.5px dashed var(--surface-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  color: var(--muted-light);
+  background: transparent;
+}
+
+/* ── The felt table ── */
+.felt-area {
+  background: var(--felt-deep);
+  border: 1px solid var(--gold-border);
+  position: relative;
+  box-shadow:
+    inset 0 0 0 1px rgba(146, 112, 31, 0.08),
+    inset 0 2px 24px rgba(20, 26, 16, 0.07);
+}
+
+.dark .felt-area {
+  box-shadow:
+    inset 0 0 0 1px rgba(212, 168, 67, 0.06),
+    inset 0 2px 40px rgba(0, 0, 0, 0.35),
+    0 20px 50px -20px rgba(0, 0, 0, 0.5);
+}
+
+/* Inner rail — the table's brass trim */
+.felt-area::before {
+  content: '';
   position: absolute;
-  font-size: 0.55rem;
-  font-weight: 400;
-  bottom: 5px;
-  right: 7px;
-  opacity: 0.3;
-  color: white;
+  inset: 9px;
+  border-radius: inherit;
+  border: 1px solid var(--gold-border);
+  opacity: 0.4;
+  pointer-events: none;
 }
 
 /* ═══════ Animations ═══════ */
@@ -432,7 +602,7 @@ input:focus-visible {
 }
 
 .deal-in {
-  animation: deal-in 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+  animation: deal-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 @keyframes emoji-float {
@@ -457,7 +627,7 @@ input:focus-visible {
 .emoji-float {
   animation: emoji-float 2s ease-out forwards;
   pointer-events: none;
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
 }
 
 @keyframes chat-pop {
@@ -496,16 +666,52 @@ input:focus-visible {
   animation: pulse-soft 2s ease-in-out infinite;
 }
 
-@keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+/* Loading shuffle — three cards fanned, breathing */
+@keyframes fan-left {
+  0%, 100% { transform: rotate(-16deg) translateX(-46%); }
+  50% { transform: rotate(-22deg) translateX(-52%); }
 }
 
-.shimmer {
-  background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.04) 50%, transparent 100%);
-  background-size: 200% 100%;
-  animation: shimmer 3s ease-in-out infinite;
+@keyframes fan-right {
+  0%, 100% { transform: rotate(16deg) translateX(46%); }
+  50% { transform: rotate(22deg) translateX(52%); }
 }
+
+.card-fan {
+  position: relative;
+  width: 4.5rem;
+  height: 4rem;
+  display: inline-block;
+}
+
+.card-fan .mini-card {
+  position: absolute;
+  left: 50%;
+  bottom: 0;
+  margin-left: -0.95rem;
+  width: 1.9rem;
+  height: 2.7rem;
+  border-radius: 0.3rem;
+  background: var(--card-face);
+  border: 1px solid var(--card-edge);
+  box-shadow: 0 2px 6px rgba(20, 26, 16, 0.25);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 0.95rem;
+  color: var(--card-ink);
+  transform-origin: 50% 95%;
+}
+
+.card-fan .mini-card:nth-child(1) { transform: rotate(-16deg) translateX(-46%); }
+.card-fan .mini-card:nth-child(2) { transform: rotate(0deg); z-index: 1; }
+.card-fan .mini-card:nth-child(3) { transform: rotate(16deg) translateX(46%); }
+
+.card-fan-animated .mini-card:nth-child(1) { animation: fan-left 1.6s ease-in-out infinite; }
+.card-fan-animated .mini-card:nth-child(3) { animation: fan-right 1.6s ease-in-out infinite; }
+
+.card-fan .mini-card .red { color: var(--card-red); }
 
 /* ── Reduced motion ── */
 @media (prefers-reduced-motion: reduce) {
@@ -519,18 +725,13 @@ input:focus-visible {
   .emoji-float,
   .chat-bubble,
   .pulse-soft,
-  .shimmer {
+  .card-fan-animated .mini-card {
     animation: none !important;
   }
 
   .vote-card,
   .btn-shine::after {
     transition: none !important;
-  }
-
-  .bg-ambient::before,
-  .bg-ambient::after {
-    animation: none !important;
   }
 }
 
@@ -541,19 +742,6 @@ input:focus-visible {
 .stagger-4 { animation-delay: 0.2s; }
 .stagger-5 { animation-delay: 0.25s; }
 
-/* ── Vote card hover lift ── */
-.vote-card {
-  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.vote-card:hover:not(:disabled) {
-  transform: translateY(-6px);
-}
-
-.vote-card:active:not(:disabled) {
-  transform: translateY(-2px);
-}
-
 /* ── Cursor pointer for interactive elements ── */
 button:not(:disabled),
 select,
@@ -561,7 +749,7 @@ select,
   cursor: pointer;
 }
 
-/* ── Scrollbar — warm tones ── */
+/* ── Scrollbar ── */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -571,35 +759,18 @@ select,
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(138, 126, 114, 0.3);
+  background: rgba(146, 112, 31, 0.3);
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(138, 126, 114, 0.5);
+  background: rgba(146, 112, 31, 0.5);
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: rgba(100, 116, 139, 0.3);
+  background: rgba(212, 168, 67, 0.22);
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: rgba(100, 116, 139, 0.5);
-}
-
-/* ── Poker table felt area ── */
-.felt-area {
-  background: var(--felt);
-  border: 1px solid var(--surface-border);
-  position: relative;
-}
-
-.felt-area::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  pointer-events: none;
-  background: radial-gradient(ellipse at center, transparent 50%, var(--background) 100%);
-  opacity: 0.4;
+  background: rgba(212, 168, 67, 0.4);
 }
