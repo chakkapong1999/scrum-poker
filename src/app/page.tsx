@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { getSocket } from '@/lib/socket';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { FloatingButton } from '@/components/FloatingButton';
 
 export default function Home() {
   const router = useRouter();
@@ -79,6 +80,14 @@ export default function Home() {
       <div className="fixed top-4 right-4 z-20">
         <ThemeToggle />
       </div>
+
+      <FloatingButton
+        label="Support me (yes, again)"
+        image="/pp-qr.JPG"
+        description="Still free. Still no ads. Scan the QR and buy me a coffee — or don't, and I'll just sit here in the corner, following you around the page, asking again tomorrow. And the day after."
+      >
+        ♠
+      </FloatingButton>
 
       {/* Oversized suit watermarks */}
       <div className="fixed top-[8%] left-[6%] text-[160px] leading-none opacity-[0.03] dark:opacity-[0.04] pointer-events-none select-none font-serif text-[var(--gold)]" aria-hidden>
