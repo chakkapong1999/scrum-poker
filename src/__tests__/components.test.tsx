@@ -639,7 +639,8 @@ describe('RoomPage', () => {
     fireEvent.change(input, { target: { value: 'Hello team' } });
 
     vi.clearAllMocks();
-    fireEvent.click(screen.getByText('Send'));
+    // the feedback dialog also has a "Send" button in the DOM — pick the chat one
+    fireEvent.click(screen.getByRole('button', { name: 'Send' }));
     expect(mockSocketEmit).toHaveBeenCalledWith('send-chat', { message: 'Hello team' });
   });
 
