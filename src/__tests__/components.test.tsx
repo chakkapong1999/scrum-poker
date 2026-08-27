@@ -12,7 +12,7 @@ vi.mock('next/navigation', () => ({
 
 // Mock next/dynamic
 vi.mock('next/dynamic', () => ({
-  default: (loader: () => Promise<{ default: React.ComponentType<Record<string, unknown>> }>) => {
+  default: () => {
     return function DynamicComponent() {
       return null;
     };
@@ -50,6 +50,7 @@ beforeEach(() => {
   mockSocketEmit.mockReset();
   mockSocketOn.mockReset();
   mockSocketOff.mockReset();
+  sessionStorage.clear();
 });
 
 // ─── VoteStats ──────────────────────────────────────────────────────────────
@@ -165,7 +166,7 @@ describe('Home page', () => {
   it('shows error when creating without a name', async () => {
     const { default: Home } = await import('@/app/page');
     render(<Home />);
-    fireEvent.click(screen.getAllByText('Create Room').find(el => el.tagName === 'BUTTON' && el.closest('.bg-gradient-to-r'))!);
+    fireEvent.click(screen.getAllByText('Create Room').find(el => el.tagName === 'BUTTON' && el.closest('.btn-felt'))!);
     expect(screen.getByText('Please enter your name')).toBeInTheDocument();
   });
 
@@ -370,7 +371,7 @@ describe('Join page', () => {
   it('shows error when submitting without a name', async () => {
     const { default: JoinPage } = await import('@/app/join/[id]/page');
     render(<JoinPage />);
-    fireEvent.click(screen.getByRole('button', { name: 'Join Room' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Take a Seat' }));
     expect(screen.getByText('Please enter your name')).toBeInTheDocument();
   });
 
@@ -378,7 +379,7 @@ describe('Join page', () => {
     const { default: JoinPage } = await import('@/app/join/[id]/page');
     render(<JoinPage />);
     fireEvent.change(screen.getByLabelText('Your Name'), { target: { value: 'Charlie' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Join Room' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Take a Seat' }));
     expect(mockSocketEmit).toHaveBeenCalledWith('join-room', expect.objectContaining({
       roomId: 'ABC123',
       playerName: 'Charlie',
@@ -389,7 +390,7 @@ describe('Join page', () => {
     const { default: JoinPage } = await import('@/app/join/[id]/page');
     render(<JoinPage />);
     fireEvent.change(screen.getByLabelText('Your Name'), { target: { value: 'Charlie' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Join Room' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Take a Seat' }));
 
     const callback = mockSocketEmit.mock.calls[0][2];
     act(() => callback({ success: true, roomId: 'ABC123' }));
@@ -400,7 +401,7 @@ describe('Join page', () => {
     const { default: JoinPage } = await import('@/app/join/[id]/page');
     render(<JoinPage />);
     fireEvent.change(screen.getByLabelText('Your Name'), { target: { value: 'Charlie' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Join Room' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Take a Seat' }));
 
     const callback = mockSocketEmit.mock.calls[0][2];
     act(() => callback({ success: false }));
@@ -411,7 +412,7 @@ describe('Join page', () => {
     const { default: JoinPage } = await import('@/app/join/[id]/page');
     render(<JoinPage />);
     fireEvent.change(screen.getByLabelText('Your Name'), { target: { value: 'Charlie' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Join Room' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Take a Seat' }));
 
     const callback = mockSocketEmit.mock.calls[0][2];
     act(() => callback({ success: false, error: 'Room is full' }));
@@ -430,7 +431,7 @@ describe('Join page', () => {
     const { default: JoinPage } = await import('@/app/join/[id]/page');
     render(<JoinPage />);
     fireEvent.change(screen.getByLabelText('Your Name'), { target: { value: 'Charlie' } });
-    fireEvent.click(screen.getByRole('button', { name: 'Join Room' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Take a Seat' }));
     expect(screen.getByText('Joining...')).toBeInTheDocument();
   });
 });
@@ -474,6 +475,8 @@ describe('RoomPage', () => {
         players: [{ id: 'test-socket-id', name: 'Alice', vote: null, isHost: true }],
         revealed: false,
         votingSystem: ['1', '2', '3', '5', '8'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -493,6 +496,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: false,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: 'voted', isHost: true }],
         votingSystem: ['1', '2', '3'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -509,6 +514,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: true,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: '5', isHost: true }],
         votingSystem: ['1', '2', '3', '5'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -526,6 +533,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: false,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: null, isHost: true }],
         votingSystem: ['1', '2', '3'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -544,6 +553,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: false,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: null, isHost: true }],
         votingSystem: ['1', '2', '3'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -564,6 +575,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: false,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: null, isHost: true }],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -589,6 +602,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: false,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: null, isHost: true }],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -614,6 +629,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: false,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: null, isHost: true }],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -622,7 +639,8 @@ describe('RoomPage', () => {
     fireEvent.change(input, { target: { value: 'Hello team' } });
 
     vi.clearAllMocks();
-    fireEvent.click(screen.getByText('Send'));
+    // the feedback dialog also has a "Send" button in the DOM — pick the chat one
+    fireEvent.click(screen.getByRole('button', { name: 'Send' }));
     expect(mockSocketEmit).toHaveBeenCalledWith('send-chat', { message: 'Hello team' });
   });
 
@@ -636,6 +654,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: false,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: null, isHost: true }],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -656,6 +676,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: false,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: null, isHost: true }],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -678,6 +700,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: false,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: null, isHost: true }],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -701,11 +725,13 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: false,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: null, isHost: true }],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
     fireEvent.click(screen.getByText('Invite'));
-    expect(screen.getByText('Copied!')).toBeInTheDocument();
+    expect(await screen.findByText('Copied!')).toBeInTheDocument();
   });
 
   it('handles reveal votes click', async () => {
@@ -718,6 +744,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: false,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: 'voted', isHost: true }],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -736,6 +764,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: true,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: '5', isHost: true }],
         votingSystem: ['1', '5'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -757,6 +787,8 @@ describe('RoomPage', () => {
           { id: 'p2', name: 'Bob', vote: null, isHost: false },
         ],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -773,6 +805,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: false,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: null, isHost: true }],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -792,6 +826,8 @@ describe('RoomPage', () => {
           { id: 'p2', name: 'Bob', vote: null, isHost: false },
         ],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -818,6 +854,8 @@ describe('RoomPage', () => {
           { id: 'p2', name: 'Bob', vote: null, isHost: true },
         ],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -859,7 +897,7 @@ describe('RoomPage', () => {
   });
 
   it('handles get-room-state failure with stored name (rejoin)', async () => {
-    vi.spyOn(sessionStorage, 'getItem').mockReturnValue('StoredAlice');
+    sessionStorage.setItem('playerName', 'StoredAlice');
     const { default: RoomPage } = await import('@/app/room/[id]/page');
     render(<RoomPage />);
 
@@ -875,7 +913,6 @@ describe('RoomPage', () => {
   });
 
   it('redirects to join page when no stored name', async () => {
-    vi.spyOn(sessionStorage, 'getItem').mockReturnValue(null);
     const { default: RoomPage } = await import('@/app/room/[id]/page');
     render(<RoomPage />);
 
@@ -888,7 +925,7 @@ describe('RoomPage', () => {
   });
 
   it('redirects when rejoin fails', async () => {
-    vi.spyOn(sessionStorage, 'getItem').mockReturnValue('Alice');
+    sessionStorage.setItem('playerName', 'Alice');
     const { default: RoomPage } = await import('@/app/room/[id]/page');
     render(<RoomPage />);
 
@@ -916,10 +953,12 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: false,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: 'voted', isHost: true }],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
-    expect(screen.getByText('All voted!')).toBeInTheDocument();
+    expect(screen.getByText('All in!')).toBeInTheDocument();
   });
 
   it('handles player-emoji event and shows floating emoji then removes it', async () => {
@@ -936,6 +975,8 @@ describe('RoomPage', () => {
           { id: 'p2', name: 'Bob', vote: null, isHost: false },
         ],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -968,6 +1009,8 @@ describe('RoomPage', () => {
           { id: 'p2', name: 'Bob', vote: null, isHost: false },
         ],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -997,6 +1040,8 @@ describe('RoomPage', () => {
           { id: 'p2', name: 'Bob', vote: null, isHost: false },
         ],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -1035,6 +1080,8 @@ describe('RoomPage', () => {
           { id: 'p2', name: 'Bob', vote: null, isHost: false },
         ],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -1068,6 +1115,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: false,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: null, isHost: true }],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -1099,6 +1148,8 @@ describe('RoomPage', () => {
           { id: 'p2', name: 'Bob', vote: 'voted', isHost: false },
         ],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -1121,6 +1172,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: false,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: 'voted', isHost: true }],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -1131,6 +1184,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: true,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: '5', isHost: true }],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
     expect(playRevealSound).toHaveBeenCalled();
@@ -1165,6 +1220,8 @@ describe('RoomPage', () => {
           { id: 'p2', name: 'Bob', vote: '5', isHost: false },
         ],
         votingSystem: ['1', '5', '8'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -1194,6 +1251,8 @@ describe('RoomPage', () => {
         id: 'ABC123', name: 'Test', revealed: false,
         players: [{ id: 'test-socket-id', name: 'Alice', vote: null, isHost: true }],
         votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
       });
     });
 
@@ -1203,5 +1262,50 @@ describe('RoomPage', () => {
     fireEvent.click(screen.getByText('Chat'));
     expect(screen.queryByText('👍')).not.toBeInTheDocument();
     expect(screen.getByText("Let's go!")).toBeInTheDocument();
+  });
+
+  it('hides voting deck and shows watching note for spectators', async () => {
+    const { default: RoomPage } = await import('@/app/room/[id]/page');
+    render(<RoomPage />);
+
+    const onRoomUpdate = mockSocketOn.mock.calls.find((c: unknown[]) => c[0] === 'room-update')![1];
+    act(() => {
+      onRoomUpdate({
+        id: 'ABC123', name: 'Test', revealed: false,
+        players: [
+          { id: 'test-socket-id', name: 'Alice', vote: null, isHost: true, isSpectator: true },
+          { id: 'p2', name: 'Bob', vote: null, isHost: false },
+        ],
+        votingSystem: ['1', '2', '3'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
+      });
+    });
+
+    expect(screen.queryByText('Pick your card')).not.toBeInTheDocument();
+    expect(screen.getByText("You're watching this round")).toBeInTheDocument();
+  });
+
+  it('excludes spectators from vote progress', async () => {
+    const { default: RoomPage } = await import('@/app/room/[id]/page');
+    render(<RoomPage />);
+
+    const onRoomUpdate = mockSocketOn.mock.calls.find((c: unknown[]) => c[0] === 'room-update')![1];
+    act(() => {
+      onRoomUpdate({
+        id: 'ABC123', name: 'Test', revealed: false,
+        players: [
+          { id: 'test-socket-id', name: 'Alice', vote: 'voted', isHost: true },
+          { id: 'p2', name: 'Watcher', vote: null, isHost: false, isSpectator: true },
+        ],
+        votingSystem: ['1', '2', '3'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
+      });
+    });
+
+    // 1 of 1 voters (spectator excluded from the denominator)
+    expect(screen.getByText('1/1')).toBeInTheDocument();
+    expect(screen.getByText('watching')).toBeInTheDocument();
   });
 });

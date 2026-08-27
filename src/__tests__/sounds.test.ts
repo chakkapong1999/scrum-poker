@@ -27,7 +27,7 @@ vi.stubGlobal('AudioContext', function () { return mockAudioContext; });
 const mockSpeechSynthesis = {
   speak: vi.fn(),
   cancel: vi.fn(),
-  getVoices: vi.fn(() => []),
+  getVoices: vi.fn(() => [] as { name: string; lang: string }[]),
   addEventListener: vi.fn(),
   speaking: false,
   pending: false,

@@ -9,6 +9,9 @@ import { RoomHeader } from './RoomHeader';
 import { PlayerArea } from './PlayerArea';
 import { InteractionBar } from './InteractionBar';
 import { VotingDeck } from './VotingDeck';
+import { StoryList } from './StoryList';
+import { EmptyRoom } from './EmptyRoom';
+import { SummaryPage } from './SummaryPage';
 import type { FloatingEmoji, ChatBubble } from './PlayerCard';
 import type { RoomState } from '@/types';
 
@@ -18,19 +21,27 @@ function removeById<T extends { id: number }>(items: T[], targetId: number): T[]
   return items.filter(item => item.id !== targetId);
 }
 
+function notifyAllVoted() {
+  playAllVotedSound();
+  if (document.hidden) document.title = '✅ All Voted! — Scrum Poker';
+}
+
+function votersOf(players: RoomState['players']) {
+  return players.filter(p => !p.isSpectator);
+}
+
 function handleSoundAndTitle(state: RoomState, prev: RoomState | null) {
   if (state.revealed && prev && !prev.revealed) {
     playRevealSound();
     if (document.hidden) document.title = '🎉 Votes Revealed! — Scrum Poker';
     return;
   }
-  if (state.revealed || state.players.length === 0) return;
-  const allVotedNow = state.players.every(p => p.vote !== null);
-  const allVotedBefore = prev?.players.length ? prev.players.every(p => p.vote !== null) : false;
-  if (allVotedNow && !allVotedBefore) {
-    playAllVotedSound();
-    if (document.hidden) document.title = '✅ All Voted! — Scrum Poker';
-  }
+  const voters = votersOf(state.players);
+  if (state.revealed || voters.length === 0) return;
+  const prevVoters = prev ? votersOf(prev.players) : [];
+  const allVotedNow = voters.every(p => p.vote !== null);
+  const allVotedBefore = prevVoters.length ? prevVoters.every(p => p.vote !== null) : false;
+  if (allVotedNow && !allVotedBefore) notifyAllVoted();
 }
 
 function applyVoteUpdate(
@@ -44,12 +55,10 @@ function applyVoteUpdate(
   );
   const next = { ...prev, players };
 
-  const allVotedNow = players.every(p => p.vote !== null);
-  const allVotedBefore = prev.players.every(p => p.vote !== null);
-  if (allVotedNow && !allVotedBefore) {
-    playAllVotedSound();
-    if (document.hidden) document.title = '✅ All Voted! — Scrum Poker';
-  }
+  const voters = votersOf(players);
+  const allVotedNow = voters.length > 0 && voters.every(p => p.vote !== null);
+  const allVotedBefore = votersOf(prev.players).every(p => p.vote !== null);
+  if (allVotedNow && !allVotedBefore) notifyAllVoted();
 
   return next;
 }
@@ -74,6 +83,21 @@ export default function RoomPage() {
   const [floatingEmojis, setFloatingEmojis] = useState<Map<string, FloatingEmoji[]>>(new Map());
   const [chatBubbles, setChatBubbles] = useState<Map<string, ChatBubble[]>>(new Map());
   const [muted, setMutedState] = useState(isMuted);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  useEffect(() => {
+    try {
+      if (localStorage.getItem('storySidebarCollapsed') === '1') setSidebarCollapsed(true);
+    } catch {}
+  }, []);
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed(prev => {
+      const next = !prev;
+      try { localStorage.setItem('storySidebarCollapsed', next ? '1' : '0'); } catch {}
+      return next;
+    });
+  };
 
   const prevRoomRef = useRef<RoomState | null>(null);
 
@@ -89,6 +113,35 @@ export default function RoomPage() {
 
   useEffect(() => {
     const socket = getSocket();
+    const pendingTimeouts: ReturnType<typeof setTimeout>[] = [];
+
+    const scheduleEmojiRemoval = (id: number, playerId: string) => {
+      pendingTimeouts.push(setTimeout(() => {
+        setFloatingEmojis(prev => {
+          const next = new Map(prev);
+          const existing = next.get(playerId);
+          if (!existing) return prev;
+          const filtered = removeById(existing, id);
+          if (filtered.length === 0) next.delete(playerId);
+          else next.set(playerId, filtered);
+          return next;
+        });
+      }, 2000));
+    };
+
+    const scheduleChatRemoval = (id: number, playerId: string) => {
+      pendingTimeouts.push(setTimeout(() => {
+        setChatBubbles(prev => {
+          const next = new Map(prev);
+          const existing = next.get(playerId);
+          if (!existing) return prev;
+          const filtered = removeById(existing, id);
+          if (filtered.length === 0) next.delete(playerId);
+          else next.set(playerId, filtered);
+          return next;
+        });
+      }, 3000));
+    };
 
     const onRoomUpdate = (state: RoomState) => {
       handleSoundAndTitle(state, prevRoomRef.current);
@@ -115,7 +168,7 @@ export default function RoomPage() {
       setFloatingEmojis(prev => {
         const next = new Map(prev);
         const existing = next.get(playerId) || [];
-        next.set(playerId, [...existing, { id, emoji }]);
+        next.set(playerId, [...existing.slice(-4), { id, emoji }]);
         return next;
       });
       scheduleEmojiRemoval(id, playerId);
@@ -156,6 +209,7 @@ export default function RoomPage() {
       sock.emit('rejoin-room', {
         roomId: roomId.toUpperCase(),
         playerName: storedName,
+        asSpectator: sessionStorage.getItem('isSpectator') === '1',
       }, (rejoinRes: { success: boolean; roomId?: string; error?: string }) => {
         if (!rejoinRes.success) setNotJoined(true);
       });
@@ -175,36 +229,9 @@ export default function RoomPage() {
       socket.off('player-emoji', onPlayerEmoji);
       socket.off('player-chat', onPlayerChat);
       socket.off('connect', onReconnect);
+      pendingTimeouts.forEach(clearTimeout);
     };
   }, [roomId]);
-
-  const scheduleEmojiRemoval = (id: number, playerId: string) => {
-    setTimeout(() => {
-      setFloatingEmojis(prev => {
-        const next = new Map(prev);
-        const existing = next.get(playerId);
-        if (!existing) return prev;
-        const filtered = removeById(existing, id);
-        if (filtered.length === 0) next.delete(playerId);
-        else next.set(playerId, filtered);
-        return next;
-      });
-    }, 2000);
-  };
-
-  const scheduleChatRemoval = (id: number, playerId: string) => {
-    setTimeout(() => {
-      setChatBubbles(prev => {
-        const next = new Map(prev);
-        const existing = next.get(playerId);
-        if (!existing) return prev;
-        const filtered = removeById(existing, id);
-        if (filtered.length === 0) next.delete(playerId);
-        else next.set(playerId, filtered);
-        return next;
-      });
-    }, 3000);
-  };
 
   const handleVote = useCallback((value: string) => {
     const socket = getSocket();
@@ -222,23 +249,71 @@ export default function RoomPage() {
     setMyVote(null);
   };
 
+  const handleAddStory = (title: string) => {
+    getSocket().emit('add-story', { title });
+  };
+
+  const handleUpdateStory = (storyId: string, title: string) => {
+    getSocket().emit('update-story', { storyId, title });
+  };
+
+  const handleDeleteStory = (storyId: string) => {
+    getSocket().emit('delete-story', { storyId });
+  };
+
+  const handleSelectStory = (storyId: string) => {
+    getSocket().emit('select-story', { storyId });
+    setMyVote(null);
+  };
+
+  const handleTransferHost = (targetPlayerId: string) => {
+    getSocket().emit('transfer-host', { targetPlayerId });
+  };
+
+  const handleCompleteStory = (finalPoint: string) => {
+    const trimmed = finalPoint.trim();
+    if (!trimmed) return;
+    getSocket().emit('complete-story', { finalPoint: trimmed });
+    setMyVote(null);
+  };
+
   const toggleMute = () => {
     const next = !muted;
     setMutedState(next);
     setMuted(next);
   };
 
-  const copyInviteLink = () => {
+  const copyInviteLink = async () => {
     const link = `${globalThis.location.origin}/join/${roomId}`;
-    navigator.clipboard.writeText(link);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    try {
+      // navigator.clipboard is unavailable on insecure (http) origins
+      if (navigator.clipboard) {
+        await navigator.clipboard.writeText(link);
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = link;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        textarea.remove();
+      }
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard access denied — leave the button state unchanged
+    }
   };
 
   const me = room?.players.find(p => p.id === myId);
   const isHost = me?.isHost ?? false;
-  const allVoted = room?.players.every(p => p.vote !== null) ?? false;
-  const votedCount = room?.players.filter(p => p.vote !== null).length ?? 0;
+  const voters = room ? votersOf(room.players) : [];
+  const votedCount = voters.reduce((n, p) => p.vote !== null ? n + 1 : n, 0);
+  const allVoted = room ? votedCount === voters.length : false;
+  const stories = room?.stories ?? [];
+  const currentStory = stories.find(s => s.id === room?.currentStoryId) ?? null;
+  const canCompleteStory = !!(room?.revealed && currentStory && votedCount > 0);
 
   useEffect(() => {
     if (notJoined) {
@@ -260,17 +335,59 @@ export default function RoomPage() {
     return (
       <div className="min-h-dvh flex items-center justify-center">
         <div className="text-center fade-in">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl glass mb-4">
-            <span className="text-3xl animate-bounce">🃏</span>
+          <div className="card-fan card-fan-animated mb-4" aria-hidden>
+            <span className="mini-card">♠</span>
+            <span className="mini-card"><span className="red">♥</span></span>
+            <span className="mini-card">♣</span>
           </div>
-          <p className="text-slate-400 dark:text-slate-500 text-sm">Connecting to room...</p>
+          <p className="text-[var(--muted)] text-sm font-serif italic">Connecting to room...</p>
         </div>
       </div>
     );
   }
 
+  if (stories.length === 0) {
+    return (
+      <div className="min-h-dvh p-4 sm:p-6 max-w-7xl mx-auto fade-in flex flex-col">
+        <RoomHeader
+          roomName={room.name}
+          roomId={roomId}
+          playerCount={room.players.length}
+          copied={copied}
+          muted={muted}
+          onCopyInvite={copyInviteLink}
+          onToggleMute={toggleMute}
+        />
+        <EmptyRoom isHost={isHost} onAdd={handleAddStory} />
+      </div>
+    );
+  }
+
+  const allEstimated = stories.length > 0 && stories.every(s => s.completed);
+  if (allEstimated && !currentStory) {
+    return (
+      <div className="min-h-dvh p-4 sm:p-6 max-w-7xl mx-auto fade-in flex flex-col">
+        <RoomHeader
+          roomName={room.name}
+          roomId={roomId}
+          playerCount={room.players.length}
+          copied={copied}
+          muted={muted}
+          onCopyInvite={copyInviteLink}
+          onToggleMute={toggleMute}
+        />
+        <SummaryPage
+          stories={stories}
+          isHost={isHost}
+          onAdd={handleAddStory}
+          onSelect={handleSelectStory}
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-dvh p-4 sm:p-6 max-w-5xl mx-auto fade-in">
+    <div className="min-h-dvh p-4 sm:p-6 max-w-7xl mx-auto fade-in">
       <RoomHeader
         roomName={room.name}
         roomId={roomId}
@@ -281,29 +398,77 @@ export default function RoomPage() {
         onToggleMute={toggleMute}
       />
 
-      <PlayerArea
-        players={room.players}
-        revealed={room.revealed}
-        isHost={isHost}
-        votedCount={votedCount}
-        allVoted={allVoted}
-        floatingEmojis={floatingEmojis}
-        chatBubbles={chatBubbles}
-        onReveal={handleReveal}
-        onReset={handleReset}
-      />
+      <div
+        className={`lg:grid lg:gap-6 lg:items-start ${
+          sidebarCollapsed ? 'lg:grid-cols-[44px_1fr]' : 'lg:grid-cols-[320px_1fr]'
+        }`}
+      >
+        <aside className="lg:sticky lg:top-4">
+          <StoryList
+            stories={stories}
+            currentStoryId={room.currentStoryId ?? null}
+            isHost={isHost}
+            collapsed={sidebarCollapsed}
+            onToggleCollapse={toggleSidebar}
+            onAdd={handleAddStory}
+            onUpdate={handleUpdateStory}
+            onDelete={handleDeleteStory}
+            onSelect={handleSelectStory}
+          />
+        </aside>
 
-      <InteractionBar />
+        <main className="min-w-0">
+          {currentStory && (
+            <div className="mb-3 px-3.5 py-2 rounded-lg bg-[var(--gold-light)] border border-[var(--gold-border)] border-l-2 border-l-[var(--gold)] flex items-center gap-2.5">
+              <span className="text-[9px] uppercase tracking-[0.25em] text-[var(--gold)] font-bold shrink-0 font-serif">
+                Now
+              </span>
+              <span className="text-sm font-semibold text-[var(--foreground)] truncate">
+                {currentStory.title}
+              </span>
+            </div>
+          )}
 
-      {room.revealed && <VoteStats players={room.players} />}
+          <PlayerArea
+            players={room.players}
+            revealed={room.revealed}
+            isHost={isHost}
+            myId={myId}
+            votedCount={votedCount}
+            allVoted={allVoted}
+            floatingEmojis={floatingEmojis}
+            chatBubbles={chatBubbles}
+            onReveal={handleReveal}
+            onReset={handleReset}
+            canCompleteStory={canCompleteStory}
+            onCompleteStory={handleCompleteStory}
+            onMakeHost={handleTransferHost}
+            votingSystem={room.votingSystem}
+          />
 
-      {!room.revealed && (
-        <VotingDeck
-          votingSystem={room.votingSystem}
-          myVote={myVote}
-          onVote={handleVote}
-        />
-      )}
+          <InteractionBar />
+
+          {room.revealed && <VoteStats players={voters} />}
+
+          {!room.revealed && currentStory && !me?.isSpectator && (
+            <VotingDeck
+              votingSystem={room.votingSystem}
+              myVote={myVote}
+              onVote={handleVote}
+            />
+          )}
+
+          {!room.revealed && currentStory && me?.isSpectator && (
+            <div className="mt-8 text-center slide-up">
+              <div className="deco-rule max-w-xs mx-auto mb-4 text-[10px]" aria-hidden>♠</div>
+              <p className="text-sm text-[var(--muted)] font-serif italic">
+                You&apos;re watching this round
+              </p>
+            </div>
+          )}
+
+        </main>
+      </div>
     </div>
   );
 }

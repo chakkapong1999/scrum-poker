@@ -9,5 +9,6 @@ servicePipeline(
     pkgManager     : 'npm',
     testScript     : 'test:coverage',
     hostPort       : 3000,
-    containerPort  : 3000
+    containerPort  : 3000,
+    envFile        : 'scrum-poker-env'
 )

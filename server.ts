@@ -1,8 +1,8 @@
 import { createServer } from 'http';
-import { parse } from 'url';
 import next from 'next';
 import { Server as SocketIOServer } from 'socket.io';
-import type { Room, Player } from './src/types';
+import { randomUUID } from 'crypto';
+import type { Room, Player, Story } from './src/types';
 import { generateRoomId, getRoomState, getVotingSystem } from './src/lib/room-utils';
 
 const dev = process.env.NODE_ENV !== 'production';
@@ -13,12 +13,18 @@ const app = next({ dev, hostname, port });
 const handle = app.getRequestHandler();
 
 const rooms = new Map<string, Room>();
+
+/** Server-side guard — clients enforce maxLength, but raw socket clients may not */
+function sanitizeName(value: unknown): string {
+  return String(value ?? '').trim().slice(0, 20);
+}
 const ROOM_TTL_MS = 30 * 60 * 1000; // 30 minutes idle timeout
 const ROOM_EMPTY_GRACE_MS = 60 * 1000; // keep empty rooms for 60s (allows refresh)
 const CLEANUP_INTERVAL_MS = 30 * 1000; // check every 30 seconds
 
 app.prepare().then(() => {
   const startedAt = Date.now();
+  let healthPlayerCache = { count: 0, updatedAt: 0 };
 
   const httpServer = createServer((req, res) => {
     // Lightweight liveness probe (uptime monitoring)
@@ -28,18 +34,20 @@ app.prepare().then(() => {
       return;
     }
 
-    // Application metrics endpoint
+    // Application metrics endpoint — player count cached for 5 s to avoid O(n) per probe
     if (req.url === '/health') {
-      const mem = process.memoryUsage();
-      let totalPlayers = 0;
-      for (const room of rooms.values()) {
-        totalPlayers += room.players.size;
+      const now = Date.now();
+      if (now - healthPlayerCache.updatedAt > 5000) {
+        let total = 0;
+        for (const room of rooms.values()) total += room.players.size;
+        healthPlayerCache = { count: total, updatedAt: now };
       }
+      const mem = process.memoryUsage();
       const payload = {
         status: 'ok',
-        uptime: Math.floor((Date.now() - startedAt) / 1000),
+        uptime: Math.floor((now - startedAt) / 1000),
         rooms: rooms.size,
-        players: totalPlayers,
+        players: healthPlayerCache.count,
         connections: io?.engine?.clientsCount ?? 0,
         memory: {
           rss: Math.round(mem.rss / 1024 / 1024),
@@ -52,36 +60,49 @@ app.prepare().then(() => {
       return;
     }
 
-    const parsedUrl = parse(req.url!, true);
-    handle(req, res, parsedUrl);
+    handle(req, res);
   });
 
   const io = new SocketIOServer(httpServer, {
     cors: { origin: '*' },
+    pingInterval: 25000,
+    pingTimeout: 300000,
+    maxHttpBufferSize: 1e5,
   });
 
   io.on('connection', (socket) => {
     let currentRoomId: string | null = null;
     let currentPlayerId: string | null = null;
 
-    socket.on('create-room', ({ playerName, roomName, votingSystem }: { playerName: string; roomName: string; votingSystem: string }, callback) => {
-      const roomId = generateRoomId();
+    socket.on('create-room', ({ playerName, roomName, votingSystem, asSpectator }: { playerName: string; roomName: string; votingSystem: string; asSpectator?: boolean }, callback) => {
+      const name = sanitizeName(playerName);
+      if (!name) {
+        callback({ success: false, error: 'Name is required' });
+        return;
+      }
+
+      // Guard against the (unlikely) ID collision overwriting a live room
+      let roomId = generateRoomId();
+      while (rooms.has(roomId)) roomId = generateRoomId();
       const playerId = socket.id;
 
       const room: Room = {
         id: roomId,
-        name: roomName || 'Scrum Poker',
+        name: String(roomName ?? '').trim().slice(0, 30) || 'Scrum Poker',
         players: new Map(),
         revealed: false,
         votingSystem: getVotingSystem(votingSystem),
         lastActivity: Date.now(),
+        stories: [],
+        currentStoryId: null,
       };
 
       const player: Player = {
         id: playerId,
-        name: playerName,
+        name,
         vote: null,
         isHost: true,
+        isSpectator: !!asSpectator,
       };
 
       room.players.set(playerId, player);
@@ -95,19 +116,26 @@ app.prepare().then(() => {
       io.to(roomId).emit('room-update', getRoomState(room));
     });
 
-    socket.on('join-room', ({ roomId, playerName }: { roomId: string; playerName: string }, callback) => {
-      const room = rooms.get(roomId.toUpperCase());
+    socket.on('join-room', ({ roomId, playerName, asSpectator }: { roomId: string; playerName: string; asSpectator?: boolean }, callback) => {
+      const room = rooms.get(String(roomId ?? '').toUpperCase());
       if (!room) {
         callback({ success: false, error: 'Room not found' });
+        return;
+      }
+
+      const name = sanitizeName(playerName);
+      if (!name) {
+        callback({ success: false, error: 'Name is required' });
         return;
       }
 
       const playerId = socket.id;
       const player: Player = {
         id: playerId,
-        name: playerName,
+        name,
         vote: null,
         isHost: false,
+        isSpectator: !!asSpectator,
       };
 
       room.players.set(playerId, player);
@@ -120,22 +148,28 @@ app.prepare().then(() => {
       io.to(room.id).emit('room-update', getRoomState(room));
     });
 
-    socket.on('rejoin-room', ({ roomId, playerName }: { roomId: string; playerName: string }, callback) => {
-      const room = rooms.get(roomId.toUpperCase());
+    socket.on('rejoin-room', ({ roomId, playerName, asSpectator }: { roomId: string; playerName: string; asSpectator?: boolean }, callback) => {
+      const room = rooms.get(String(roomId ?? '').toUpperCase());
       if (!room) {
         callback({ success: false, error: 'Room not found' });
+        return;
+      }
+
+      const name = sanitizeName(playerName);
+      if (!name) {
+        callback({ success: false, error: 'Name is required' });
         return;
       }
 
       const playerId = socket.id;
       const player: Player = {
         id: playerId,
-        name: playerName,
+        name,
         vote: null,
         isHost: false,
+        isSpectator: !!asSpectator,
       };
 
-      // If no host remains, this player becomes host
       const hasHost = Array.from(room.players.values()).some(p => p.isHost);
       if (!hasHost) player.isHost = true;
 
@@ -164,15 +198,17 @@ app.prepare().then(() => {
 
     socket.on('send-emoji', ({ emoji }: { emoji: string }) => {
       if (!currentRoomId || !currentPlayerId) return;
+      const safeEmoji = String(emoji ?? '').slice(0, 16);
+      if (!safeEmoji.trim()) return;
       io.to(currentRoomId).emit('player-emoji', {
         playerId: currentPlayerId,
-        emoji,
+        emoji: safeEmoji,
       });
     });
 
     socket.on('send-chat', ({ message }: { message: string }) => {
       if (!currentRoomId || !currentPlayerId) return;
-      const trimmed = message.slice(0, 50);
+      const trimmed = String(message ?? '').trim().slice(0, 50);
       if (!trimmed) return;
       io.to(currentRoomId).emit('player-chat', {
         playerId: currentPlayerId,
@@ -184,15 +220,14 @@ app.prepare().then(() => {
       if (!currentRoomId || !currentPlayerId) return;
       const room = rooms.get(currentRoomId);
       if (!room || room.revealed) return;
+      if (!room.currentStoryId) return;
 
-      // Validate vote value against room's voting system
       if (vote !== null && !room.votingSystem.includes(vote)) return;
 
       const player = room.players.get(currentPlayerId);
-      if (player) {
+      if (player && !player.isSpectator) {
         player.vote = vote;
         room.lastActivity = Date.now();
-        // Send lightweight diff instead of full state for vote changes
         io.to(currentRoomId).emit('vote-update', {
           playerId: currentPlayerId,
           vote: vote ? 'voted' : null,
@@ -224,6 +259,112 @@ app.prepare().then(() => {
       room.revealed = false;
       room.lastActivity = Date.now();
       room.players.forEach(p => { p.vote = null; });
+      io.to(currentRoomId).emit('room-update', getRoomState(room));
+    });
+
+    const requireHost = (): Room | null => {
+      if (!currentRoomId || !currentPlayerId) return null;
+      const room = rooms.get(currentRoomId);
+      if (!room) return null;
+      const player = room.players.get(currentPlayerId);
+      if (!player?.isHost) return null;
+      return room;
+    };
+
+    const resetVotingState = (room: Room) => {
+      room.revealed = false;
+      room.players.forEach(p => { p.vote = null; });
+    };
+
+    socket.on('add-story', ({ title }: { title: string }) => {
+      const room = requireHost();
+      if (!room) return;
+      const trimmed = title.trim().slice(0, 200);
+      if (!trimmed) return;
+      const story: Story = {
+        id: randomUUID(),
+        title: trimmed,
+        finalPoint: null,
+        completed: false,
+      };
+      room.stories.push(story);
+      if (!room.currentStoryId) {
+        room.currentStoryId = story.id;
+        resetVotingState(room);
+      }
+      room.lastActivity = Date.now();
+      io.to(room.id).emit('room-update', getRoomState(room));
+    });
+
+    socket.on('update-story', ({ storyId, title }: { storyId: string; title: string }) => {
+      const room = requireHost();
+      if (!room) return;
+      const story = room.stories.find(s => s.id === storyId);
+      if (!story) return;
+      const trimmed = title.trim().slice(0, 200);
+      if (!trimmed) return;
+      story.title = trimmed;
+      room.lastActivity = Date.now();
+      io.to(room.id).emit('room-update', getRoomState(room));
+    });
+
+    socket.on('delete-story', ({ storyId }: { storyId: string }) => {
+      const room = requireHost();
+      if (!room) return;
+      const idx = room.stories.findIndex(s => s.id === storyId);
+      if (idx < 0) return;
+      room.stories.splice(idx, 1);
+      if (room.currentStoryId === storyId) {
+        const next = room.stories.find(s => !s.completed) ?? null;
+        room.currentStoryId = next ? next.id : null;
+        resetVotingState(room);
+      }
+      room.lastActivity = Date.now();
+      io.to(room.id).emit('room-update', getRoomState(room));
+    });
+
+    socket.on('select-story', ({ storyId }: { storyId: string }) => {
+      const room = requireHost();
+      if (!room) return;
+      if (room.currentStoryId === storyId) return;
+      const story = room.stories.find(s => s.id === storyId);
+      if (!story) return;
+      room.currentStoryId = storyId;
+      resetVotingState(room);
+      room.lastActivity = Date.now();
+      io.to(room.id).emit('room-update', getRoomState(room));
+    });
+
+    socket.on('complete-story', ({ finalPoint }: { finalPoint: unknown }) => {
+      const room = requireHost();
+      if (!room || !room.currentStoryId) return;
+      const story = room.stories.find(s => s.id === room.currentStoryId);
+      if (!story) return;
+      const trimmed = typeof finalPoint === 'string' ? finalPoint.trim().slice(0, 10) : '';
+      if (!trimmed) return;
+      story.finalPoint = trimmed;
+      story.completed = true;
+      const next = room.stories.find(s => !s.completed);
+      room.currentStoryId = next ? next.id : null;
+      resetVotingState(room);
+      room.lastActivity = Date.now();
+      io.to(room.id).emit('room-update', getRoomState(room));
+    });
+
+    socket.on('transfer-host', ({ targetPlayerId }: { targetPlayerId: string }) => {
+      if (!currentRoomId || !currentPlayerId) return;
+      const room = rooms.get(currentRoomId);
+      if (!room) return;
+
+      const currentPlayer = room.players.get(currentPlayerId);
+      if (!currentPlayer?.isHost) return;
+
+      const targetPlayer = room.players.get(targetPlayerId);
+      if (!targetPlayer || targetPlayer.id === currentPlayerId) return;
+
+      currentPlayer.isHost = false;
+      targetPlayer.isHost = true;
+      room.lastActivity = Date.now();
       io.to(currentRoomId).emit('room-update', getRoomState(room));
     });
 
