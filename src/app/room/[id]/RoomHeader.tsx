@@ -1,6 +1,7 @@
 'use client';
 
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { FeedbackDialog } from '@/components/FeedbackDialog';
 
 export function RoomHeader({ roomName, roomId, playerCount, copied, muted, onCopyInvite, onToggleMute }: Readonly<{
   roomName: string;
@@ -69,6 +70,7 @@ export function RoomHeader({ roomName, roomId, playerCount, copied, muted, onCop
           )}
         </button>
         <ThemeToggle />
+        <FeedbackDialog icon />
         <div className="px-3 py-2 glass rounded-lg text-xs text-[var(--muted)] font-medium flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-[var(--emerald)] animate-pulse" />
           {playerCount} player{playerCount === 1 ? '' : 's'}

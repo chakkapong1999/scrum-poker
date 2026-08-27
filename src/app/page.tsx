@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { getSocket } from '@/lib/socket';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { FloatingButton } from '@/components/FloatingButton';
+import { FeedbackDialog } from '@/components/FeedbackDialog';
 
 export default function Home() {
   const router = useRouter();
@@ -72,7 +73,7 @@ export default function Home() {
     });
   };
 
-  const inputClass = "w-full px-4 py-3 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg text-[var(--foreground)] placeholder-[var(--muted-light)] focus:outline-none input-glow transition-all";
+  const inputClass = "w-full px-4 py-2.5 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg text-[var(--foreground)] placeholder-[var(--muted-light)] focus:outline-none input-glow transition-all";
 
   return (
     <div className="min-h-dvh flex items-center justify-center p-4">
@@ -81,13 +82,13 @@ export default function Home() {
         <ThemeToggle />
       </div>
 
-      <FloatingButton
+      {/* <FloatingButton
         label="Support me (yes, again)"
         image="/pp-qr.JPG"
         description="Still free. Still no ads. Scan the QR and buy me a coffee — or don't, and I'll just sit here in the corner, following you around the page, asking again tomorrow. And the day after."
       >
         ♠
-      </FloatingButton>
+      </FloatingButton> */}
 
       {/* Oversized suit watermarks */}
       <div className="fixed top-[8%] left-[6%] text-[160px] leading-none opacity-[0.03] dark:opacity-[0.04] pointer-events-none select-none font-serif text-[var(--gold)]" aria-hidden>
@@ -99,8 +100,8 @@ export default function Home() {
 
       <div className="w-full max-w-md slide-up">
         {/* Marque */}
-        <div className="text-center mb-9">
-          <div className="card-fan mb-4" aria-hidden>
+        <div className="text-center mb-5">
+          <div className="card-fan mb-2" aria-hidden>
             <span className="mini-card">♠</span>
             <span className="mini-card"><span className="red">♥</span></span>
             <span className="mini-card">♣</span>
@@ -108,14 +109,14 @@ export default function Home() {
           <h1 className="text-5xl font-serif font-black gold-foil tracking-tight leading-tight">
             Scrum Poker
           </h1>
-          <div className="deco-rule max-w-50 mx-auto mt-3 mb-2 text-[10px]" aria-hidden>♦</div>
+          <div className="deco-rule max-w-50 mx-auto mt-2 mb-1.5 text-[10px]" aria-hidden>♦</div>
           <p className="text-[var(--muted)] text-sm font-serif italic">Estimate together, in real-time</p>
         </div>
 
         {/* Panel */}
-        <div className="panel rounded-2xl p-6 [--radius:1rem]">
+        <div className="panel rounded-2xl p-4 [--radius:1rem]">
           {/* Tabs */}
-          <div className="relative flex mb-6 rounded-lg p-1 gap-1 border border-[var(--surface-border)] bg-[var(--felt)]">
+          <div className="relative flex mb-4 rounded-lg p-1 gap-1 border border-[var(--surface-border)] bg-[var(--felt)]">
             <button
               onClick={() => { setActiveTab('create'); setError(''); }}
               className={`flex-1 py-2.5 rounded-md text-sm font-semibold tracking-wide transition-all duration-200 ${
@@ -139,8 +140,8 @@ export default function Home() {
           </div>
 
           {/* Name field */}
-          <div className="mb-4">
-            <label htmlFor="playerName" className="block text-[11px] font-semibold text-[var(--gold)] mb-1.5 uppercase tracking-[0.18em]">Your Name</label>
+          <div className="mb-3">
+            <label htmlFor="playerName" className="block text-[11px] font-semibold text-[var(--gold)] mb-1 uppercase tracking-[0.18em]">Your Name</label>
             <input
               id="playerName"
               type="text"
@@ -155,8 +156,8 @@ export default function Home() {
 
           {activeTab === 'create' ? (
             <>
-              <div className="mb-4">
-                <label htmlFor="roomName" className="block text-[11px] font-semibold text-[var(--gold)] mb-1.5 uppercase tracking-[0.18em]">Room Name</label>
+              <div className="mb-3">
+                <label htmlFor="roomName" className="block text-[11px] font-semibold text-[var(--gold)] mb-1 uppercase tracking-[0.18em]">Room Name</label>
                 <input
                   id="roomName"
                   type="text"
@@ -169,8 +170,8 @@ export default function Home() {
                 />
               </div>
 
-              <div className="mb-6">
-                <label htmlFor="votingSystem" className="block text-[11px] font-semibold text-[var(--gold)] mb-1.5 uppercase tracking-[0.18em]">Voting System</label>
+              <div className="mb-4">
+                <label htmlFor="votingSystem" className="block text-[11px] font-semibold text-[var(--gold)] mb-1 uppercase tracking-[0.18em]">Voting System</label>
                 <select
                   id="votingSystem"
                   value={votingSystem}
@@ -185,7 +186,7 @@ export default function Home() {
               <button
                 onClick={handleCreate}
                 disabled={loading}
-                className="btn-shine btn-felt w-full py-3.5 font-semibold rounded-lg tracking-wide"
+                className="btn-shine btn-felt w-full py-3 font-semibold rounded-lg tracking-wide"
               >
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
@@ -200,15 +201,15 @@ export default function Home() {
             </>
           ) : (
             <>
-              <div className="mb-6">
-                <label htmlFor="joinCode" className="block text-[11px] font-semibold text-[var(--gold)] mb-1.5 uppercase tracking-[0.18em]">Room Code</label>
+              <div className="mb-4">
+                <label htmlFor="joinCode" className="block text-[11px] font-semibold text-[var(--gold)] mb-1 uppercase tracking-[0.18em]">Room Code</label>
                 <input
                   id="joinCode"
                   type="text"
                   value={joinCode}
                   onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
                   placeholder="------"
-                  className={`${inputClass} text-center text-2xl tracking-[0.4em] font-mono py-3.5`}
+                  className={`${inputClass} text-center text-2xl tracking-[0.4em] font-mono py-3`}
                   maxLength={6}
                   onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
                 />
@@ -217,7 +218,7 @@ export default function Home() {
               <button
                 onClick={handleJoin}
                 disabled={loading}
-                className="btn-shine btn-felt w-full py-3.5 font-semibold rounded-lg tracking-wide"
+                className="btn-shine btn-felt w-full py-3 font-semibold rounded-lg tracking-wide"
               >
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
@@ -233,7 +234,7 @@ export default function Home() {
           )}
 
           {/* Spectator toggle */}
-          <label className="mt-4 flex items-center gap-2.5 px-3 py-2.5 rounded-lg border border-[var(--surface-border)] bg-[var(--felt)] cursor-pointer select-none hover:border-[var(--gold-border)] transition-colors">
+          <label className="mt-3 flex items-center gap-2.5 px-3 py-2.5 rounded-lg border border-[var(--surface-border)] bg-[var(--felt)] cursor-pointer select-none hover:border-[var(--gold-border)] transition-colors">
             <input
               type="checkbox"
               checked={asSpectator}
@@ -249,15 +250,16 @@ export default function Home() {
           </label>
 
           {error && (
-            <div role="alert" className="mt-4 px-3 py-2 bg-[var(--accent-red-light)] border border-[var(--accent-red-border)] rounded-lg float-in">
+            <div role="alert" className="mt-3 px-3 py-2 bg-[var(--accent-red-light)] border border-[var(--accent-red-border)] rounded-lg float-in">
               <p className="text-[var(--accent-red)] text-sm text-center">{error}</p>
             </div>
           )}
         </div>
 
         {/* Footer */}
-        <div className="text-center mt-7 space-y-1.5">
+        <div className="text-center mt-4 space-y-1">
           <p className="text-[var(--muted)] text-xs">No sign-up required. Sessions are ephemeral.</p>
+          <FeedbackDialog />
           <p className="text-[var(--gold)] text-[11px] opacity-70 font-serif tracking-[0.5em] pl-2">
             ♠ ♥ ♣ ♦
           </p>
