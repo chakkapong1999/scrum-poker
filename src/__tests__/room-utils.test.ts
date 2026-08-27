@@ -53,6 +53,8 @@ describe('getRoomState', () => {
       revealed: false,
       votingSystem: FIBONACCI,
       lastActivity: Date.now(),
+      stories: [],
+      currentStoryId: null,
       ...overrides,
     };
   }

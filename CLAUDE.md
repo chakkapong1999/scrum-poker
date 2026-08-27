@@ -12,9 +12,9 @@ Real-time planning poker app built with Next.js 16.2.3, React 19, Socket.IO 4, a
 
 ## Key Files
 
-- `server.ts` — Socket.IO server, room management, all game logic (~269 lines)
+- `server.ts` — Socket.IO server, room management, all game logic (~410 lines)
 - `src/app/page.tsx` — Home page (create/join room)
-- `src/app/room/[id]/page.tsx` — Main voting room orchestrator (~310 lines)
+- `src/app/room/[id]/page.tsx` — Main voting room orchestrator (~474 lines)
 - `src/app/room/[id]/RoomHeader.tsx` — Room title, ID, voting system selector, host controls
 - `src/app/room/[id]/PlayerArea.tsx` — Grid layout of player cards
 - `src/app/room/[id]/PlayerCard.tsx` — Individual player card with vote display and emoji
@@ -39,9 +39,18 @@ Real-time planning poker app built with Next.js 16.2.3, React 19, Socket.IO 4, a
 - `npm run test:watch` — Run tests in watch mode
 - `npm run test:coverage` — Run tests with coverage
 
+## Environment
+
+- `PORT` — HTTP server port (default: `3000`)
+- `NODE_ENV` — Set to `production` for production server
+
+## Testing
+
+Test files live in `src/__tests__/`: `components.test.tsx`, `room-utils.test.ts`, `sounds.test.ts`, `types.test.ts`. Setup file: `src/__tests__/setup.ts`.
+
 ## Socket Events
 
-**Client → Server:** `create-room` (votingSystem is a string key: `'fibonacci'` or `'tshirt'`), `join-room`, `rejoin-room`, `get-room-state`, `vote`, `reveal-votes`, `reset-votes`, `send-emoji`, `send-chat`
+**Client → Server:** `create-room` (votingSystem is a string key: `'fibonacci'` or `'tshirt'`), `join-room`, `rejoin-room`, `get-room-state`, `vote`, `reveal-votes`, `reset-votes`, `send-emoji`, `send-chat` — `create-room`/`join-room`/`rejoin-room` accept optional `asSpectator: boolean`
 
 **Server → Client:** `room-update`, `vote-update`, `player-emoji`, `player-chat`
 
@@ -50,6 +59,7 @@ Real-time planning poker app built with Next.js 16.2.3, React 19, Socket.IO 4, a
 - Room IDs are uppercase 6-char alphanumeric, excluding ambiguous chars (I, O, 0, 1) — see `ROOM_ID_CHARS` in `room-utils.ts`
 - `votingSystem` is stored as `string[]` on the room — resolved from key (`'fibonacci'` | `'tshirt'`) via `getVotingSystem()` in `room-utils.ts`
 - Vote masking: server sends `'voted'` instead of actual vote value until `revealed === true`
+- Spectators (`Player.isSpectator`) can't vote (server-enforced) and are excluded from vote progress/stats; spectator choice persists in `sessionStorage('isSpectator')`
 - Host auto-transfers to first remaining player on disconnect
 - Room cleanup: 30-minute idle timeout (`ROOM_TTL_MS`) + 60-second grace period for empty rooms (`ROOM_EMPTY_GRACE_MS`), checked every 30s
 - `/healthz` endpoint on the HTTP server for liveness probes
