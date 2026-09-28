@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Scrum Poker — System Architecture</title>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --color-paper:   #f5f5f5;
+      --color-ink:     #2d3142;
+      --color-muted:   #4f5d75;
+      --color-accent:  #eb6c36;
+      --font-sans:     'Geist', system-ui, sans-serif;
+      --font-serif:    'Instrument Serif', serif;
+      --font-mono:     'Geist Mono', ui-monospace, monospace;
+    }
+    body {
+      font-family: var(--font-sans);
+      background: var(--color-paper);
+      color: var(--color-ink);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 3rem 2rem;
+    }
+    .frame { max-width: 1200px; width: 100%; }
+    .eyebrow {
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      font-weight: 500;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--color-muted);
+      margin-bottom: 0.5rem;
+    }
+    h1 {
+      font-family: var(--font-serif);
+      font-size: clamp(1.5rem, 2.4vw + 0.75rem, 2rem);
+      font-weight: 400;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+      color: var(--color-ink);
+      margin-bottom: 1.5rem;
+    }
+    svg { width: 100%; min-width: 900px; display: block; }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <p class="eyebrow">Architecture · Diagram Design</p>
+    <h1>Scrum Poker — System Architecture</h1>
+
+    <svg viewBox="0 0 1000 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="scrum-poker-arch-title scrum-poker-arch-desc">
+      <title id="scrum-poker-arch-title">Scrum Poker — System Architecture</title>
+      <desc id="scrum-poker-arch-desc">Browser pages talk through a single Socket.IO client to one Node process, where a custom HTTP server routes page requests to Next.js and upgrades WebSocket traffic to the Socket.IO server, which reads and writes an in-memory rooms map that a periodic sweeper evicts stale rooms from.</desc>
+      <defs>
+        <marker id="arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+        <marker id="arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+        <marker id="arrow-link" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#2e5aa8"/></marker>
+      </defs>
+
+      <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+      <!-- ============ ZONES (drawn first) ============ -->
+      <rect x="40" y="100" width="264" height="244" rx="8" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+      <rect x="64" y="104" width="64" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="96" y="112" fill="rgba(45,49,66,0.40)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.14em">BROWSER</text>
+
+      <rect x="380" y="100" width="552" height="364" rx="8" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+      <rect x="404" y="104" width="104" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="456" y="112" fill="rgba(45,49,66,0.40)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.14em">NODE PROCESS</text>
+
+      <!-- ============ ARROWS (before boxes) ============ -->
+      <!-- pages -> socket client -->
+      <line x1="120" y1="188" x2="120" y2="248" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+      <line x1="224" y1="188" x2="224" y2="248" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+      <!-- socket client -> node http server (right + up elbow) -->
+      <path d="M 272,280 H 334 Q 342,280 342,272 V 172 Q 342,164 350,164 H 412" fill="none" stroke="#2e5aa8" stroke-width="1.2" marker-end="url(#arrow-link)"/>
+
+      <!-- http server -> next.js handler -->
+      <line x1="612" y1="164" x2="700" y2="164" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+      <!-- http server -> socket.io server -->
+      <line x1="512" y1="196" x2="512" y2="252" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+      <!-- socket.io server -> rooms map -->
+      <line x1="612" y1="288" x2="700" y2="288" stroke="#4f5d75" stroke-width="1.2" marker-end="url(#arrow)"/>
+
+      <!-- cleanup sweeper -> rooms map -->
+      <line x1="800" y1="376" x2="800" y2="324" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+
+      <!-- socket.io server -> socket client (broadcast return) -->
+      <line x1="412" y1="308" x2="272" y2="308" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#arrow)"/>
+
+      <!-- ============ ARROW LABELS ============ -->
+      <rect x="350" y="212" width="56" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="378" y="220" fill="#2e5aa8" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">HTTP + WS</text>
+
+      <rect x="624" y="144" width="64" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="656" y="152" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">SSR / ASSETS</text>
+
+      <rect x="520" y="216" width="64" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="552" y="224" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">WS UPGRADE</text>
+
+      <rect x="624" y="268" width="64" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="656" y="276" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">READ / WRITE</text>
+
+      <rect x="808" y="340" width="40" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="828" y="348" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">EVICT</text>
+
+      <rect x="308" y="316" width="68" height="12" rx="2" fill="#f5f5f5"/>
+      <text x="342" y="324" fill="#7a8399" font-size="8" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.06em">ROOM-UPDATE</text>
+
+      <!-- ============ NODES ============ -->
+      <!-- Home / Join -->
+      <rect x="72" y="132" width="96" height="56" rx="6" fill="#f5f5f5"/>
+      <rect x="72" y="132" width="96" height="56" rx="6" fill="rgba(79,93,117,0.10)" stroke="#7a8399" stroke-width="1"/>
+      <text x="120" y="156" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Home / Join</text>
+      <text x="120" y="172" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">join/[id]</text>
+
+      <!-- Voting Room -->
+      <rect x="176" y="132" width="96" height="56" rx="6" fill="#f5f5f5"/>
+      <rect x="176" y="132" width="96" height="56" rx="6" fill="rgba(79,93,117,0.10)" stroke="#7a8399" stroke-width="1"/>
+      <text x="224" y="156" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Voting Room</text>
+      <text x="224" y="172" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">room/[id]</text>
+
+      <!-- Socket client singleton -->
+      <rect x="72" y="248" width="200" height="64" rx="6" fill="#f5f5f5"/>
+      <rect x="72" y="248" width="200" height="64" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <rect x="80" y="256" width="28" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.40)" stroke-width="0.8"/>
+      <text x="94" y="264" fill="rgba(45,49,66,0.80)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">LIB</text>
+      <text x="172" y="288" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Socket Client</text>
+      <text x="172" y="304" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">src/lib/socket.ts · singleton</text>
+
+      <!-- Node HTTP server -->
+      <rect x="412" y="132" width="200" height="64" rx="6" fill="#f5f5f5"/>
+      <rect x="412" y="132" width="200" height="64" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <rect x="420" y="140" width="28" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.40)" stroke-width="0.8"/>
+      <text x="434" y="148" fill="rgba(45,49,66,0.80)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">HTTP</text>
+      <text x="512" y="172" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Node HTTP Server</text>
+      <text x="512" y="188" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">server.ts · :3000 · /healthz</text>
+
+      <!-- Next.js handler -->
+      <rect x="700" y="132" width="200" height="64" rx="6" fill="#f5f5f5"/>
+      <rect x="700" y="132" width="200" height="64" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <rect x="708" y="140" width="28" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.40)" stroke-width="0.8"/>
+      <text x="722" y="148" fill="rgba(45,49,66,0.80)" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">SSR</text>
+      <text x="800" y="172" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Next.js App Router</text>
+      <text x="800" y="188" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">src/app · no REST API</text>
+
+      <!-- Socket.IO server (FOCAL) -->
+      <rect x="412" y="252" width="200" height="72" rx="6" fill="#f5f5f5"/>
+      <rect x="412" y="252" width="200" height="72" rx="6" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+      <rect x="420" y="260" width="28" height="12" rx="2" fill="transparent" stroke="rgba(235,108,54,0.40)" stroke-width="0.8"/>
+      <text x="434" y="268" fill="#eb6c36" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">WS</text>
+      <text x="512" y="292" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Socket.IO Server</text>
+      <text x="512" y="308" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">vote · reveal · stories · host</text>
+
+      <!-- Rooms map (FOCAL) -->
+      <rect x="700" y="252" width="200" height="72" rx="6" fill="#f5f5f5"/>
+      <rect x="700" y="252" width="200" height="72" rx="6" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+      <rect x="708" y="260" width="28" height="12" rx="2" fill="transparent" stroke="rgba(235,108,54,0.40)" stroke-width="0.8"/>
+      <text x="722" y="268" fill="#eb6c36" font-size="7" font-family="'Geist Mono', monospace" text-anchor="middle" letter-spacing="0.08em">STATE</text>
+      <text x="800" y="292" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">In-Memory Rooms</text>
+      <text x="800" y="308" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">Map&lt;string, Room&gt; · no DB</text>
+
+      <!-- Cleanup sweeper -->
+      <rect x="700" y="376" width="200" height="56" rx="6" fill="#f5f5f5"/>
+      <rect x="700" y="376" width="200" height="56" rx="6" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.20)" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="800" y="404" fill="#2d3142" font-size="12" font-weight="600" font-family="'Geist', sans-serif" text-anchor="middle">Cleanup Sweeper</text>
+      <text x="800" y="420" fill="#4f5d75" font-size="9" font-family="'Geist Mono', monospace" text-anchor="middle">30s tick · TTL 30m · grace 60s</text>
+
+      <!-- ============ LEGEND ============ -->
+      <line x1="40" y1="504" x2="960" y2="504" stroke="rgba(45,49,66,0.10)" stroke-width="0.8"/>
+      <text x="40" y="524" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.14em">LEGEND</text>
+
+      <rect x="140" y="516" width="12" height="12" rx="2" fill="rgba(235,108,54,0.08)" stroke="#eb6c36" stroke-width="1"/>
+      <text x="160" y="524" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.06em">FOCAL — HUB &amp; STATE</text>
+
+      <rect x="340" y="516" width="12" height="12" rx="2" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+      <text x="360" y="524" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.06em">SERVER MODULE</text>
+
+      <rect x="540" y="516" width="12" height="12" rx="2" fill="rgba(79,93,117,0.10)" stroke="#7a8399" stroke-width="1"/>
+      <text x="560" y="524" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.06em">CLIENT ROUTE</text>
+
+      <line x1="740" y1="522" x2="752" y2="522" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3"/>
+      <text x="760" y="524" fill="#4f5d75" font-size="8" font-family="'Geist Mono', monospace" letter-spacing="0.06em">ASYNC / BROADCAST</text>
+    </svg>
+  </div>
+</body>
+</html>

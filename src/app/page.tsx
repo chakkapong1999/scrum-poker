@@ -274,6 +274,7 @@ export default function Home() {
           <p className="text-[var(--gold)] text-[11px] opacity-70 font-serif tracking-[0.5em] pl-2">
             ♠ ♥ ♣ ♦
           </p>
+          <p className="text-[var(--muted)] text-[10px] opacity-60">v{process.env.APP_VERSION}</p>
         </div>
       </div>
     </div>
