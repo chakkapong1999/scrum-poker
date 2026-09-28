@@ -57,7 +57,7 @@ function suggestedPoint(players: Player[], votingSystem: string[]): string {
   return snap.raw;
 }
 
-export function PlayerArea({ players, revealed, isHost, myId, votedCount, allVoted, floatingEmojis, chatBubbles, onReveal, onReset, canCompleteStory, onCompleteStory, onMakeHost, votingSystem }: Readonly<{
+export function PlayerArea({ players, revealed, isHost, myId, votedCount, allVoted, floatingEmojis, chatBubbles, onReveal, onReset, canCompleteStory, onCompleteStory, onMakeHost, onKick, votingSystem }: Readonly<{
   players: Player[];
   revealed: boolean;
   isHost: boolean;
@@ -71,6 +71,7 @@ export function PlayerArea({ players, revealed, isHost, myId, votedCount, allVot
   canCompleteStory: boolean;
   onCompleteStory: (finalPoint: string) => void;
   onMakeHost: (targetPlayerId: string) => void;
+  onKick: (targetPlayerId: string) => void;
   votingSystem: string[];
 }>) {
   const [showSaveInput, setShowSaveInput] = useState(false);
@@ -199,6 +200,7 @@ export function PlayerArea({ players, revealed, isHost, myId, votedCount, allVot
             floatingEmojis={floatingEmojis.get(player.id) || []}
             chatBubbles={chatBubbles.get(player.id) || []}
             onMakeHost={isHost && player.id !== myId ? () => onMakeHost(player.id) : undefined}
+            onKick={isHost && player.id !== myId ? () => onKick(player.id) : undefined}
           />
         ))}
       </div>

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useSyncExternalStore } from 'react';
 import { useRouter } from 'next/navigation';
 import { getSocket } from '@/lib/socket';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -17,6 +17,11 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<'create' | 'join'>('create');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const kicked = useSyncExternalStore(
+    () => () => {},
+    () => new URLSearchParams(globalThis.location.search).has('kicked'),
+    () => false,
+  );
 
   const handleCreate = () => {
     if (!playerName.trim()) {
@@ -249,6 +254,12 @@ export default function Home() {
             <span className="text-xs text-[var(--muted)] ml-auto">watch, don&apos;t vote</span>
           </label>
 
+          {kicked && !error && (
+            <div role="alert" className="mt-3 px-3 py-2 bg-[var(--accent-red-light)] border border-[var(--accent-red-border)] rounded-lg float-in">
+              <p className="text-[var(--accent-red)] text-sm text-center">You were removed from the room by the host.</p>
+            </div>
+          )}
+
           {error && (
             <div role="alert" className="mt-3 px-3 py-2 bg-[var(--accent-red-light)] border border-[var(--accent-red-border)] rounded-lg float-in">
               <p className="text-[var(--accent-red)] text-sm text-center">{error}</p>
@@ -263,6 +274,7 @@ export default function Home() {
           <p className="text-[var(--gold)] text-[11px] opacity-70 font-serif tracking-[0.5em] pl-2">
             ♠ ♥ ♣ ♦
           </p>
+          <p className="text-[var(--muted)] text-[10px] opacity-60">v{process.env.APP_VERSION}</p>
         </div>
       </div>
     </div>
