@@ -45,20 +45,30 @@ export const VoteCard = memo(function VoteCard({ value, selected, onClick, disab
   );
 });
 
-export const PlayerCard = memo(function PlayerCard({ player, revealed, floatingEmojis, chatBubbles, onMakeHost }: Readonly<{
+export const PlayerCard = memo(function PlayerCard({ player, revealed, floatingEmojis, chatBubbles, onMakeHost, onKick }: Readonly<{
   player: Player;
   revealed: boolean;
   floatingEmojis: FloatingEmoji[];
   chatBubbles: ChatBubble[];
   onMakeHost?: () => void;
+  onKick?: () => void;
 }>) {
-  const [confirming, setConfirming] = useState(false);
+  const [confirming, setConfirming] = useState<'host' | 'kick' | null>(null);
 
   useEffect(() => {
     if (!confirming) return;
-    const t = setTimeout(() => setConfirming(false), 3000);
+    const t = setTimeout(() => setConfirming(null), 3000);
     return () => clearTimeout(t);
   }, [confirming]);
+
+  const confirmThen = (action: 'host' | 'kick', run: () => void) => {
+    if (confirming === action) {
+      run();
+      setConfirming(null);
+    } else {
+      setConfirming(action);
+    }
+  };
 
   const hasVoted = player.vote !== null;
   const showVote = revealed && !!player.vote && player.vote !== 'voted';
@@ -126,25 +136,33 @@ export const PlayerCard = memo(function PlayerCard({ player, revealed, floatingE
             <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-[var(--gold-light)] text-[var(--gold)] border border-[var(--gold-border)] font-semibold tracking-[0.12em]">HOST</span>
           )}
         </div>
-        {onMakeHost && (
-          <button
-            onClick={() => {
-              if (confirming) {
-                onMakeHost();
-                setConfirming(false);
-              } else {
-                setConfirming(true);
-              }
-            }}
-            className={`text-[10px] px-2 py-0.5 rounded-full border transition-all font-medium ${
-              confirming
-                ? 'bg-[var(--gold-light)] text-[var(--gold)] border-[var(--gold-border)]'
-                : 'glass text-[var(--muted)] hover:text-[var(--gold)] hover:border-[var(--gold-border)]'
-            }`}
-          >
-            {confirming ? 'Confirm?' : '👑 Make Host'}
-          </button>
-        )}
+        <div className="flex items-center gap-1">
+          {onMakeHost && (
+            <button
+              onClick={() => confirmThen('host', onMakeHost)}
+              className={`text-[10px] px-2 py-0.5 rounded-full border transition-all font-medium ${
+                confirming === 'host'
+                  ? 'bg-[var(--gold-light)] text-[var(--gold)] border-[var(--gold-border)]'
+                  : 'glass text-[var(--muted)] hover:text-[var(--gold)] hover:border-[var(--gold-border)]'
+              }`}
+            >
+              {confirming === 'host' ? 'Confirm?' : '👑 Make Host'}
+            </button>
+          )}
+          {onKick && (
+            <button
+              onClick={() => confirmThen('kick', onKick)}
+              aria-label={confirming === 'kick' ? `Confirm kick ${player.name}` : `Kick ${player.name}`}
+              className={`text-[10px] px-2 py-0.5 rounded-full border transition-all font-medium ${
+                confirming === 'kick'
+                  ? 'bg-[var(--accent-red-light)] text-[var(--accent-red)] border-[var(--accent-red-border)]'
+                  : 'glass text-[var(--muted)] hover:text-[var(--accent-red)] hover:border-[var(--accent-red-border)]'
+              }`}
+            >
+              {confirming === 'kick' ? 'Kick?' : '✕'}
+            </button>
+          )}
+        </div>
       </div>
     </div>
   );

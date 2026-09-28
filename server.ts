@@ -196,8 +196,9 @@ app.prepare().then(() => {
       callback({ success: true, state: getRoomState(room) });
     });
 
+    // Membership check: kicked sockets keep currentRoomId
     socket.on('send-emoji', ({ emoji }: { emoji: string }) => {
-      if (!currentRoomId || !currentPlayerId) return;
+      if (!currentRoomId || !currentPlayerId || !rooms.get(currentRoomId)?.players.has(currentPlayerId)) return;
       const safeEmoji = String(emoji ?? '').slice(0, 16);
       if (!safeEmoji.trim()) return;
       io.to(currentRoomId).emit('player-emoji', {
@@ -207,7 +208,7 @@ app.prepare().then(() => {
     });
 
     socket.on('send-chat', ({ message }: { message: string }) => {
-      if (!currentRoomId || !currentPlayerId) return;
+      if (!currentRoomId || !currentPlayerId || !rooms.get(currentRoomId)?.players.has(currentPlayerId)) return;
       const trimmed = String(message ?? '').trim().slice(0, 50);
       if (!trimmed) return;
       io.to(currentRoomId).emit('player-chat', {
@@ -366,6 +367,18 @@ app.prepare().then(() => {
       targetPlayer.isHost = true;
       room.lastActivity = Date.now();
       io.to(currentRoomId).emit('room-update', getRoomState(room));
+    });
+
+    // ponytail: no ban list — a kicked player can rejoin via the invite link; add one if trolls become a problem
+    socket.on('kick-player', ({ targetPlayerId }: { targetPlayerId: string }) => {
+      const room = requireHost();
+      if (!room || targetPlayerId === currentPlayerId || !room.players.has(targetPlayerId)) return;
+
+      room.players.delete(targetPlayerId);
+      room.lastActivity = Date.now();
+      io.to(targetPlayerId).emit('kicked');
+      io.in(targetPlayerId).socketsLeave(room.id);
+      io.to(room.id).emit('room-update', getRoomState(room));
     });
 
     socket.on('disconnect', () => {

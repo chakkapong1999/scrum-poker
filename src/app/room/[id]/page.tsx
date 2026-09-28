@@ -190,6 +190,14 @@ export default function RoomPage() {
 
     socket.on('player-chat', onPlayerChat);
 
+    // Hard reload drops the old socket; clearing the name stops auto-rejoin via back button
+    const onKicked = () => {
+      sessionStorage.removeItem('playerName');
+      globalThis.location.replace('/?kicked=1');
+    };
+
+    socket.on('kicked', onKicked);
+
     const requestOrRejoin = () => {
       socket.emit('get-room-state', (res: { success: boolean; state?: RoomState }) => {
         if (res.success && res.state) {
@@ -228,6 +236,7 @@ export default function RoomPage() {
       socket.off('vote-update', onVoteUpdate);
       socket.off('player-emoji', onPlayerEmoji);
       socket.off('player-chat', onPlayerChat);
+      socket.off('kicked', onKicked);
       socket.off('connect', onReconnect);
       pendingTimeouts.forEach(clearTimeout);
     };
@@ -270,7 +279,11 @@ export default function RoomPage() {
     getSocket().emit('transfer-host', { targetPlayerId });
   };
 
-  const handleCompleteStory = (finalPoint: string) => {
+  const handleKick = (targetPlayerId: string) => {
+    getSocket().emit('kick-player', { targetPlayerId });
+  };
+
+  const handleCompleteStory =(finalPoint: string) => {
     const trimmed = finalPoint.trim();
     if (!trimmed) return;
     getSocket().emit('complete-story', { finalPoint: trimmed });
@@ -443,6 +456,7 @@ export default function RoomPage() {
             canCompleteStory={canCompleteStory}
             onCompleteStory={handleCompleteStory}
             onMakeHost={handleTransferHost}
+            onKick={handleKick}
             votingSystem={room.votingSystem}
           />
 

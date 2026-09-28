@@ -50,9 +50,9 @@ Test files live in `src/__tests__/`: `components.test.tsx`, `room-utils.test.ts`
 
 ## Socket Events
 
-**Client → Server:** `create-room` (votingSystem is a string key: `'fibonacci'` or `'tshirt'`), `join-room`, `rejoin-room`, `get-room-state`, `vote`, `reveal-votes`, `reset-votes`, `send-emoji`, `send-chat` — `create-room`/`join-room`/`rejoin-room` accept optional `asSpectator: boolean`
+**Client → Server:** `create-room` (votingSystem is a string key: `'fibonacci'` or `'tshirt'`), `join-room`, `rejoin-room`, `get-room-state`, `vote`, `reveal-votes`, `reset-votes`, `send-emoji`, `send-chat`, `kick-player` (host only) — `create-room`/`join-room`/`rejoin-room` accept optional `asSpectator: boolean`
 
-**Server → Client:** `room-update`, `vote-update`, `player-emoji`, `player-chat`
+**Server → Client:** `room-update`, `vote-update`, `player-emoji`, `player-chat`, `kicked` (sent only to the removed player)
 
 ## Important Patterns
 

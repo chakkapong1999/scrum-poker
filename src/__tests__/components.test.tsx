@@ -1308,4 +1308,32 @@ describe('RoomPage', () => {
     expect(screen.getByText('1/1')).toBeInTheDocument();
     expect(screen.getByText('watching')).toBeInTheDocument();
   });
+
+  it('host kicks another player after confirming', async () => {
+    const { default: RoomPage } = await import('@/app/room/[id]/page');
+    render(<RoomPage />);
+
+    const onRoomUpdate = mockSocketOn.mock.calls.find((c: unknown[]) => c[0] === 'room-update')![1];
+    act(() => {
+      onRoomUpdate({
+        id: 'ABC123', name: 'Test', revealed: false,
+        players: [
+          { id: 'test-socket-id', name: 'Alice', vote: null, isHost: true },
+          { id: 'p2', name: 'Bob', vote: null, isHost: false },
+        ],
+        votingSystem: ['1'],
+        stories: [{ id: 's1', title: 'Story', finalPoint: null, completed: false }],
+        currentStoryId: 's1',
+      });
+    });
+
+    // No kick button on the host's own card
+    expect(screen.queryByLabelText('Kick Alice')).not.toBeInTheDocument();
+
+    vi.clearAllMocks();
+    fireEvent.click(screen.getByLabelText('Kick Bob'));
+    expect(mockSocketEmit).not.toHaveBeenCalledWith('kick-player', expect.anything());
+    fireEvent.click(screen.getByLabelText('Confirm kick Bob'));
+    expect(mockSocketEmit).toHaveBeenCalledWith('kick-player', { targetPlayerId: 'p2' });
+  });
 });
