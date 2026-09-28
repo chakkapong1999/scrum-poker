@@ -6,6 +6,12 @@ WORKDIR /app
 COPY package.json package-lock.json ./
 RUN npm ci
 
+# --- Production dependencies (server.ts needs socket.io, which standalone doesn't trace) ---
+FROM base AS prod-deps
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev
+
 # --- Build ---
 FROM base AS builder
 WORKDIR /app
@@ -26,16 +32,18 @@ RUN adduser --system --uid 1001 nextjs
 COPY --from=builder /app/public ./public
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
+COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=builder /app/server.ts ./server.ts
 COPY --from=builder /app/src/types ./src/types
 COPY --from=builder /app/src/lib/room-utils.ts ./src/lib/room-utils.ts
 COPY --from=builder /app/tsconfig.json ./tsconfig.json
 
-# tsx is needed to run the custom TypeScript server
-RUN npm install --no-save tsx
+# tsx is needed to run the custom TypeScript server.
+# Installed globally: a local npm install over the pruned standalone node_modules crashes npm.
+RUN npm install -g tsx@4
 
 USER nextjs
 
 EXPOSE 3000
 
-CMD ["npx", "tsx", "server.ts"]
+CMD ["tsx", "server.ts"]
