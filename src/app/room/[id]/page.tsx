@@ -218,8 +218,9 @@ export default function RoomPage() {
         roomId: roomId.toUpperCase(),
         playerName: storedName,
         asSpectator: sessionStorage.getItem('isSpectator') === '1',
-      }, (rejoinRes: { success: boolean; roomId?: string; error?: string }) => {
+      }, (rejoinRes: { success: boolean; roomId?: string; error?: string; vote?: string | null }) => {
         if (!rejoinRes.success) setNotJoined(true);
+        else setMyVote(rejoinRes.vote ?? null);
       });
     };
 

@@ -60,7 +60,9 @@ Test files live in `src/__tests__/`: `components.test.tsx`, `room-utils.test.ts`
 - `votingSystem` is stored as `string[]` on the room — resolved from key (`'fibonacci'` | `'tshirt'`) via `getVotingSystem()` in `room-utils.ts`
 - Vote masking: server sends `'voted'` instead of actual vote value until `revealed === true`
 - Spectators (`Player.isSpectator`) can't vote (server-enforced) and are excluded from vote progress/stats; spectator choice persists in `sessionStorage('isSpectator')`
-- Host auto-transfers to first remaining player on disconnect
+- Seats survive refresh/reconnect: the client sends a per-tab secret `seatToken` (`sessionStorage`) in the socket handshake `auth`; `join-room`/`rejoin-room` with a known token move the existing seat (host, vote, order) to the new socket. Tokens live server-side only (`seatTokens`) — never put them in `RoomState`
+- A disconnected player keeps their seat for `PLAYER_GRACE_MS` (20s); after that they're removed and host auto-transfers to the first remaining player
+- Every socket handler is registered via the `on()` wrapper in `server.ts` (try/catch) — a throw in a raw `socket.on` listener crashes the whole process
 - Room cleanup: 30-minute idle timeout (`ROOM_TTL_MS`) + 60-second grace period for empty rooms (`ROOM_EMPTY_GRACE_MS`), checked every 30s
 - `/healthz` endpoint on the HTTP server for liveness probes
 - TTS requires macOS system voices installed (Accessibility > Spoken Content > Manage Voices)
