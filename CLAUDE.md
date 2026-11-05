@@ -15,11 +15,11 @@ Real-time planning poker app built with Next.js 16.2.3, React 19, Socket.IO 4, a
 - `server.ts` — Socket.IO server, room management, all game logic (~410 lines)
 - `src/app/page.tsx` — Home page (create/join room)
 - `src/app/room/[id]/page.tsx` — Main voting room orchestrator (~474 lines)
-- `src/app/room/[id]/RoomHeader.tsx` — Room title, ID, voting system selector, host controls
-- `src/app/room/[id]/PlayerArea.tsx` — Grid layout of player cards
-- `src/app/room/[id]/PlayerCard.tsx` — Individual player card with vote display and emoji
-- `src/app/room/[id]/VotingDeck.tsx` — Vote option buttons
-- `src/app/room/[id]/VoteStats.tsx` — Vote statistics after reveal
+- `src/app/room/[id]/RoomHeader.tsx` — Top bar: wordmark, room name, invite, mute, theme, feedback, leave
+- `src/app/room/[id]/PlayerArea.tsx` — Oval felt table: voters seated on an ellipse, story title, results and host controls in the centre; spectators listed below
+- `src/app/room/[id]/PlayerCard.tsx` — One seat (card flip, reactions, hover/tap host controls) and the hand's `VoteCard`
+- `src/app/room/[id]/VotingDeck.tsx` — Fanned hand of vote cards, locked after reveal
+- `src/app/room/[id]/VoteStats.tsx` — Round result (headline, min/max, tally bars) rendered in the table centre
 - `src/app/room/[id]/InteractionBar.tsx` — Chat and emoji interaction panel
 - `src/app/join/[id]/page.tsx` — Invite join page
 - `src/lib/socket.ts` — Socket.IO client singleton

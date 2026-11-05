@@ -33,33 +33,28 @@ export function InteractionBar() {
   };
 
   return (
-    <div className="flex flex-col items-center gap-3 mb-6">
+    <div className="relative bar-foot">
       <div className="flex gap-2">
         <button
           onClick={() => { setEmojiPickerOpen(!emojiPickerOpen); setChatOpen(false); }}
-          className={`px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${
-            emojiPickerOpen
-              ? 'bg-[var(--gold-light)] text-[var(--gold)] border border-[var(--gold-border)]'
-              : 'glass text-[var(--muted)] hover:text-[var(--gold)] hover:bg-[var(--surface-hover)]'
-          }`}
+          aria-expanded={emojiPickerOpen}
+          className="chip"
         >
-          <span className="text-base">😄</span>
-          <span className="hidden sm:inline text-xs tracking-wide">Reaction</span>
+          <span className="text-sm" aria-hidden>😄</span>
+          <span>Reaction</span>
         </button>
         <button
           onClick={() => { setChatOpen(!chatOpen); setEmojiPickerOpen(false); }}
-          className={`px-4 py-2 rounded-full text-sm font-medium transition-all flex items-center gap-2 ${
-            chatOpen
-              ? 'bg-[var(--gold-light)] text-[var(--gold)] border border-[var(--gold-border)]'
-              : 'glass text-[var(--muted)] hover:text-[var(--gold)] hover:bg-[var(--surface-hover)]'
-          }`}
+          aria-expanded={chatOpen}
+          className="chip"
         >
-          <span className="text-base">💬</span>
-          <span className="hidden sm:inline text-xs tracking-wide">Chat</span>
+          <span className="text-sm" aria-hidden>💬</span>
+          <span>Chat</span>
         </button>
       </div>
       {emojiPickerOpen && (
-        <div className="panel rounded-2xl p-3 float-in [--radius:1rem]">
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-30 w-[min(30rem,calc(100vw-2rem))]">
+        <div className="panel rounded-2xl p-3 float-in [--radius:1rem] [--surface:var(--dialog)]">
           <div className="flex flex-wrap justify-center gap-1">
             {REACTION_EMOJIS.map(emoji => (
               <button
@@ -72,9 +67,11 @@ export function InteractionBar() {
             ))}
           </div>
         </div>
+        </div>
       )}
       {chatOpen && (
-        <div className="panel rounded-2xl p-4 float-in w-full max-w-md [--radius:1rem]">
+        <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-30 w-[min(28rem,calc(100vw-2rem))]">
+        <div className="panel rounded-2xl p-4 float-in [--radius:1rem] [--surface:var(--dialog)]">
           <div className="flex flex-wrap justify-center gap-1.5 mb-3">
             {QUICK_MESSAGES.map(msg => (
               <button
@@ -105,6 +102,7 @@ export function InteractionBar() {
               Send
             </button>
           </div>
+        </div>
         </div>
       )}
     </div>

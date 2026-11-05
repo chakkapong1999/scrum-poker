@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Fraunces, Schibsted_Grotesk, IBM_Plex_Mono } from "next/font/google";
+import { Fraunces, Schibsted_Grotesk } from "next/font/google";
 import { ThemeProvider } from "@/lib/theme";
 import "./globals.css";
 
@@ -14,12 +14,6 @@ const schibsted = Schibsted_Grotesk({
   variable: "--font-body",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
-});
-
-const plexMono = IBM_Plex_Mono({
-  variable: "--font-mono-plex",
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
 });
 
 export const metadata: Metadata = {
@@ -59,7 +53,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${fraunces.variable} ${schibsted.variable} ${plexMono.variable} h-full antialiased dark`}
+      className={`${fraunces.variable} ${schibsted.variable} h-full antialiased dark`}
       suppressHydrationWarning
     >
       <head>
@@ -70,6 +64,7 @@ export default function RootLayout({
         <ThemeProvider>
           <div className="bg-ambient" />
           <div className="bg-noise" />
+          <div className="bg-suits" aria-hidden><span className="bg-spade">♠</span><span className="bg-heart">♥</span></div>
           <div className="relative z-10 flex-1 flex flex-col">{children}</div>
         </ThemeProvider>
       </body>

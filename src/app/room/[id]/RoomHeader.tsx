@@ -3,7 +3,7 @@
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { FeedbackDialog } from '@/components/FeedbackDialog';
 
-export function RoomHeader({ roomName, roomId, playerCount, copied, muted, onCopyInvite, onToggleMute }: Readonly<{
+export function RoomHeader({ roomName, roomId, playerCount, copied, muted, onCopyInvite, onToggleMute, onLeave }: Readonly<{
   roomName: string;
   roomId: string;
   playerCount: number;
@@ -11,50 +11,25 @@ export function RoomHeader({ roomName, roomId, playerCount, copied, muted, onCop
   muted: boolean;
   onCopyInvite: () => void;
   onToggleMute: () => void;
+  onLeave: () => void;
 }>) {
   return (
-    <header className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8">
-      <div className="flex items-center gap-4">
-        <div className="card-fan scale-[0.55] origin-left -mr-5" aria-hidden>
-          <span className="mini-card">♠</span>
-          <span className="mini-card"><span className="red">♥</span></span>
-          <span className="mini-card">♣</span>
-        </div>
-        <div>
-          <h1 className="text-xl font-serif font-bold gold-foil leading-tight">{roomName}</h1>
-          <div className="flex items-center gap-2 mt-0.5">
-            <code className="text-xs text-[var(--muted)] font-mono tracking-[0.25em]">
-              {roomId}
-            </code>
-          </div>
-        </div>
+    <header className="bar">
+      <div className="bar-title">
+        <span className="wordmark gold-foil">Scrum Poker</span>
+        <h1 className="room-title">{roomName}</h1>
       </div>
-      <div className="flex items-center gap-2">
-        <button
-          onClick={onCopyInvite}
-          className={`px-3.5 py-2 glass rounded-lg text-sm transition-all flex items-center gap-2 hover:bg-[var(--surface-hover)] ${
-            copied ? 'text-[var(--emerald)] border-[var(--emerald-border)]' : 'text-[var(--muted)] hover:text-[var(--gold)]'
-          }`}
-        >
-          {copied ? (
-            <>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-              <span className="text-xs">Copied!</span>
-            </>
-          ) : (
-            <>
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-              </svg>
-              <span className="hidden sm:inline text-xs">Invite</span>
-            </>
-          )}
+      <div className="bar-actions">
+        <button onClick={onCopyInvite} className="chip">
+          <span className={copied ? 'text-[var(--emerald)]' : ''}>{copied ? 'Copied!' : 'Invite'}</span>
+          <code>{roomId}</code>
         </button>
+        <div className="chip">
+          {playerCount} player{playerCount === 1 ? '' : 's'}
+        </div>
         <button
           onClick={onToggleMute}
-          className="p-2 glass rounded-lg text-[var(--muted)] hover:text-[var(--gold)] hover:bg-[var(--surface-hover)] transition-all"
+          className="chip chip-icon"
           title={muted ? 'Unmute sounds' : 'Mute sounds'}
           aria-label={muted ? 'Unmute sounds' : 'Mute sounds'}
         >
@@ -69,12 +44,9 @@ export function RoomHeader({ roomName, roomId, playerCount, copied, muted, onCop
             </svg>
           )}
         </button>
-        <ThemeToggle />
         <FeedbackDialog icon />
-        <div className="px-3 py-2 glass rounded-lg text-xs text-[var(--muted)] font-medium flex items-center gap-1.5">
-          <span className="w-1.5 h-1.5 rounded-full bg-[var(--emerald)] animate-pulse" />
-          {playerCount} player{playerCount === 1 ? '' : 's'}
-        </div>
+        <ThemeToggle />
+        <button onClick={onLeave} className="chip">Leave room</button>
       </div>
     </header>
   );

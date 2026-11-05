@@ -34,7 +34,7 @@ export default function Home() {
     const socket = getSocket();
     socket.emit('create-room', {
       playerName: playerName.trim(),
-      roomName: roomName.trim() || 'Scrum Poker',
+      roomName: roomName.trim() || 'Sprint Planning',
       votingSystem,
       asSpectator,
     }, (res: { success: boolean; roomId?: string; error?: string }) => {
@@ -78,8 +78,6 @@ export default function Home() {
     });
   };
 
-  const inputClass = "w-full px-4 py-2.5 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg text-[var(--foreground)] placeholder-[var(--muted-light)] focus:outline-none input-glow transition-all";
-
   return (
     <div className="min-h-dvh flex items-center justify-center p-4">
       {/* Theme toggle */}
@@ -95,26 +93,18 @@ export default function Home() {
         ♠
       </FloatingButton> */}
 
-      {/* Oversized suit watermarks */}
-      <div className="fixed top-[8%] left-[6%] text-[160px] leading-none opacity-[0.03] dark:opacity-[0.04] pointer-events-none select-none font-serif text-[var(--gold)]" aria-hidden>
-        ♠
-      </div>
-      <div className="fixed bottom-[10%] right-[7%] text-[140px] leading-none opacity-[0.03] dark:opacity-[0.04] pointer-events-none select-none font-serif text-[var(--accent-red)]" aria-hidden>
-        ♥
-      </div>
-
       <div className="w-full max-w-md slide-up">
         {/* Marque */}
         <div className="text-center mb-5">
-          <div className="card-fan mb-2" aria-hidden>
+          <div className="card-fan mb-4" aria-hidden>
             <span className="mini-card">♠</span>
             <span className="mini-card"><span className="red">♥</span></span>
             <span className="mini-card">♣</span>
           </div>
-          <h1 className="text-5xl font-serif font-black gold-foil tracking-tight leading-tight">
+          <h1 className="text-5xl font-serif font-black gold-foil leading-[60px]">
             Scrum Poker
           </h1>
-          <div className="deco-rule max-w-50 mx-auto mt-2 mb-1.5 text-[10px]" aria-hidden>♦</div>
+          <div className="deco-rule max-w-50 mx-auto mb-2 text-[8px]" aria-hidden>♦</div>
           <p className="text-[var(--muted)] text-sm font-serif italic">Estimate together, in real-time</p>
         </div>
 
@@ -146,14 +136,14 @@ export default function Home() {
 
           {/* Name field */}
           <div className="mb-3">
-            <label htmlFor="playerName" className="block text-[11px] font-semibold text-[var(--gold)] mb-1 uppercase tracking-[0.18em]">Your Name</label>
+            <label htmlFor="playerName" className="label">Your Name</label>
             <input
               id="playerName"
               type="text"
               value={playerName}
               onChange={(e) => setPlayerName(e.target.value)}
               placeholder="Enter your name"
-              className={inputClass}
+              className="input"
               maxLength={20}
               onKeyDown={(e) => e.key === 'Enter' && (activeTab === 'create' ? handleCreate() : handleJoin())}
             />
@@ -162,28 +152,28 @@ export default function Home() {
           {activeTab === 'create' ? (
             <>
               <div className="mb-3">
-                <label htmlFor="roomName" className="block text-[11px] font-semibold text-[var(--gold)] mb-1 uppercase tracking-[0.18em]">Room Name</label>
+                <label htmlFor="roomName" className="label">Room Name</label>
                 <input
                   id="roomName"
                   type="text"
                   value={roomName}
                   onChange={(e) => setRoomName(e.target.value)}
                   placeholder="Sprint Planning"
-                  className={inputClass}
+                  className="input"
                   maxLength={30}
                   onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
                 />
               </div>
 
               <div className="mb-4">
-                <label htmlFor="votingSystem" className="block text-[11px] font-semibold text-[var(--gold)] mb-1 uppercase tracking-[0.18em]">Voting System</label>
+                <label htmlFor="votingSystem" className="label">Voting System</label>
                 <select
                   id="votingSystem"
                   value={votingSystem}
                   onChange={(e) => setVotingSystem(e.target.value)}
-                  className={inputClass}
+                  className="input"
                 >
-                  <option value="fibonacci">Fibonacci (0, 1, 2, 3, 5, 8, 13, 21...)</option>
+                  <option value="fibonacci">Fibonacci (1, 2, 3, 5, 8, 13, 21...)</option>
                   <option value="tshirt">T-Shirt (XS, S, M, L, XL, XXL)</option>
                 </select>
               </div>
@@ -191,7 +181,7 @@ export default function Home() {
               <button
                 onClick={handleCreate}
                 disabled={loading}
-                className="btn-shine btn-felt w-full py-3 font-semibold rounded-lg tracking-wide"
+                className="btn-shine btn-felt w-full h-[50px] font-semibold rounded-lg tracking-wide"
               >
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
@@ -207,14 +197,16 @@ export default function Home() {
           ) : (
             <>
               <div className="mb-4">
-                <label htmlFor="joinCode" className="block text-[11px] font-semibold text-[var(--gold)] mb-1 uppercase tracking-[0.18em]">Room Code</label>
+                <label htmlFor="joinCode" className="label">Room Code</label>
                 <input
                   id="joinCode"
                   type="text"
                   value={joinCode}
                   onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-                  placeholder="------"
-                  className={`${inputClass} text-center text-2xl tracking-[0.4em] font-mono py-3`}
+                  placeholder="K7M2QX"
+                  autoComplete="off"
+                  spellCheck={false}
+                  className="input"
                   maxLength={6}
                   onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
                 />
@@ -223,7 +215,7 @@ export default function Home() {
               <button
                 onClick={handleJoin}
                 disabled={loading}
-                className="btn-shine btn-felt w-full py-3 font-semibold rounded-lg tracking-wide"
+                className="btn-shine btn-felt w-full h-[50px] font-semibold rounded-lg tracking-wide"
               >
                 {loading ? (
                   <span className="flex items-center justify-center gap-2">
@@ -239,19 +231,18 @@ export default function Home() {
           )}
 
           {/* Spectator toggle */}
-          <label className="mt-3 flex items-center gap-2.5 px-3 py-2.5 rounded-lg border border-[var(--surface-border)] bg-[var(--felt)] cursor-pointer select-none hover:border-[var(--gold-border)] transition-colors">
+          <label className="spectate">
             <input
               type="checkbox"
               checked={asSpectator}
               onChange={(e) => setAsSpectator(e.target.checked)}
-              className="accent-[var(--gold)] w-3.5 h-3.5"
             />
             <svg className="w-4 h-4 text-[var(--muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
-            <span className="text-sm text-[var(--foreground)] font-medium">Join as spectator</span>
-            <span className="text-xs text-[var(--muted)] ml-auto">watch, don&apos;t vote</span>
+            <span>Join as spectator</span>
+            <small>watch, don&apos;t vote</small>
           </label>
 
           {kicked && !error && (

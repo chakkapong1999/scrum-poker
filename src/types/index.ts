@@ -34,5 +34,5 @@ export interface RoomState {
   currentStoryId: string | null;
 }
 
-export const FIBONACCI: string[] = ['0', '1', '2', '3', '5', '8', '13', '21', '34', '55', '89', '?', '☕'];
-export const T_SHIRT: string[] = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '?', '☕'];
+export const FIBONACCI: string[] = ['1', '2', '3', '5', '8', '13', '21', '34', '55', '89', '?', '☕', '🧠'];
+export const T_SHIRT: string[] = ['XS', 'S', 'M', 'L', 'XL', 'XXL', '?', '☕', '🧠'];

@@ -8,7 +8,7 @@ export function ThemeToggle({ className = '' }: { className?: string }) {
   return (
     <button
       onClick={toggleTheme}
-      className={`p-2 glass rounded-lg text-[var(--muted)] hover:text-[var(--gold)] hover:bg-[var(--surface-hover)] transition-all ${className}`}
+      className={`chip chip-icon ${className}`}
       title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
       aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
     >

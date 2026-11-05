@@ -46,14 +46,6 @@ export default function JoinPage() {
         <ThemeToggle />
       </div>
 
-      {/* Suit watermarks */}
-      <div className="fixed top-[12%] right-[8%] text-[140px] leading-none opacity-[0.03] dark:opacity-[0.04] pointer-events-none select-none font-serif text-[var(--gold)]" aria-hidden>
-        ♣
-      </div>
-      <div className="fixed bottom-[12%] left-[6%] text-[120px] leading-none opacity-[0.03] dark:opacity-[0.04] pointer-events-none select-none font-serif text-[var(--accent-red)]" aria-hidden>
-        ♦
-      </div>
-
       <div className="w-full max-w-md slide-up">
         <div className="text-center mb-9">
           <div className="card-fan mb-4" aria-hidden>
@@ -61,26 +53,26 @@ export default function JoinPage() {
             <span className="mini-card"><span className="red">♥</span></span>
             <span className="mini-card">♣</span>
           </div>
-          <h1 className="text-4xl font-serif font-black gold-foil tracking-tight">Join Session</h1>
+          <h1 className="text-4xl font-serif font-black gold-foil">Join Session</h1>
           <div className="deco-rule max-w-50 mx-auto mt-3 mb-3 text-[10px]" aria-hidden>♦</div>
           <p className="text-[var(--muted)] text-sm font-serif italic">
             You&apos;ve been invited to room{' '}
-            <code className="not-italic px-2.5 py-1 rounded-md bg-[var(--gold-light)] border border-[var(--gold-border)] text-[var(--gold)] font-mono text-sm tracking-[0.2em] font-semibold">
+            <code className="not-italic px-2.5 py-1 rounded-md bg-[var(--gold-light)] border border-[var(--gold-border)] text-[var(--gold)] text-sm tracking-[0.2em] font-semibold">
               {roomId.toUpperCase()}
             </code>
           </p>
         </div>
 
         <div className="panel rounded-2xl p-6 [--radius:1rem]">
-          <div className="mb-6">
-            <label htmlFor="playerName" className="block text-[11px] font-semibold text-[var(--gold)] mb-1.5 uppercase tracking-[0.18em]">Your Name</label>
+          <div>
+            <label htmlFor="playerName" className="label">Your Name</label>
             <input
               id="playerName"
               type="text"
               value={playerName}
               onChange={(e) => setPlayerName(e.target.value)}
               placeholder="Enter your name"
-              className="w-full px-4 py-3 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg text-[var(--foreground)] placeholder-[var(--muted-light)] focus:outline-none input-glow transition-all"
+              className="input"
               maxLength={20}
               autoFocus
               onKeyDown={(e) => e.key === 'Enter' && handleJoin()}
@@ -88,25 +80,24 @@ export default function JoinPage() {
           </div>
 
           {/* Spectator toggle */}
-          <label className="mb-6 flex items-center gap-2.5 px-3 py-2.5 rounded-lg border border-[var(--surface-border)] bg-[var(--felt)] cursor-pointer select-none hover:border-[var(--gold-border)] transition-colors">
+          <label className="spectate mb-4">
             <input
               type="checkbox"
               checked={asSpectator}
               onChange={(e) => setAsSpectator(e.target.checked)}
-              className="accent-[var(--gold)] w-3.5 h-3.5"
             />
             <svg className="w-4 h-4 text-[var(--muted)]" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden>
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
             </svg>
-            <span className="text-sm text-[var(--foreground)] font-medium">Join as spectator</span>
-            <span className="text-xs text-[var(--muted)] ml-auto">watch, don&apos;t vote</span>
+            <span>Join as spectator</span>
+            <small>watch, don&apos;t vote</small>
           </label>
 
           <button
             onClick={handleJoin}
             disabled={loading}
-            className="btn-shine btn-felt w-full py-3.5 font-semibold rounded-lg tracking-wide"
+            className="btn-shine btn-felt w-full h-[50px] font-semibold rounded-lg tracking-wide"
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">

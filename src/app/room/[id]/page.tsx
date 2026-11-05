@@ -291,6 +291,12 @@ export default function RoomPage() {
     setMyVote(null);
   };
 
+  // Hard navigation drops the socket, so the server frees the seat after its grace period
+  const handleLeave = () => {
+    sessionStorage.removeItem('playerName');
+    globalThis.location.assign('/');
+  };
+
   const toggleMute = () => {
     const next = !muted;
     setMutedState(next);
@@ -360,18 +366,23 @@ export default function RoomPage() {
     );
   }
 
+  const header = (
+    <RoomHeader
+      roomName={room.name}
+      roomId={roomId}
+      playerCount={room.players.length}
+      copied={copied}
+      muted={muted}
+      onCopyInvite={copyInviteLink}
+      onToggleMute={toggleMute}
+      onLeave={handleLeave}
+    />
+  );
+
   if (stories.length === 0) {
     return (
-      <div className="min-h-dvh p-4 sm:p-6 max-w-7xl mx-auto fade-in flex flex-col">
-        <RoomHeader
-          roomName={room.name}
-          roomId={roomId}
-          playerCount={room.players.length}
-          copied={copied}
-          muted={muted}
-          onCopyInvite={copyInviteLink}
-          onToggleMute={toggleMute}
-        />
+      <div className="room fade-in">
+        {header}
         <EmptyRoom isHost={isHost} onAdd={handleAddStory} />
       </div>
     );
@@ -380,16 +391,8 @@ export default function RoomPage() {
   const allEstimated = stories.length > 0 && stories.every(s => s.completed);
   if (allEstimated && !currentStory) {
     return (
-      <div className="min-h-dvh p-4 sm:p-6 max-w-7xl mx-auto fade-in flex flex-col">
-        <RoomHeader
-          roomName={room.name}
-          roomId={roomId}
-          playerCount={room.players.length}
-          copied={copied}
-          muted={muted}
-          onCopyInvite={copyInviteLink}
-          onToggleMute={toggleMute}
-        />
+      <div className="room fade-in">
+        {header}
         <SummaryPage
           stories={stories}
           isHost={isHost}
@@ -401,20 +404,12 @@ export default function RoomPage() {
   }
 
   return (
-    <div className="min-h-dvh p-4 sm:p-6 max-w-7xl mx-auto fade-in">
-      <RoomHeader
-        roomName={room.name}
-        roomId={roomId}
-        playerCount={room.players.length}
-        copied={copied}
-        muted={muted}
-        onCopyInvite={copyInviteLink}
-        onToggleMute={toggleMute}
-      />
+    <div className="room fade-in">
+      {header}
 
       <div
-        className={`lg:grid lg:gap-6 lg:items-start ${
-          sidebarCollapsed ? 'lg:grid-cols-[44px_1fr]' : 'lg:grid-cols-[320px_1fr]'
+        className={`flex flex-col gap-4 lg:grid lg:gap-6 lg:items-start ${
+          sidebarCollapsed ? 'lg:grid-cols-[44px_1fr]' : 'lg:grid-cols-[280px_1fr]'
         }`}
       >
         <aside className="lg:sticky lg:top-4">
@@ -431,18 +426,7 @@ export default function RoomPage() {
           />
         </aside>
 
-        <main className="min-w-0">
-          {currentStory && (
-            <div className="mb-3 px-3.5 py-2 rounded-lg bg-[var(--gold-light)] border border-[var(--gold-border)] border-l-2 border-l-[var(--gold)] flex items-center gap-2.5">
-              <span className="text-[9px] uppercase tracking-[0.25em] text-[var(--gold)] font-bold shrink-0 font-serif">
-                Now
-              </span>
-              <span className="text-sm font-semibold text-[var(--foreground)] truncate">
-                {currentStory.title}
-              </span>
-            </div>
-          )}
-
+        <main className="min-w-0 flex flex-col gap-4">
           <PlayerArea
             players={room.players}
             revealed={room.revealed}
@@ -459,29 +443,25 @@ export default function RoomPage() {
             onMakeHost={handleTransferHost}
             onKick={handleKick}
             votingSystem={room.votingSystem}
-          />
+            storyTitle={currentStory?.title}
+          >
+            {room.revealed && <VoteStats players={voters} />}
+          </PlayerArea>
 
-          <InteractionBar />
-
-          {room.revealed && <VoteStats players={voters} />}
-
-          {!room.revealed && currentStory && !me?.isSpectator && (
+          {currentStory && !me?.isSpectator && (
             <VotingDeck
               votingSystem={room.votingSystem}
               myVote={myVote}
               onVote={handleVote}
+              disabled={room.revealed}
             />
           )}
 
-          {!room.revealed && currentStory && me?.isSpectator && (
-            <div className="mt-8 text-center slide-up">
-              <div className="deco-rule max-w-xs mx-auto mb-4 text-[10px]" aria-hidden>♠</div>
-              <p className="text-sm text-[var(--muted)] font-serif italic">
-                You&apos;re watching this round
-              </p>
-            </div>
+          {currentStory && me?.isSpectator && (
+            <p className="hand-note">You&apos;re watching this round</p>
           )}
 
+          <InteractionBar />
         </main>
       </div>
     </div>

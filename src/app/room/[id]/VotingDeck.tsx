@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { VoteCard } from './PlayerCard';
 
 function readCollapsed(): boolean {
@@ -11,10 +11,11 @@ function readCollapsed(): boolean {
   }
 }
 
-export function VotingDeck({ votingSystem, myVote, onVote }: Readonly<{
+export function VotingDeck({ votingSystem, myVote, onVote, disabled = false }: Readonly<{
   votingSystem: string[];
   myVote: string | null;
   onVote: (value: string) => void;
+  disabled?: boolean;
 }>) {
   const [collapsed, setCollapsed] = useState(readCollapsed);
 
@@ -26,17 +27,18 @@ export function VotingDeck({ votingSystem, myVote, onVote }: Readonly<{
     });
   };
 
+  const last = votingSystem.length - 1;
+
   return (
-    <div className="mt-8 slide-up">
-      <div className="deco-rule max-w-xs mx-auto mb-5 text-[10px]" aria-hidden>♠</div>
-      <div className="flex items-center justify-center gap-2.5 mb-5">
-        <h3 className="text-xs text-[var(--gold)] text-center uppercase tracking-[0.3em] font-semibold font-serif">Pick your card</h3>
+    <section className="hand-wrap" aria-label="Your cards">
+      <div className="hand-head">
+        <h3>{disabled ? 'Your card' : 'Pick your card'}</h3>
         <button
           onClick={toggleCollapsed}
           aria-expanded={!collapsed}
           aria-label={collapsed ? 'Show voting cards' : 'Hide voting cards'}
           title={collapsed ? 'Show voting cards' : 'Hide voting cards'}
-          className="p-1 rounded-md glass text-[var(--muted)] hover:text-[var(--gold)] hover:bg-[var(--surface-hover)] transition-all"
+          className="hand-toggle"
         >
           <svg
             className={`w-3.5 h-3.5 transition-transform duration-300 ${collapsed ? 'rotate-180' : ''}`}
@@ -49,19 +51,19 @@ export function VotingDeck({ votingSystem, myVote, onVote }: Readonly<{
         </button>
       </div>
       {!collapsed && (
-        <div className="flex flex-wrap gap-3 justify-center pb-2">
+        <div className="hand" style={{ '--n': votingSystem.length } as CSSProperties}>
           {votingSystem.map((value, i) => (
-            <div key={value} className="deal-in" style={{ animationDelay: `${i * 45}ms` }}>
-              <VoteCard
-                value={value}
-                selected={myVote === value}
-                onClick={() => onVote(value)}
-                disabled={false}
-              />
-            </div>
+            <VoteCard
+              key={value}
+              value={value}
+              selected={myVote === value}
+              onClick={() => onVote(value)}
+              disabled={disabled}
+              style={{ '--i': i, '--t': last > 0 ? (2 * i) / last - 1 : 0 } as CSSProperties}
+            />
           ))}
         </div>
       )}
-    </div>
+    </section>
   );
 }

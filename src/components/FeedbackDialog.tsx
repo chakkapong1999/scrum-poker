@@ -26,8 +26,6 @@ export function FeedbackDialog({ icon }: { icon?: boolean } = {}) {
     }
   };
 
-  const inputClass = "w-full px-4 py-3 bg-[var(--input-bg)] border border-[var(--input-border)] rounded-lg text-[var(--foreground)] placeholder-[var(--muted-light)] focus:outline-none input-glow transition-all";
-
   return (
     <>
       <button
@@ -35,7 +33,7 @@ export function FeedbackDialog({ icon }: { icon?: boolean } = {}) {
         title="Send feedback"
         aria-label="Send feedback"
         className={icon
-          ? 'p-2 glass rounded-lg text-[var(--muted)] hover:text-[var(--gold)] hover:bg-[var(--surface-hover)] transition-all'
+          ? 'chip chip-icon'
           : 'text-[var(--muted)] text-xs underline underline-offset-4 hover:text-[var(--gold)] transition-colors'}
       >
         {icon ? (
@@ -48,13 +46,13 @@ export function FeedbackDialog({ icon }: { icon?: boolean } = {}) {
       <dialog
         ref={ref}
         onClose={() => setStatus('idle')}
-        className="panel rounded-2xl p-6 w-[min(28rem,calc(100vw-2rem))] m-auto [--surface:#fffdf5] dark:[--surface:#17231d] backdrop:bg-black/70 text-[var(--foreground)] [--radius:1rem]"
+        className="dialog m-auto"
       >
         <form onSubmit={send}>
-          <h2 className="text-xl font-serif font-bold gold-foil mb-1">Send Feedback</h2>
+          <h2 className="text-2xl font-serif font-semibold mb-1">Send Feedback</h2>
           <p className="text-[var(--muted)] text-xs mb-4">Bugs, ideas, complaints — all welcome.</p>
 
-          <label htmlFor="fb-message" className="block text-[11px] font-semibold text-[var(--gold)] mb-1.5 uppercase tracking-[0.18em]">Message</label>
+          <label htmlFor="fb-message" className="label">Message</label>
           <textarea
             id="fb-message"
             name="message"
@@ -62,11 +60,11 @@ export function FeedbackDialog({ icon }: { icon?: boolean } = {}) {
             maxLength={2000}
             rows={5}
             placeholder="What's on your mind?"
-            className={`${inputClass} resize-none mb-4`}
+            className="input resize-none mb-4"
           />
 
-          <label htmlFor="fb-email" className="block text-[11px] font-semibold text-[var(--gold)] mb-1.5 uppercase tracking-[0.18em]">Email (optional)</label>
-          <input id="fb-email" name="email" type="email" maxLength={100} placeholder="you@example.com" className={`${inputClass} mb-4`} />
+          <label htmlFor="fb-email" className="label">Email (optional)</label>
+          <input id="fb-email" name="email" type="email" maxLength={100} placeholder="you@example.com" className="input mb-4" />
 
           {status !== 'idle' && status !== 'sending' && (
             <p role="status" className={`text-sm text-center mb-3 ${status === 'sent' ? 'text-[var(--gold)]' : 'text-[var(--accent-red)]'}`}>

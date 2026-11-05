@@ -115,6 +115,7 @@ describe('VoteStats', () => {
       { id: '1', name: 'Alice', vote: '3', isHost: true },
       { id: '2', name: 'Bob', vote: '?', isHost: false },
       { id: '3', name: 'Carol', vote: '5', isHost: false },
+      { id: '4', name: 'Dan', vote: '🧠', isHost: false },
     ]} />);
     expect(screen.getByText('4.0')).toBeInTheDocument(); // avg of 3 and 5
   });
@@ -1225,8 +1226,9 @@ describe('RoomPage', () => {
       });
     });
 
-    // When revealed, actual votes are shown
-    expect(screen.getByText('8')).toBeInTheDocument();
+    // When revealed, actual votes are shown on the seat, and the hand stays visible but locked
+    expect(screen.getAllByText('8')).toHaveLength(2);
+    expect(screen.getByRole('button', { name: 'Vote 8' })).toBeDisabled();
   });
 
   it('restores tab title on visibility change', async () => {

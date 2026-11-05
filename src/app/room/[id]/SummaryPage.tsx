@@ -83,7 +83,7 @@ export function SummaryPage({
               key={story.id}
               className="flex items-center gap-2 px-3 py-2 rounded-lg bg-[var(--felt)] border border-[var(--surface-border)]"
             >
-              <span className="text-[10px] text-[var(--muted)] font-mono w-6 tabular-nums shrink-0">
+              <span className="text-[10px] text-[var(--muted)] w-6 tabular-nums shrink-0">
                 #{idx + 1}
               </span>
               <button
@@ -98,7 +98,7 @@ export function SummaryPage({
                 {story.title}
               </button>
               {story.finalPoint !== null ? (
-                <span className="px-2 py-0.5 rounded text-xs font-mono font-semibold bg-[var(--emerald-light)] text-[var(--emerald)] border border-[var(--emerald-border)] tabular-nums shrink-0">
+                <span className="px-2 py-0.5 rounded text-xs font-semibold bg-[var(--emerald-light)] text-[var(--emerald)] border border-[var(--emerald-border)] tabular-nums shrink-0">
                   {story.finalPoint}
                 </span>
               ) : (

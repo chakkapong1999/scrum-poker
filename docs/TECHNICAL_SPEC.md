@@ -145,8 +145,8 @@ interface RoomState {                   // wire format sent to clients
 
 Decks (`src/types/index.ts`):
 
-- `FIBONACCI` — `0 1 2 3 5 8 13 21 34 55 89 ? ☕`
-- `T_SHIRT` — `XS S M L XL XXL ? ☕`
+- `FIBONACCI` — `1 2 3 5 8 13 21 34 55 89 ? ☕ 🧠`
+- `T_SHIRT` — `XS S M L XL XXL ? ☕ 🧠`
 
 `getVotingSystem(key)` maps `'tshirt'` → `T_SHIRT`, anything else → `FIBONACCI`. The room
 stores the **resolved array**, so an unknown key silently degrades to Fibonacci rather than
@@ -282,7 +282,7 @@ disconnect, host passes to the first player in `Map` insertion order (i.e. earli
 still present). If the room is empty of hosts, the next `rejoin-room` claims host.
 
 **Statistics** (`VoteStats`, client-side, computed after reveal over non-spectators):
-`?` and `☕` are excluded; average / min / max are computed over values that parse as
+`?`, `☕` and `🧠` are excluded; average / min / max are computed over values that parse as
 numbers (so a T-shirt deck shows distribution only); consensus is flagged when more than
 one vote exists and all are identical; the distribution bar chart is percent of all
 players passed in.

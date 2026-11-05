@@ -65,7 +65,7 @@ export function StoryList({
   return (
     <>
       {collapsed && (
-        <div className="hidden lg:flex glass rounded-lg p-2 mb-4 flex-col items-center gap-2">
+        <div className="hidden lg:flex glass rounded-lg p-2 flex-col items-center gap-2">
           <button
             onClick={onToggleCollapse}
             className="p-1.5 rounded-md text-[var(--muted)] hover:text-[var(--gold)] hover:bg-[var(--surface-hover)] transition-all"
@@ -76,19 +76,19 @@ export function StoryList({
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
           </button>
-          <div className="text-[10px] text-[var(--muted)] tabular-nums [writing-mode:vertical-rl] rotate-180 tracking-wider font-mono">
+          <div className="text-[10px] text-[var(--muted)] tabular-nums [writing-mode:vertical-rl] rotate-180 tracking-wider">
             {stories.length - remaining}/{stories.length}
           </div>
         </div>
       )}
 
-    <div className={`glass rounded-xl p-3 mb-4 ${collapsed ? 'lg:hidden' : ''}`}>
+    <div className={`panel rounded-2xl p-4 [--radius:1rem] ${collapsed ? 'lg:hidden' : ''}`}>
       <div className="flex items-center justify-between mb-2">
-        <h3 className="text-[10px] font-semibold text-[var(--gold)] uppercase tracking-[0.25em] font-serif">
+        <h3 className="text-[11px] font-semibold text-[var(--gold)] uppercase tracking-[0.14em]">
           Stories
         </h3>
         <div className="flex items-center gap-2">
-          <span className="text-[10px] text-[var(--muted)] tabular-nums font-mono">
+          <span className="text-[10px] text-[var(--muted)] tabular-nums">
             {stories.length - remaining}/{stories.length} done
           </span>
           {onToggleCollapse && (
@@ -116,7 +116,7 @@ export function StoryList({
       )}
 
       {stories.length > 0 && (
-        <ul className="space-y-1 mb-2 max-h-[60vh] overflow-y-auto pr-1">
+        <ul className="space-y-1 mb-2 max-h-40 lg:max-h-[60vh] overflow-y-auto pr-1">
           {stories.map((story, idx) => {
             const isCurrent = story.id === currentStoryId;
             const isEditing = editingId === story.id;
@@ -129,7 +129,7 @@ export function StoryList({
                     : 'bg-[var(--felt)] border-[var(--surface-border)] border-l-transparent'
                 }`}
               >
-                <span className={`text-[10px] font-mono w-5 tabular-nums shrink-0 ${isCurrent ? 'text-[var(--gold)]' : 'text-[var(--muted)]'}`}>
+                <span className={`text-[10px] w-5 tabular-nums shrink-0 ${isCurrent ? 'text-[var(--gold)]' : 'text-[var(--muted)]'}`}>
                   #{idx + 1}
                 </span>
 
@@ -162,7 +162,7 @@ export function StoryList({
                 )}
 
                 {story.completed && story.finalPoint !== null && (
-                  <span className="px-1.5 py-0 rounded text-[10px] font-mono font-semibold bg-[var(--emerald-light)] text-[var(--emerald)] border border-[var(--emerald-border)] tabular-nums shrink-0">
+                  <span className="px-1.5 py-0 rounded text-[10px] font-semibold bg-[var(--emerald-light)] text-[var(--emerald)] border border-[var(--emerald-border)] tabular-nums shrink-0">
                     {story.finalPoint}
                   </span>
                 )}

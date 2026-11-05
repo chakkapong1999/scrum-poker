@@ -3,7 +3,7 @@ import { FIBONACCI, T_SHIRT } from '@/types';
 
 describe('FIBONACCI voting system', () => {
   it('contains expected Fibonacci values', () => {
-    expect(FIBONACCI).toContain('0');
+    expect(FIBONACCI).not.toContain('0');
     expect(FIBONACCI).toContain('1');
     expect(FIBONACCI).toContain('2');
     expect(FIBONACCI).toContain('3');
@@ -16,6 +16,7 @@ describe('FIBONACCI voting system', () => {
   it('contains special cards', () => {
     expect(FIBONACCI).toContain('?');
     expect(FIBONACCI).toContain('☕');
+    expect(FIBONACCI).toContain('🧠');
   });
 
   it('has all values as strings', () => {
@@ -25,12 +26,13 @@ describe('FIBONACCI voting system', () => {
 
 describe('T_SHIRT voting system', () => {
   it('contains expected T-Shirt sizes in order', () => {
-    const sizes = T_SHIRT.filter(v => v !== '?' && v !== '☕');
+    const sizes = T_SHIRT.filter(v => v !== '?' && v !== '☕' && v !== '🧠');
     expect(sizes).toEqual(['XS', 'S', 'M', 'L', 'XL', 'XXL']);
   });
 
   it('contains special cards', () => {
     expect(T_SHIRT).toContain('?');
     expect(T_SHIRT).toContain('☕');
+    expect(T_SHIRT).toContain('🧠');
   });
 });
