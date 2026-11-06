@@ -145,7 +145,7 @@ interface RoomState {                   // wire format sent to clients
 
 Decks (`src/types/index.ts`):
 
-- `FIBONACCI` — `1 2 3 5 8 13 21 34 55 89 ? ☕ 🧠`
+- `FIBONACCI` — `1 2 3 5 8 13 21 ? ☕ 🧠`
 - `T_SHIRT` — `XS S M L XL XXL ? ☕ 🧠`
 
 `getVotingSystem(key)` maps `'tshirt'` → `T_SHIRT`, anything else → `FIBONACCI`. The room

@@ -173,7 +173,7 @@ export default function Home() {
                   onChange={(e) => setVotingSystem(e.target.value)}
                   className="input"
                 >
-                  <option value="fibonacci">Fibonacci (1, 2, 3, 5, 8, 13, 21...)</option>
+                  <option value="fibonacci">Fibonacci (1, 2, 3, 5, 8, 13, 21)</option>
                   <option value="tshirt">T-Shirt (XS, S, M, L, XL, XXL)</option>
                 </select>
               </div>

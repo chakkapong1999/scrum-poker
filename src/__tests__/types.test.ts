@@ -4,6 +4,7 @@ import { FIBONACCI, T_SHIRT } from '@/types';
 describe('FIBONACCI voting system', () => {
   it('contains expected Fibonacci values', () => {
     expect(FIBONACCI).not.toContain('0');
+    expect(FIBONACCI).not.toContain('34');
     expect(FIBONACCI).toContain('1');
     expect(FIBONACCI).toContain('2');
     expect(FIBONACCI).toContain('3');

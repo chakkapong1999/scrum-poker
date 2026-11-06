@@ -4,7 +4,7 @@ Real-time planning poker for agile teams. Create a room, share the link, and est
 
 ## Features
 
-- **Real-time voting** — Fibonacci (1, 2, 3, 5, 8, 13, 21...) and T-Shirt (XS, S, M, L, XL, XXL) scales
+- **Real-time voting** — Fibonacci (1, 2, 3, 5, 8, 13, 21) and T-Shirt (XS, S, M, L, XL, XXL) scales
 - **Story tracking** — Host adds/edits/deletes stories; team estimates them in order; completed stories retain their final point
 - **Session summary** — When all stories are estimated, shows total points and a full results table
 - **Spectator mode** — Join as a spectator to observe without voting
